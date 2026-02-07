@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { type PersonaId, type AuditConfig, personas } from "@/types/audit";
+import ImageUpload from "./ImageUpload";
 
 interface AuditConfigScreenProps {
   personaId: PersonaId;
-  onStart: (config: AuditConfig) => void;
+  onStart: (config: AuditConfig, imageBase64: string, imagePreviewUrl: string) => void;
   onBack: () => void;
 }
 
@@ -46,7 +47,15 @@ const AuditConfigScreen = ({ personaId, onStart, onBack }: AuditConfigScreenProp
   const persona = personas.find(p => p.id === personaId)!;
   const [fidelity, setFidelity] = useState<AuditConfig['fidelity']>('high-fidelity');
   const [purpose, setPurpose] = useState<AuditConfig['purpose']>(purposeOptions[personaId][0].value);
-  const [frameCount, setFrameCount] = useState(1);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
+  const handleImageSelect = (base64: string, previewUrl: string) => {
+    setImageBase64(base64);
+    setImagePreviewUrl(previewUrl);
+  };
+
+  const canStart = !!imageBase64;
 
   return (
     <motion.div
@@ -72,6 +81,14 @@ const AuditConfigScreen = ({ personaId, onStart, onBack }: AuditConfigScreenProp
             <h2 className="text-2xl font-bold">{persona.title} Mode</h2>
             <p className="text-sm text-muted-foreground">{persona.subtitle}</p>
           </div>
+        </div>
+
+        {/* Image Upload */}
+        <div className="mb-8">
+          <ImageUpload
+            onImageSelect={handleImageSelect}
+            previewUrl={imagePreviewUrl}
+          />
         </div>
 
         {/* Fidelity */}
@@ -119,36 +136,23 @@ const AuditConfigScreen = ({ personaId, onStart, onBack }: AuditConfigScreenProp
           </div>
         </div>
 
-        {/* Frame Count */}
-        <div className="mb-10">
-          <label className="text-sm font-medium text-muted-foreground mb-3 block">
-            Frames to Audit
-          </label>
-          <div className="flex items-center gap-4">
-            {[1, 3, 5].map(num => (
-              <button
-                key={num}
-                onClick={() => setFrameCount(num)}
-                className={`w-14 h-14 rounded-xl border text-lg font-semibold transition-all ${
-                  frameCount === num
-                    ? 'border-primary bg-primary/10 text-foreground'
-                    : 'border-border bg-card text-muted-foreground hover:border-muted-foreground'
-                }`}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Start */}
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onStart({ fidelity, purpose, frameCount })}
-          className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-lg glow-primary transition-all hover:brightness-110"
+          whileHover={canStart ? { scale: 1.02 } : undefined}
+          whileTap={canStart ? { scale: 0.98 } : undefined}
+          onClick={() => {
+            if (canStart && imagePreviewUrl) {
+              onStart({ fidelity, purpose, frameCount: 1 }, imageBase64!, imagePreviewUrl);
+            }
+          }}
+          disabled={!canStart}
+          className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
+            canStart
+              ? 'bg-primary text-primary-foreground glow-primary hover:brightness-110'
+              : 'bg-surface-3 text-muted-foreground cursor-not-allowed'
+          }`}
         >
-          Run Audit →
+          {canStart ? 'Run AI Audit →' : 'Upload a design to start'}
         </motion.button>
       </div>
     </motion.div>

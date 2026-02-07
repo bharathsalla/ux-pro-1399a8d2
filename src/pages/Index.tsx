@@ -1,43 +1,52 @@
 import { useState, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
-import { type PersonaId, type AuditConfig, type AuditStep } from "@/types/audit";
+import { type PersonaId, type AuditConfig, type AuditStep, type AuditResult } from "@/types/audit";
 import PersonaSelect from "@/components/PersonaSelect";
 import AuditConfigScreen from "@/components/AuditConfigScreen";
 import AuditRunning from "@/components/AuditRunning";
-import AuditResults from "@/components/AuditResults";
-import { generateAuditResults } from "@/data/auditData";
+import ImageAuditResults from "@/components/ImageAuditResults";
+import { useAuditDesign } from "@/hooks/useAuditDesign";
+import { toast } from "sonner";
 
 const Index = () => {
   const [step, setStep] = useState<AuditStep>('persona');
   const [selectedPersona, setSelectedPersona] = useState<PersonaId | null>(null);
-  const [, setConfig] = useState<AuditConfig | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const { runAudit } = useAuditDesign();
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
     setSelectedPersona(id);
     setStep('config');
   }, []);
 
-  const handleConfigStart = useCallback((cfg: AuditConfig) => {
-    setConfig(cfg);
+  const handleConfigStart = useCallback(async (cfg: AuditConfig, imageBase64: string, previewUrl: string) => {
+    if (!selectedPersona) return;
+    setImagePreviewUrl(previewUrl);
     setStep('running');
-  }, []);
 
-  const handleAuditComplete = useCallback(() => {
-    setStep('results');
-  }, []);
+    const result = await runAudit(imageBase64, selectedPersona, cfg);
+
+    if (result) {
+      setAuditResult(result);
+      setStep('results');
+    } else {
+      toast.error("Audit failed. Please try again.");
+      setStep('config');
+    }
+  }, [selectedPersona, runAudit]);
 
   const handleRestart = useCallback(() => {
     setStep('persona');
     setSelectedPersona(null);
-    setConfig(null);
+    setImagePreviewUrl(null);
+    setAuditResult(null);
   }, []);
 
   const handleBack = useCallback(() => {
     setStep('persona');
     setSelectedPersona(null);
   }, []);
-
-  const result = selectedPersona ? generateAuditResults(selectedPersona) : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -57,14 +66,15 @@ const Index = () => {
           <AuditRunning
             key="running"
             personaId={selectedPersona}
-            onComplete={handleAuditComplete}
+            onComplete={() => {}}
           />
         )}
-        {step === 'results' && selectedPersona && result && (
-          <AuditResults
+        {step === 'results' && selectedPersona && auditResult && imagePreviewUrl && (
+          <ImageAuditResults
             key="results"
             personaId={selectedPersona}
-            result={result}
+            result={auditResult}
+            imageUrl={imagePreviewUrl}
             onRestart={handleRestart}
           />
         )}
