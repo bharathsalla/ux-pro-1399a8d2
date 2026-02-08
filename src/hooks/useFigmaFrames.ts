@@ -43,9 +43,19 @@ export function useFigmaFrames(): UseFigmaFramesReturn {
       if (data?.error) throw new Error(data.error);
 
       const response = data as FigmaResponse;
-      setFrames(response.frames);
+
+      // Filter out frames with invalid/null image URLs
+      const validFrames = response.frames.filter(
+        (f) => f.imageUrl && f.imageUrl.startsWith("http")
+      );
+
+      if (validFrames.length === 0) {
+        throw new Error("No valid frames could be exported. Try a different Figma file.");
+      }
+
+      setFrames(validFrames);
       setFileName(response.fileName);
-      return response.frames;
+      return validFrames;
     } catch (e) {
       const message = e instanceof Error ? e.message : "Something went wrong";
       setError(message);

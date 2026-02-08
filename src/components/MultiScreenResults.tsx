@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { type PersonaId, type ScreenAuditResult, type AuditIssue, personas } from "@/types/audit";
 import ScoreRing from "./ScoreRing";
 import StickyNote from "./StickyNote";
+import FigmaAnalyzing from "./FigmaAnalyzing";
 
 interface MultiScreenResultsProps {
   personaId: PersonaId;
@@ -196,12 +197,10 @@ const MultiScreenResults = ({
                 className="p-4 lg:p-6"
               >
                 {currentScreen.isLoading ? (
-                  <div className="flex flex-col items-center justify-center py-32">
-                    <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin mb-4" />
-                    <p className="text-sm text-muted-foreground">
-                      Analyzing "{currentScreen.screenName}"...
-                    </p>
-                  </div>
+                  <FigmaAnalyzing
+                    status="processing"
+                    frameCount={totalScreens}
+                  />
                 ) : currentScreen.error ? (
                   <div className="flex flex-col items-center justify-center py-32">
                     <p className="text-destructive text-sm mb-2">

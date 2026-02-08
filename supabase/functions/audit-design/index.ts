@@ -141,6 +141,39 @@ const PERSONA_CONFIGS: Record<string, { focus: string; priorities: string; tone:
   },
 };
 
+function tryParseJSON(content: string): Record<string, unknown> | null {
+  // Strip markdown code fences
+  let cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+
+  // First try direct parse
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    // noop
+  }
+
+  // Try to extract JSON object from the response
+  const jsonStart = cleaned.indexOf("{");
+  const jsonEnd = cleaned.lastIndexOf("}");
+  if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+    try {
+      return JSON.parse(cleaned.substring(jsonStart, jsonEnd + 1));
+    } catch {
+      // noop
+    }
+  }
+
+  // Try fixing common issues: trailing commas
+  try {
+    cleaned = cleaned.replace(/,\s*([\]}])/g, "$1");
+    return JSON.parse(cleaned);
+  } catch {
+    // noop
+  }
+
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -161,6 +194,23 @@ serve(async (req) => {
         JSON.stringify({ error: "personaId is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Validate image URL is still accessible if provided
+    if (imageUrl) {
+      try {
+        const imgCheck = await fetch(imageUrl, { method: "HEAD" });
+        if (!imgCheck.ok) {
+          console.error("Image URL not accessible:", imgCheck.status);
+          return new Response(
+            JSON.stringify({ error: "Design image is no longer accessible. Figma image URLs may have expired. Please re-extract the frames." }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } catch (e) {
+        console.error("Image URL check failed:", e);
+        // Continue anyway — might work with the AI gateway
+      }
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -185,6 +235,8 @@ ${MASTER_RULES}
 You are analyzing a UI/UX design screenshot. Perform a thorough audit using the rules above.
 Design context: Fidelity = "${fidelity || "high-fidelity"}", Purpose = "${purpose || "review"}".${screenContext}
 
+IMPORTANT: If the image appears blank, empty, or entirely one color, return a score of 0 and explain this clearly. Do NOT invent issues for a blank screen.
+
 For each issue found:
 1. Identify which rule(s) it violates (use rule IDs like H1, A3, V2, L5, etc.)
 2. Estimate the x,y position on the image as a percentage (0-100)
@@ -193,7 +245,7 @@ For each issue found:
 
 Weight your scoring based on: ${config.ruleWeights}
 
-You MUST respond with ONLY a valid JSON object (no markdown, no backticks) in this exact format:
+You MUST respond with ONLY a valid JSON object (no markdown, no backticks, no trailing text) in this exact format:
 {
   "overallScore": <number 0-100>,
   "summary": "<2-3 sentence summary in persona-appropriate tone>",
@@ -221,7 +273,7 @@ You MUST respond with ONLY a valid JSON object (no markdown, no backticks) in th
   ]
 }
 
-Return 4-8 categories with 1-4 issues each. Every issue MUST have x,y coordinates, ruleId, and principle. Be thorough but prioritize according to your persona weights.`;
+CRITICAL: Return ONLY the JSON object. No text before or after. No markdown fences. Return 4-8 categories with 1-4 issues each. Every issue MUST have x,y coordinates, ruleId, and principle.`;
 
     // Build image content — support both base64 and URL
     const imageContent = imageBase64
@@ -277,19 +329,20 @@ Return 4-8 categories with 1-4 issues each. Every issue MUST have x,y coordinate
     }
 
     const data = await response.json();
-    let content = data.choices?.[0]?.message?.content || "";
+    const content = data.choices?.[0]?.message?.content || "";
 
-    // Strip markdown code fences if present
-    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
-    let auditResult;
-    try {
-      auditResult = JSON.parse(content);
-    } catch {
-      console.error("Failed to parse AI response:", content);
+    const auditResult = tryParseJSON(content);
+    if (!auditResult) {
+      console.error("Failed to parse AI response after all attempts. Content length:", content.length);
+      // Return a fallback result instead of crashing
       return new Response(
-        JSON.stringify({ error: "Failed to parse audit results", raw: content }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          overallScore: 0,
+          summary: "The AI analysis could not be completed for this screen. Please try again.",
+          riskLevel: "High",
+          categories: [],
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

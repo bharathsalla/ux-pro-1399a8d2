@@ -15,6 +15,27 @@ interface UseAuditDesignReturn {
   ) => Promise<void>;
 }
 
+const CONCURRENCY = 3;
+
+async function runWithConcurrency<T>(
+  tasks: (() => Promise<T>)[],
+  concurrency: number
+): Promise<T[]> {
+  const results: T[] = new Array(tasks.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < tasks.length) {
+      const index = nextIndex++;
+      results[index] = await tasks[index]();
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrency, tasks.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
+}
+
 export function useAuditDesign(): UseAuditDesignReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,9 +88,7 @@ export function useAuditDesign(): UseAuditDesignReturn {
     setIsLoading(true);
     setError(null);
 
-    // Process frames sequentially to avoid rate limits
-    for (let i = 0; i < frames.length; i++) {
-      const frame = frames[i];
+    const auditOneScreen = (frame: FigmaFrame, index: number) => async () => {
       try {
         const { data, error: fnError } = await supabase.functions.invoke(
           "audit-design",
@@ -87,7 +106,7 @@ export function useAuditDesign(): UseAuditDesignReturn {
         if (fnError) throw new Error(fnError.message || "Audit failed");
         if (data?.error) throw new Error(data.error);
 
-        onScreenComplete(i, {
+        onScreenComplete(index, {
           screenName: frame.name,
           screenImageUrl: frame.imageUrl,
           result: data as AuditResult,
@@ -95,14 +114,17 @@ export function useAuditDesign(): UseAuditDesignReturn {
       } catch (e) {
         const message = e instanceof Error ? e.message : "Failed to audit screen";
         console.error(`Audit error for frame "${frame.name}":`, e);
-        onScreenComplete(i, {
+        onScreenComplete(index, {
           screenName: frame.name,
           screenImageUrl: frame.imageUrl,
           result: null,
           error: message,
         });
       }
-    }
+    };
+
+    const tasks = frames.map((frame, index) => auditOneScreen(frame, index));
+    await runWithConcurrency(tasks, CONCURRENCY);
 
     setIsLoading(false);
   };
