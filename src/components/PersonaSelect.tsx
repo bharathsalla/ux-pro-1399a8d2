@@ -1,10 +1,26 @@
 import { motion } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
-import heroIllustration from "@/assets/hero-illustration.png";
+import heroCharacters from "@/assets/hero-characters.png";
 
 interface PersonaSelectProps {
   onSelect: (id: PersonaId) => void;
 }
+
+const personaAccentBg: Record<string, string> = {
+  solo: "hover:border-persona-solo/40 hover:bg-persona-solo/5",
+  lead: "hover:border-persona-lead/40 hover:bg-persona-lead/5",
+  a11y: "hover:border-persona-a11y/40 hover:bg-persona-a11y/5",
+  founder: "hover:border-persona-founder/40 hover:bg-persona-founder/5",
+  consultant: "hover:border-persona-consultant/40 hover:bg-persona-consultant/5",
+};
+
+const personaIconBg: Record<string, string> = {
+  solo: "bg-persona-solo/10 text-persona-solo",
+  lead: "bg-persona-lead/10 text-persona-lead",
+  a11y: "bg-persona-a11y/10 text-persona-a11y",
+  founder: "bg-persona-founder/10 text-persona-founder",
+  consultant: "bg-persona-consultant/10 text-persona-consultant",
+};
 
 const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
   return (
@@ -15,28 +31,41 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
       className="min-h-screen flex flex-col lg:flex-row"
     >
       {/* Left Column – Hero */}
-      <div className="lg:w-1/2 flex items-center justify-center bg-card p-8 lg:p-16 lg:sticky lg:top-0 lg:h-screen">
+      <div className="lg:w-1/2 flex items-center justify-center bg-secondary/50 p-8 lg:p-16 lg:sticky lg:top-0 lg:h-screen relative overflow-hidden">
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
+          backgroundSize: '32px 32px'
+        }} />
+
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="max-w-md w-full"
+          className="max-w-md w-full relative z-10"
         >
-          <img
-            src={heroIllustration}
-            alt="UX Audit Pro hero illustration"
-            className="w-full h-auto"
-          />
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <img
+              src={heroCharacters}
+              alt="UX Audit Pro characters"
+              className="w-full h-auto max-h-[400px] object-contain drop-shadow-xl"
+            />
+          </motion.div>
+
           <motion.div
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="mt-8 text-center"
+            className="mt-10 text-center"
           >
-            <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
-              Design with confidence.
+            <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
+              Design with
+              <span className="text-gradient-primary"> confidence.</span>
             </h2>
-            <p className="text-muted-foreground text-base mt-3 leading-relaxed">
+            <p className="text-muted-foreground text-base lg:text-lg mt-3 leading-relaxed">
               AI-powered design audits built on 60+ UX/UI
               <br className="hidden sm:block" /> principles, laws & standards.
             </p>
@@ -45,21 +74,26 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
       </div>
 
       {/* Right Column – Persona Cards */}
-      <div className="lg:w-1/2 flex flex-col items-center justify-center px-6 py-12 lg:px-12 lg:py-16 lg:overflow-y-auto">
+      <div className="lg:w-1/2 flex flex-col items-center justify-center px-6 py-12 lg:px-12 lg:py-16 lg:overflow-y-auto bg-background">
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
           className="text-center mb-10 w-full max-w-lg"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-sm text-primary font-medium mb-6">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.15, type: "spring", stiffness: 200 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-sm text-primary font-semibold mb-6"
+          >
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             UX Audit Pro
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-4 leading-[1.1]">
+          </motion.div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground mb-4 leading-[1.1]">
             Who are you
             <br />
-            auditing for?
+            <span className="text-gradient-hero">auditing for?</span>
           </h1>
           <p className="text-muted-foreground text-lg max-w-sm mx-auto leading-relaxed">
             Select your role to get a personalized audit experience.
@@ -73,18 +107,20 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 + index * 0.06 }}
-              whileHover={{ x: 4 }}
+              whileHover={{ x: 4, scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelect(persona.id)}
-              className="group relative flex items-center gap-4 p-5 rounded-xl border border-border bg-card text-left transition-all duration-200 hover:border-primary/40 hover:bg-primary/[0.03] focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className={`group relative flex items-center gap-4 p-5 rounded-2xl border border-border bg-card text-left transition-all duration-300 shadow-sm card-hover focus:outline-none focus:ring-2 focus:ring-primary/50 ${personaAccentBg[persona.id]}`}
             >
-              <span className="text-2xl shrink-0">{persona.icon}</span>
+              <span className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${personaIconBg[persona.id]}`}>
+                {persona.icon}
+              </span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <h3 className="font-bold text-base text-foreground">
                     {persona.title}
                   </h3>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground font-medium">
                     · {persona.subtitle}
                   </span>
                 </div>
@@ -93,7 +129,7 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
                 </p>
               </div>
               <svg
-                className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0"
+                className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

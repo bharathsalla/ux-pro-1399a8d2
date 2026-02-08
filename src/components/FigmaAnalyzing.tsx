@@ -61,12 +61,12 @@ const FigmaAnalyzing = ({ status, frameCount }: FigmaAnalyzingProps) => {
     <div className="flex flex-col items-center justify-center py-20 px-4">
       <div className="max-w-sm w-full text-center">
         {/* Scanning Animation */}
-        <div className="relative w-32 h-32 mx-auto mb-8">
+        <div className="relative w-36 h-36 mx-auto mb-10">
           {/* Outer ring */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 rounded-full border border-border"
+            className="absolute inset-0 rounded-full border-2 border-border"
           />
           {/* Middle ring */}
           <motion.div
@@ -78,17 +78,17 @@ const FigmaAnalyzing = ({ status, frameCount }: FigmaAnalyzingProps) => {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-6 rounded-full border-2 border-primary/50 border-t-primary"
+            className="absolute inset-6 rounded-full border-2 border-primary/40 border-t-primary"
           />
           {/* Center pulse */}
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-10 rounded-full bg-primary/20 flex items-center justify-center"
+            className="absolute inset-11 rounded-full bg-primary/10 flex items-center justify-center"
           >
-            <span className="text-2xl">{analysisSteps[activeStep].icon}</span>
+            <span className="text-3xl">{analysisSteps[activeStep].icon}</span>
           </motion.div>
-          {/* Scanning dots */}
+          {/* Orbiting dots */}
           {[0, 1, 2, 3].map((i) => (
             <motion.div
               key={i}
@@ -101,7 +101,7 @@ const FigmaAnalyzing = ({ status, frameCount }: FigmaAnalyzingProps) => {
                 repeat: Infinity,
                 delay: i * 0.5,
               }}
-              className="absolute w-2 h-2 rounded-full bg-primary"
+              className="absolute w-2.5 h-2.5 rounded-full bg-primary shadow-sm"
               style={{
                 top: `${50 + 45 * Math.sin((i * Math.PI) / 2)}%`,
                 left: `${50 + 45 * Math.cos((i * Math.PI) / 2)}%`,
@@ -112,7 +112,7 @@ const FigmaAnalyzing = ({ status, frameCount }: FigmaAnalyzingProps) => {
         </div>
 
         {/* Status */}
-        <h3 className="text-lg font-semibold text-foreground mb-1">
+        <h3 className="text-xl font-bold text-foreground mb-1">
           {status === "extracting"
             ? `Extracting${frameCount ? ` ${frameCount} screens` : ""}${dots}`
             : `Processing design${dots}`}
@@ -130,10 +130,10 @@ const FigmaAnalyzing = ({ status, frameCount }: FigmaAnalyzingProps) => {
         </AnimatePresence>
 
         {/* Rule Scanner */}
-        <div className="bg-card border border-border rounded-xl p-4 text-left">
+        <div className="bg-card border border-border rounded-2xl p-5 text-left shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Rule Engine Active
             </span>
           </div>
@@ -154,15 +154,18 @@ const FigmaAnalyzing = ({ status, frameCount }: FigmaAnalyzingProps) => {
                   <motion.div
                     key={`${scanIndex}-${idx}`}
                     initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: idx === 0 ? 1 : 0.3 + idx * 0.1, x: 0 }}
+                    animate={{
+                      opacity: idx === 0 ? 1 : 0.3 + idx * 0.15,
+                      x: 0,
+                    }}
                     exit={{ opacity: 0, x: 10 }}
-                    className="flex items-center gap-2 text-xs py-1"
+                    className="flex items-center gap-2 text-xs py-1.5"
                   >
                     {idx === 0 ? (
-                      <span className="w-3 h-3 rounded-full border border-primary border-t-transparent animate-spin shrink-0" />
+                      <span className="w-3.5 h-3.5 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
                     ) : (
                       <svg
-                        className="w-3 h-3 text-primary shrink-0"
+                        className="w-3.5 h-3.5 text-primary shrink-0"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -178,8 +181,8 @@ const FigmaAnalyzing = ({ status, frameCount }: FigmaAnalyzingProps) => {
                     <span
                       className={
                         idx === 0
-                          ? "text-foreground font-medium font-mono"
-                          : "text-muted-foreground font-mono"
+                          ? "text-foreground font-semibold font-mono text-xs"
+                          : "text-muted-foreground font-mono text-xs"
                       }
                     >
                       {rule}
@@ -190,9 +193,13 @@ const FigmaAnalyzing = ({ status, frameCount }: FigmaAnalyzingProps) => {
           </div>
         </div>
 
-        <p className="mt-6 text-xs text-muted-foreground">
-          Powered by 60+ UX/UI principles & standards
-        </p>
+        <motion.p
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="mt-6 text-xs text-muted-foreground font-medium"
+        >
+          ✨ Powered by 60+ UX/UI principles & standards
+        </motion.p>
       </div>
     </div>
   );
