@@ -39,8 +39,20 @@ export function useFigmaFrames(): UseFigmaFramesReturn {
         }
       );
 
-      if (fnError) throw new Error(fnError.message || "Failed to fetch Figma frames");
-      if (data?.error) throw new Error(data.error);
+      if (fnError) {
+        // Check if the error message contains rate limit info
+        const errMsg = fnError.message || "";
+        if (errMsg.includes("429") || errMsg.includes("rate limit")) {
+          throw new Error("Figma API rate limit reached. Please wait about 60 seconds and try again.");
+        }
+        throw new Error(errMsg || "Failed to fetch Figma frames");
+      }
+      if (data?.error) {
+        if (data.error.includes("rate limit") || data.error.includes("429")) {
+          throw new Error("Figma API rate limit reached. Please wait about 60 seconds and try again.");
+        }
+        throw new Error(data.error);
+      }
 
       const response = data as FigmaResponse;
 
@@ -50,7 +62,7 @@ export function useFigmaFrames(): UseFigmaFramesReturn {
       );
 
       if (validFrames.length === 0) {
-        throw new Error("No valid frames could be exported. Try a different Figma file.");
+        throw new Error("No valid frames could be exported. The file may have no visible top-level frames, or Figma export timed out. Try again in a minute.");
       }
 
       setFrames(validFrames);
