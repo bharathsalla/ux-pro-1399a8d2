@@ -155,7 +155,7 @@ const ImageAuditResults = ({
           transition={{ delay: 0.4 }}
           className="mb-6"
         >
-          <IssueOverlay issues={filteredIssues} imageUrl={imageUrl} />
+          <IssueOverlay issues={filteredIssues} imageUrl={imageUrl} activeIssueId={activeIssueId} onPinClick={scrollToIssue} />
         </motion.div>
 
         {/* Issues list */}
@@ -192,11 +192,12 @@ const ImageAuditResults = ({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.04 }}
-                className={`bg-card border p-4 flex items-start gap-3 transition-all ${
+                className={`bg-card border p-4 flex items-start gap-3 cursor-pointer transition-all ${
                   isHighlighted
                     ? "border-primary ring-2 ring-primary/20"
-                    : "border-border"
+                    : "border-border hover:border-primary/30"
                 }`}
+                onClick={() => setActiveIssueId(isHighlighted ? null : issue.id)}
               >
                 <span className="w-6 h-6 bg-surface-2 flex items-center justify-center text-xs font-bold text-foreground shrink-0 border border-border">
                   {idx + 1}

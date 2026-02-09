@@ -54,10 +54,17 @@ const MultiScreenResults = ({
     }, 0);
   }, [screens]);
 
+  const [activeIssueId, setActiveIssueId] = useState<string | null>(null);
   const currentScreen = screens[selectedScreen];
   const currentIssues: AuditIssue[] = currentScreen?.result
     ? currentScreen.result.categories.flatMap((cat) => cat.issues)
     : [];
+
+  const scrollToIssue = (issueId: string) => {
+    setActiveIssueId(issueId);
+    const el = document.getElementById(`issue-${issueId}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   return (
     <motion.div
@@ -253,6 +260,8 @@ const MultiScreenResults = ({
                         issues={currentIssues}
                         imageUrl={currentScreen.screenImageUrl}
                         imageAlt={currentScreen.screenName}
+                        activeIssueId={activeIssueId}
+                        onPinClick={scrollToIssue}
                       />
                     </div>
 
@@ -272,10 +281,16 @@ const MultiScreenResults = ({
                         return (
                           <motion.div
                             key={issue.id}
+                            id={`issue-${issue.id}`}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.05 }}
-                            className="bg-card border border-border p-4 flex items-start gap-3"
+                            className={`bg-card border p-4 flex items-start gap-3 cursor-pointer transition-all ${
+                              activeIssueId === issue.id
+                                ? "border-primary ring-2 ring-primary/20"
+                                : "border-border hover:border-primary/30"
+                            }`}
+                            onClick={() => setActiveIssueId(activeIssueId === issue.id ? null : issue.id)}
                           >
                             <span className="w-6 h-6 bg-surface-2 flex items-center justify-center text-xs font-bold text-foreground shrink-0 border border-border">
                               {idx + 1}

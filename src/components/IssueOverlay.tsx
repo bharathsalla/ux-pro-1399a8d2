@@ -6,6 +6,8 @@ interface IssueOverlayProps {
   issues: AuditIssue[];
   imageUrl: string;
   imageAlt?: string;
+  activeIssueId?: string | null;
+  onPinClick?: (issueId: string) => void;
 }
 
 const severityConfig: Record<string, { bg: string; ring: string; text: string; label: string }> = {
@@ -29,11 +31,16 @@ const severityConfig: Record<string, { bg: string; ring: string; text: string; l
   },
 };
 
-const IssueOverlay = ({ issues, imageUrl, imageAlt = "Design screenshot" }: IssueOverlayProps) => {
-  const [activeIssue, setActiveIssue] = useState<string | null>(null);
+const IssueOverlay = ({ issues, imageUrl, imageAlt = "Design screenshot", activeIssueId: externalActiveId, onPinClick }: IssueOverlayProps) => {
+  const [internalActive, setInternalActive] = useState<string | null>(null);
+  const activeIssue = externalActiveId !== undefined ? externalActiveId : internalActive;
 
   const handlePinClick = (issueId: string) => {
-    setActiveIssue(activeIssue === issueId ? null : issueId);
+    if (onPinClick) {
+      onPinClick(issueId);
+    } else {
+      setInternalActive(internalActive === issueId ? null : issueId);
+    }
   };
 
   return (
@@ -102,7 +109,7 @@ const IssueOverlay = ({ issues, imageUrl, imageAlt = "Design screenshot" }: Issu
                         </span>
                       )}
                       <button
-                        onClick={() => setActiveIssue(null)}
+                        onClick={() => { if (onPinClick) onPinClick(''); else setInternalActive(null); }}
                         className="text-card/60 hover:text-card transition-colors"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
