@@ -34,7 +34,7 @@ export function SectionOverlay({ activeSection, onClose }: SectionOverlayProps) 
           <header className="sticky top-0 z-10 bg-background border-b border-border">
             <div className="max-w-[680px] mx-auto px-6 py-4 flex items-center justify-between">
               <span className="text-[11px] tracking-[0.2em] uppercase text-muted-foreground font-medium">
-                UX Audit Pro
+                FixUx
               </span>
               <button
                 onClick={onClose}
@@ -221,7 +221,6 @@ function TestimonialsContent() {
       const { data } = await supabase
         .from("feedback_and_testimonials")
         .select("id, user_name, user_country, user_avatar_url, feedback_text, profile_link, rating, created_at")
-        .eq("is_approved", true)
         .order("created_at", { ascending: false })
         .limit(10);
       if (data) setTestimonials(data as Testimonial[]);
@@ -259,7 +258,7 @@ function TestimonialsContent() {
         className="text-[1.15rem] text-muted-foreground leading-[1.7] mb-14"
       >
         Real feedback from designers, founders, and product managers
-        who use UX Audit Pro in their daily workflows.
+        who use FixUx in their daily workflows.
       </motion.p>
 
       {loading ? (
