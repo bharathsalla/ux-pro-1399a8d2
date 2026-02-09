@@ -335,59 +335,46 @@ function ContactContent() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.04 }}
-        className="text-4xl md:text-[3.2rem] font-extrabold text-foreground leading-[1.08] mb-8"
+        className="text-4xl md:text-[3.2rem] font-extrabold text-foreground leading-[1.08] mb-10"
       >
         Contact Us
       </motion.h1>
 
-      {/* Contact avatar image */}
-      <motion.figure
+      {/* Side-by-side: image + text */}
+      <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.06 }}
-        className="mb-12 flex justify-center"
+        className="flex flex-col md:flex-row gap-8 items-center mb-14"
       >
-        <div className="w-40 h-40 border-2 border-dashed border-primary/30 overflow-hidden">
+        <div className="w-56 h-56 md:w-64 md:h-64 shrink-0 border-2 border-dashed border-primary/30 overflow-hidden">
           <img src={contactAvatarImg} alt="Contact us" className="w-full h-full object-cover" />
         </div>
-      </motion.figure>
-
-      <motion.p
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.08 }}
-        className="text-[1.15rem] text-muted-foreground leading-[1.7] mb-14"
-      >
-        Have questions, feature requests, or want to collaborate?
-        We'd love to hear from you.
-      </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12 }}
-        className="space-y-10"
-      >
-        <div className="border-l-2 border-primary pl-6 space-y-2">
-          <p className="text-[11px] tracking-[0.15em] uppercase text-muted-foreground font-medium">Email</p>
-          <a
-            href="mailto:bhrathuxdesigner@gmail.com"
-            className="text-[1.1rem] text-foreground underline underline-offset-4 decoration-border hover:decoration-primary hover:text-primary transition-colors"
-          >
-            bhrathuxdesigner@gmail.com
-          </a>
-          <p className="text-[13px] text-muted-foreground">We typically respond within 24 hours.</p>
-        </div>
-
-        <div className="border-l-2 border-border pl-6 space-y-2">
-          <p className="text-[11px] tracking-[0.15em] uppercase text-muted-foreground font-medium">Social</p>
-          <div className="flex items-center gap-5">
-            <a href="#" className="text-[14px] text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground transition-colors">
-              𝕏 Twitter
+        <div className="flex-1 space-y-4">
+          <p className="text-[1.15rem] text-muted-foreground leading-[1.7]">
+            Have questions, feature requests, or want to collaborate?
+            We'd love to hear from you.
+          </p>
+          <div className="border-l-2 border-primary pl-6 space-y-2">
+            <p className="text-[11px] tracking-[0.15em] uppercase text-muted-foreground font-medium">Email</p>
+            <a
+              href="mailto:bhrathuxdesigner@gmail.com"
+              className="text-[1.1rem] text-foreground underline underline-offset-4 decoration-border hover:decoration-primary hover:text-primary transition-colors"
+            >
+              bhrathuxdesigner@gmail.com
             </a>
-            <a href="#" className="text-[14px] text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground transition-colors">
-              LinkedIn
-            </a>
+            <p className="text-[13px] text-muted-foreground">We typically respond within 24 hours.</p>
+          </div>
+          <div className="border-l-2 border-border pl-6 space-y-2">
+            <p className="text-[11px] tracking-[0.15em] uppercase text-muted-foreground font-medium">Social</p>
+            <div className="flex items-center gap-5">
+              <a href="#" className="text-[14px] text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground transition-colors">
+                𝕏 Twitter
+              </a>
+              <a href="#" className="text-[14px] text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground transition-colors">
+                LinkedIn
+              </a>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -413,33 +400,27 @@ function WhyFreeContent() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.04 }}
-        className="text-4xl md:text-[3.2rem] font-extrabold text-foreground leading-[1.08] mb-8"
+        className="text-4xl md:text-[3.2rem] font-extrabold text-foreground leading-[1.08] mb-10"
       >
         Why It Is Free
       </motion.h1>
 
-      {/* Why free avatar */}
-      <motion.figure
+      {/* Side-by-side: image + text */}
+      <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.06 }}
-        className="mb-12 flex justify-center"
+        className="flex flex-col md:flex-row gap-8 items-center mb-14"
       >
-        <div className="w-40 h-40 border-2 border-dashed border-primary/30 overflow-hidden">
+        <div className="w-56 h-56 md:w-64 md:h-64 shrink-0 border-2 border-dashed border-primary/30 overflow-hidden">
           <img src={whyFreeAvatarImg} alt="Why it is free" className="w-full h-full object-cover" />
         </div>
-      </motion.figure>
-
-      <motion.p
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.08 }}
-        className="text-[1.15rem] text-muted-foreground leading-[1.7] mb-14"
-      >
-        We believe every designer, product manager, and startup founder
-        deserves access to professional-grade functional feedback —
-        regardless of budget.
-      </motion.p>
+        <p className="flex-1 text-[1.15rem] text-muted-foreground leading-[1.7]">
+          We believe every designer, product manager, and startup founder
+          deserves access to professional-grade functional feedback —
+          regardless of budget.
+        </p>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 8 }}

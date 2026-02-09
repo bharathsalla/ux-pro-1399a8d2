@@ -29,11 +29,9 @@ export function FixUxLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
         <line x1="17" y1="13" x2="17" y2="21" stroke="white" strokeWidth="2" strokeLinecap="round" />
         <line x1="13" y1="17" x2="21" y2="17" stroke="white" strokeWidth="2" strokeLinecap="round" />
       </svg>
-      <span
-        className={`${s.text} font-black tracking-tight text-foreground uppercase`}
-        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "0.02em" }}
-      >
-        FixUx
+      <span className={`inline-flex items-baseline ${s.text} uppercase`} style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "0.02em" }}>
+        <span className="font-black tracking-tight text-foreground">Fix</span>
+        <span className="font-[900] tracking-tight text-foreground" style={{ fontWeight: 900 }}>Ux</span>
       </span>
     </span>
   );
