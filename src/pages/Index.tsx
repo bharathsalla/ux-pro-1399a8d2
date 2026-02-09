@@ -17,13 +17,12 @@ import HeaderProfile from "@/components/auth/HeaderProfile";
 import CountryModal from "@/components/auth/CountryModal";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import CommentsWidget from "@/components/feedback/CommentsWidget";
-import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
+
 import { useAuditDesign } from "@/hooks/useAuditDesign";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useAdminContext } from "@/contexts/AdminContext";
+
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { MessageCircle, ShieldCheck } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 interface UploadedImage {
   base64: string;
@@ -33,7 +32,7 @@ interface UploadedImage {
 
 const Index = () => {
   const { profile, user, loading: authLoading } = useAuthContext();
-  const { isAdmin } = useAdminContext();
+  
   const [step, setStep] = useState<AuditStep>('persona');
   const [selectedPersona, setSelectedPersona] = useState<PersonaId | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -49,9 +48,6 @@ const Index = () => {
   // Engagement gate state
   const [showCommentsGate, setShowCommentsGate] = useState(false);
   
-  // Admin modal state
-  const [showAdminModal, setShowAdminModal] = useState(false);
-
   const { runAudit, runMultiScreenAudit } = useAuditDesign();
 
   // Determine engagement gates
@@ -240,27 +236,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <HeaderProfile />
 
-      {/* Admin modal */}
-      <AdminPasscodeModal
-        open={showAdminModal}
-        onOpenChange={setShowAdminModal}
-        onSuccess={() => {}}
-      />
 
-      {/* Admin access button */}
-      {user && (
-        <div className="fixed top-4 left-4 z-50">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowAdminModal(true)}
-            className="gap-1"
-          >
-            <ShieldCheck className="h-4 w-4" />
-            Admin
-          </Button>
-        </div>
-      )}
 
       <AnimatePresence mode="wait">
         {step === 'persona' && (
