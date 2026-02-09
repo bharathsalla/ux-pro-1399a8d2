@@ -23,10 +23,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         setIsCheckingAdmin(false);
-        const msg = error.message?.includes("401") || error.message?.includes("Unauthorized")
-          ? "Please log in first to access admin."
-          : "This area is restricted to administrators.";
-        return { success: false, error: msg };
+        return { success: false, error: "Invalid passcode. Please try again." };
       }
 
       if (data?.success) {
