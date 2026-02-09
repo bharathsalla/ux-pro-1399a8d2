@@ -223,7 +223,7 @@ function TestimonialsContent() {
         .select("id, user_name, user_country, user_avatar_url, feedback_text, profile_link, rating, created_at")
         .eq("is_approved", true)
         .order("created_at", { ascending: false })
-        .limit(12);
+        .limit(10);
       if (data) setTestimonials(data as Testimonial[]);
       setLoading(false);
     };
@@ -357,10 +357,10 @@ function ContactContent() {
         <div className="border-l-2 border-primary pl-6 space-y-2">
           <p className="text-[11px] tracking-[0.15em] uppercase text-muted-foreground font-medium">Email</p>
           <a
-            href="mailto:hello@uxpro.dev"
+            href="mailto:bhrathuxdesigner@gmail.com"
             className="text-[1.1rem] text-foreground underline underline-offset-4 decoration-border hover:decoration-primary hover:text-primary transition-colors"
           >
-            hello@uxpro.dev
+            bhrathuxdesigner@gmail.com
           </a>
           <p className="text-[13px] text-muted-foreground">We typically respond within 24 hours.</p>
         </div>
