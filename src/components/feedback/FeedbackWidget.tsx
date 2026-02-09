@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, ThumbsUp, Award, Heart, Sparkles, Globe } from "lucide-react";
+import { Loader2, ThumbsUp, Award, Heart, Sparkles, Globe, Link2, AlertCircle } from "lucide-react";
 
 interface FeedbackWidgetProps {
   onComplete: () => void;
@@ -15,18 +16,44 @@ interface FeedbackWidgetProps {
 
 type EmojiReaction = "like" | "clap" | "love";
 
+const PROFILE_PLATFORMS = [
+  { label: "LinkedIn", placeholder: "https://linkedin.com/in/..." },
+  { label: "Medium", placeholder: "https://medium.com/@..." },
+  { label: "Behance", placeholder: "https://behance.net/..." },
+  { label: "Dribbble", placeholder: "https://dribbble.com/..." },
+  { label: "GitHub", placeholder: "https://github.com/..." },
+  { label: "YouTube", placeholder: "https://youtube.com/@..." },
+  { label: "Portfolio", placeholder: "https://your-site.com" },
+];
+
+function isValidUrl(str: string): boolean {
+  try {
+    const url = new URL(str);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
   const { profile, user, refreshProfile } = useAuthContext();
   const [feedbackText, setFeedbackText] = useState("");
+  const [profileLink, setProfileLink] = useState("");
   const [selectedReaction, setSelectedReaction] = useState<EmojiReaction | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const canSubmit = feedbackText.trim().length > 0 || selectedReaction !== null;
+  const hasContent = feedbackText.trim().length > 0 || selectedReaction !== null;
+  const hasValidLink = isValidUrl(profileLink.trim());
+  const canSubmit = hasContent && hasValidLink;
 
   const handleSubmit = async () => {
-    if (!canSubmit) {
-      setError("Please share your feedback or select a reaction to continue.");
+    if (!hasContent) {
+      setError("Please share your feedback or select a reaction.");
+      return;
+    }
+    if (!hasValidLink) {
+      setError("Please provide at least one valid profile link to continue.");
       return;
     }
     if (!user || !profile) return;
@@ -40,6 +67,7 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
       user_avatar_url: profile.avatar_url,
       feedback_text: feedbackText.trim() || `Reacted with ${selectedReaction}`,
       reactions_breakdown: selectedReaction ? { [selectedReaction]: 1 } : {},
+      profile_link: profileLink.trim(),
     });
 
     if (insertError) {
@@ -48,7 +76,6 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
       return;
     }
 
-    // Update profile
     await supabase
       .from("profiles")
       .update({ has_submitted_feedback: true })
@@ -121,17 +148,53 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Feedback textarea */}
+            <Textarea
+              value={feedbackText}
+              onChange={(e) => {
+                setFeedbackText(e.target.value);
+                setError("");
+              }}
+              placeholder="Share your thoughts and experience with UX Pro..."
+              rows={4}
+              className="resize-none text-base"
+            />
+
+            {/* Profile Link — MANDATORY */}
             <div className="space-y-2">
-              <Textarea
-                value={feedbackText}
+              <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-primary" />
+                Your Profile Link
+                <span className="text-destructive">*</span>
+              </label>
+              <Input
+                value={profileLink}
                 onChange={(e) => {
-                  setFeedbackText(e.target.value);
+                  setProfileLink(e.target.value);
                   setError("");
                 }}
-                placeholder="Share your thoughts and experience with UX Pro..."
-                rows={4}
-                className="resize-none text-base"
+                placeholder="https://linkedin.com/in/your-profile"
+                className="text-sm"
+                type="url"
               />
+              <div className="flex flex-wrap gap-1.5">
+                {PROFILE_PLATFORMS.map((p) => (
+                  <span
+                    key={p.label}
+                    className="text-[10px] px-2 py-0.5 bg-surface-2 border border-border text-muted-foreground cursor-pointer hover:text-foreground hover:border-primary/30 transition-colors"
+                    onClick={() => {
+                      if (!profileLink) setProfileLink(p.placeholder);
+                    }}
+                  >
+                    {p.label}
+                  </span>
+                ))}
+              </div>
+              {profileLink && !hasValidLink && (
+                <p className="text-xs text-destructive flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  Please enter a valid URL (e.g. https://linkedin.com/in/...)
+                </p>
+              )}
             </div>
 
             {/* Reaction buttons */}
@@ -156,7 +219,10 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
 
             {/* Error message */}
             {error && (
-              <p className="text-sm text-destructive">{error}</p>
+              <p className="text-sm text-destructive flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {error}
+              </p>
             )}
 
             {/* Submit button */}
@@ -177,7 +243,7 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              Your feedback helps us improve and is shared with the community.
+              Your feedback and profile link will be shared with the community upon admin approval.
             </p>
           </CardContent>
         </Card>

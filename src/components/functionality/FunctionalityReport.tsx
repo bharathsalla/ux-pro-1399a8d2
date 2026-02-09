@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import type { FunctionalityResult, FunctionalityGap } from "@/types/functionality";
 
 interface FunctionalityReportProps {
@@ -35,27 +35,28 @@ const verdictConfig = {
 };
 
 const severityConfig = {
-  critical: { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/20", dot: "bg-destructive" },
-  major: { bg: "bg-score-medium/10", text: "text-score-medium", border: "border-score-medium/20", dot: "bg-score-medium" },
-  minor: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20", dot: "bg-primary" },
+  critical: { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/20", dot: "bg-destructive", dashColor: "border-destructive/60" },
+  major: { bg: "bg-score-medium/10", text: "text-score-medium", border: "border-score-medium/20", dot: "bg-score-medium", dashColor: "border-score-medium/60" },
+  minor: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20", dot: "bg-primary", dashColor: "border-primary/60" },
 };
 
-type Tab = "overview" | "gaps" | "recommendations" | "enterprise";
+type Tab = "gaps" | "recommendations" | "enterprise";
 
 const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: FunctionalityReportProps) => {
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
-  const [showImage, setShowImage] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("gaps");
   const [hoveredGap, setHoveredGap] = useState<number | null>(null);
+  const [selectedGap, setSelectedGap] = useState<number | null>(null);
   const config = verdictConfig[result.verdict];
 
   const displayImageUrl = imageBase64 ? `data:image/png;base64,${imageBase64}` : imageUrl;
 
   const tabs: { id: Tab; label: string; icon: string; count?: number }[] = [
-    { id: "overview", label: "Overview", icon: "📋" },
-    { id: "gaps", label: "Gaps", icon: "🔍", count: result.gaps?.length || 0 },
+    { id: "gaps", label: "Functional Gaps", icon: "🔍", count: result.gaps?.length || 0 },
     { id: "recommendations", label: "Fixes", icon: "💡", count: result.recommendations?.length || 0 },
     { id: "enterprise", label: "Readiness", icon: "🏢" },
   ];
+
+  const activeGapIndex = hoveredGap ?? selectedGap;
 
   return (
     <motion.div
@@ -81,86 +82,13 @@ const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: Funct
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {displayImageUrl && (
-            <button
-              onClick={() => setShowImage(!showImage)}
-              className="text-xs text-muted-foreground hover:text-foreground border border-border px-3 py-1 bg-card transition-colors flex items-center gap-1"
-            >
-              {showImage ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-              {showImage ? "Hide Screen" : "Show Screen"}
-            </button>
-          )}
-          <button
-            onClick={onRecheck}
-            className="text-xs text-muted-foreground hover:text-foreground border border-border px-3 py-1 bg-card transition-colors"
-          >
-            Re-analyze
-          </button>
-        </div>
+        <button
+          onClick={onRecheck}
+          className="text-xs text-muted-foreground hover:text-foreground border border-border px-3 py-1 bg-card transition-colors"
+        >
+          Re-analyze
+        </button>
       </div>
-
-      {/* Annotated image panel */}
-      <AnimatePresence>
-        {showImage && displayImageUrl && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="border-b border-border overflow-hidden"
-          >
-            <div className="p-4 bg-surface-2">
-              <div className="relative inline-block w-full">
-                <img
-                  src={displayImageUrl}
-                  alt="Analyzed screen"
-                  className="w-full max-h-[400px] object-contain border border-border bg-card"
-                />
-                {/* Area annotations overlay */}
-                {result.gaps && result.gaps.length > 0 && (
-                  <div className="absolute inset-0 pointer-events-none">
-                    {result.gaps.map((gap, i) => {
-                      if (!gap.area) return null;
-                      const isHovered = hoveredGap === i;
-                      const sev = severityConfig[gap.severity] || severityConfig.minor;
-                      return (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: isHovered ? 1 : 0.7, scale: 1 }}
-                          className={`absolute pointer-events-auto cursor-default ${
-                            isHovered ? "z-20" : "z-10"
-                          }`}
-                          style={{
-                            // Distribute annotations along the right edge with spacing
-                            top: `${10 + (i * 80) / Math.max(result.gaps.length, 1)}%`,
-                            right: "8px",
-                          }}
-                        >
-                          <div className={`flex items-center gap-1 px-2 py-1 text-[10px] font-medium border ${sev.bg} ${sev.text} ${sev.border} bg-card/90 backdrop-blur-sm shadow-sm max-w-[180px]`}>
-                            <span className={`w-2 h-2 shrink-0 ${sev.dot}`} />
-                            <span className="truncate">{gap.area}</span>
-                          </div>
-                          {isHovered && (
-                            <div className="absolute right-0 top-full mt-1 p-2 bg-card border border-border shadow-md text-xs text-foreground max-w-[220px] z-30">
-                              {gap.issue}
-                            </div>
-                          )}
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-              {result.gaps && result.gaps.some(g => g.area) && (
-                <p className="text-[10px] text-muted-foreground mt-2 text-center">
-                  Hover over gap cards below to highlight areas on the screen
-                </p>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Context bar */}
       <div className="px-5 py-2.5 bg-surface-2 border-b border-border flex flex-wrap gap-3">
@@ -183,6 +111,20 @@ const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: Funct
           <span className="text-xs text-muted-foreground">
             <span className="font-semibold text-foreground">Goal:</span> {result.coreGoal}
           </span>
+        )}
+      </div>
+
+      {/* Summary & Strengths */}
+      <div className="px-5 py-4 border-b border-border">
+        <p className="text-sm text-foreground leading-relaxed mb-3">{result.summary}</p>
+        {result.strengths && result.strengths.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {result.strengths.map((s, i) => (
+              <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-score-high/5 border border-score-high/15 text-score-high">
+                <span>✓</span> {s.title}
+              </span>
+            ))}
+          </div>
         )}
       </div>
 
@@ -210,92 +152,153 @@ const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: Funct
       </div>
 
       {/* Tab content */}
-      <div className="p-5">
+      <div>
         <AnimatePresence mode="wait">
-          {activeTab === "overview" && (
-            <motion.div
-              key="overview"
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              className="space-y-4"
-            >
-              <p className="text-sm text-foreground leading-relaxed">{result.summary}</p>
-
-              {result.strengths && result.strengths.length > 0 && (
-                <div>
-                  <h5 className="text-xs font-bold text-score-high uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-score-high" />
-                    Functional Strengths
-                  </h5>
-                  <div className="space-y-2">
-                    {result.strengths.map((s, i) => (
-                      <div key={i} className="bg-score-high/5 border border-score-high/15 p-3">
-                        <p className="text-xs font-medium text-foreground flex items-start gap-2">
-                          <span className="text-score-high mt-0.5 shrink-0">✓</span>
-                          {s.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1 ml-5">{s.detail}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          )}
-
           {activeTab === "gaps" && (
             <motion.div
               key="gaps"
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              className="space-y-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
               {result.gaps && result.gaps.length > 0 ? (
-                result.gaps.map((gap, i) => {
-                  const sev = severityConfig[gap.severity] || severityConfig.minor;
-                  return (
-                    <div
-                      key={i}
-                      className="bg-card border border-border p-4 transition-all hover:border-primary/30"
-                      onMouseEnter={() => setHoveredGap(i)}
-                      onMouseLeave={() => setHoveredGap(null)}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="w-6 h-6 bg-surface-2 flex items-center justify-center text-xs font-bold text-foreground shrink-0 border border-border">
-                          {i + 1}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <span className={`px-2 py-0.5 text-xs font-medium ${sev.bg} ${sev.text} border ${sev.border}`}>
-                              {gap.severity}
-                            </span>
-                            {gap.area && (
-                              <span className="px-2 py-0.5 text-[10px] font-medium bg-surface-2 text-muted-foreground border border-border flex items-center gap-1">
-                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                {gap.area}
-                              </span>
-                            )}
-                          </div>
-                          <h4 className="text-sm font-medium text-foreground">{gap.issue}</h4>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            <span className="font-semibold">Impact:</span> {gap.impact}
-                          </p>
-                          <div className="mt-2 p-2 bg-surface-2 border border-border">
-                            <p className="text-xs text-muted-foreground">
-                              <span className="font-semibold text-foreground">Industry standard:</span>{" "}
-                              {gap.industryExpectation}
-                            </p>
+                <div className="flex flex-col lg:flex-row">
+                  {/* LEFT COLUMN: Image with dashed gap outlines */}
+                  {displayImageUrl && (
+                    <div className="lg:w-1/2 border-r border-border p-4 bg-surface-2">
+                      <div className="sticky top-0">
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-3 flex items-center gap-1.5">
+                          <MapPin className="w-3 h-3" />
+                          Screen Annotations
+                        </p>
+                        <div className="relative">
+                          <img
+                            src={displayImageUrl}
+                            alt="Analyzed screen"
+                            className="w-full object-contain border border-border bg-card"
+                          />
+                          {/* Dashed gap area annotations */}
+                          <div className="absolute inset-0 pointer-events-none">
+                            {result.gaps.map((gap, i) => {
+                              if (!gap.area) return null;
+                              const isActive = activeGapIndex === i;
+                              const sev = severityConfig[gap.severity] || severityConfig.minor;
+                              
+                              // Position annotations distributed across the image
+                              const row = Math.floor(i / 2);
+                              const col = i % 2;
+                              const totalRows = Math.ceil(result.gaps.length / 2);
+                              const topPct = 5 + (row * 85) / Math.max(totalRows, 1);
+                              const leftPct = col === 0 ? 3 : 50;
+                              const width = col === 0 ? 44 : 44;
+
+                              return (
+                                <motion.div
+                                  key={i}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ 
+                                    opacity: isActive ? 1 : 0.5,
+                                    scale: isActive ? 1.02 : 1,
+                                  }}
+                                  className={`absolute pointer-events-auto transition-all duration-300 ${
+                                    isActive ? "z-20" : "z-10"
+                                  }`}
+                                  style={{
+                                    top: `${topPct}%`,
+                                    left: `${leftPct}%`,
+                                    width: `${width}%`,
+                                    minHeight: "40px",
+                                  }}
+                                >
+                                  {/* Dashed outline box */}
+                                  <div className={`border-2 border-dashed ${sev.dashColor} ${
+                                    isActive ? "bg-primary/5" : ""
+                                  } p-2 transition-all`}>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className={`w-5 h-5 flex items-center justify-center text-[10px] font-bold text-primary-foreground ${sev.dot} shrink-0`}>
+                                        {i + 1}
+                                      </span>
+                                      <span className={`text-[9px] font-medium ${sev.text} truncate bg-card/80 backdrop-blur-sm px-1 py-0.5`}>
+                                        {gap.area}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {/* Connector line hint */}
+                                  {isActive && (
+                                    <motion.div
+                                      initial={{ width: 0 }}
+                                      animate={{ width: "100%" }}
+                                      className="h-px bg-primary/40 mt-1"
+                                    />
+                                  )}
+                                </motion.div>
+                              );
+                            })}
                           </div>
                         </div>
+                        <p className="text-[10px] text-muted-foreground mt-3 text-center">
+                          Hover or click gap cards to highlight areas on screen
+                        </p>
                       </div>
                     </div>
-                  );
-                })
+                  )}
+
+                  {/* RIGHT COLUMN: Gap descriptions */}
+                  <div className={`${displayImageUrl ? "lg:w-1/2" : "w-full"} p-4 space-y-3`}>
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+                      Functional Gaps ({result.gaps.length})
+                    </p>
+                    {result.gaps.map((gap, i) => {
+                      const sev = severityConfig[gap.severity] || severityConfig.minor;
+                      const isActive = activeGapIndex === i;
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          className={`bg-card border p-4 transition-all cursor-pointer ${
+                            isActive
+                              ? "border-primary ring-2 ring-primary/20"
+                              : "border-border hover:border-primary/30"
+                          }`}
+                          onMouseEnter={() => setHoveredGap(i)}
+                          onMouseLeave={() => setHoveredGap(null)}
+                          onClick={() => setSelectedGap(selectedGap === i ? null : i)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className={`w-6 h-6 flex items-center justify-center text-xs font-bold text-primary-foreground shrink-0 ${sev.dot}`}>
+                              {i + 1}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span className={`px-2 py-0.5 text-xs font-medium ${sev.bg} ${sev.text} border ${sev.border}`}>
+                                  {gap.severity}
+                                </span>
+                                {gap.area && (
+                                  <span className="px-2 py-0.5 text-[10px] font-medium bg-surface-2 text-muted-foreground border border-border flex items-center gap-1">
+                                    <MapPin className="w-2.5 h-2.5" />
+                                    {gap.area}
+                                  </span>
+                                )}
+                              </div>
+                              <h4 className="text-sm font-semibold text-foreground">{gap.issue}</h4>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                <span className="font-semibold">Why it matters:</span> {gap.impact}
+                              </p>
+                              <div className="mt-2 p-2 bg-surface-2 border border-border">
+                                <p className="text-xs text-muted-foreground">
+                                  <span className="font-semibold text-foreground">Industry standard:</span>{" "}
+                                  {gap.industryExpectation}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">No functional gaps identified.</p>
               )}
@@ -308,7 +311,7 @@ const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: Funct
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
-              className="space-y-3"
+              className="p-5 space-y-3"
             >
               {result.recommendations && result.recommendations.length > 0 ? (
                 result.recommendations.map((rec, i) => (
@@ -348,7 +351,7 @@ const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: Funct
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
-              className="space-y-3"
+              className="p-5 space-y-3"
             >
               {result.enterpriseReadiness && (
                 <>
