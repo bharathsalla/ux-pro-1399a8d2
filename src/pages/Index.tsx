@@ -207,7 +207,6 @@ const Index = () => {
             personaId={selectedPersona}
             onStart={handleConfigStart}
             onStartMultiImage={handleMultiImageStart}
-            onStartFigma={handleFigmaStart}
             onBack={handleBack}
           />
         )}

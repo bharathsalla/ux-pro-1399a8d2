@@ -4,6 +4,7 @@ import { type PersonaId, type ScreenAuditResult, type AuditIssue, personas } fro
 import ScoreRing from "./ScoreRing";
 import IssueOverlay from "./IssueOverlay";
 import FigmaAnalyzing from "./FigmaAnalyzing";
+import FunctionalityFeedback from "./FunctionalityFeedback";
 
 interface MultiScreenResultsProps {
   personaId: PersonaId;
@@ -281,6 +282,14 @@ const MultiScreenResults = ({
                           </motion.div>
                         );
                       })}
+                    </div>
+
+                    {/* Functionality Feedback — post-analysis */}
+                    <div className="mt-5">
+                      <FunctionalityFeedback
+                        imageUrl={currentScreen.screenImageUrl}
+                        screenName={currentScreen.screenName}
+                      />
                     </div>
                   </>
                 ) : null}

@@ -1,9 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { type PersonaId, type AuditConfig, type InputMode, type FigmaFrame, personas } from "@/types/audit";
+import { type PersonaId, type AuditConfig, personas } from "@/types/audit";
 import ImageUpload from "./ImageUpload";
-import FigmaUrlInput from "./FigmaUrlInput";
-import { useFigmaFrames } from "@/hooks/useFigmaFrames";
 
 interface UploadedImage {
   base64: string;
@@ -15,7 +13,6 @@ interface AuditConfigScreenProps {
   personaId: PersonaId;
   onStart: (config: AuditConfig, imageBase64: string, imagePreviewUrl: string) => void;
   onStartMultiImage?: (config: AuditConfig, images: UploadedImage[]) => void;
-  onStartFigma: (config: AuditConfig, frames: FigmaFrame[]) => void;
   onBack: () => void;
 }
 
@@ -53,9 +50,9 @@ const purposeOptions: Record<PersonaId, { value: AuditConfig['purpose']; label: 
   ],
 };
 
-type ExtInputMode = 'single' | 'multi' | 'figma';
+type ExtInputMode = 'single' | 'multi';
 
-const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma, onBack }: AuditConfigScreenProps) => {
+const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: AuditConfigScreenProps) => {
   const persona = personas.find(p => p.id === personaId)!;
   const [inputMode, setInputMode] = useState<ExtInputMode>('single');
   const [fidelity, setFidelity] = useState<AuditConfig['fidelity']>('high-fidelity');
@@ -64,45 +61,35 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
-  const { isLoading: figmaLoading, error: figmaError, frames, fileName, fetchFrames, reset: resetFigma } = useFigmaFrames();
-
   const handleImageSelect = (base64: string, previewUrl: string) => {
     setImageBase64(base64);
     setImagePreviewUrl(previewUrl);
   };
 
-  const handleFigmaFetch = useCallback(async (url: string) => {
-    await fetchFrames(url);
-  }, [fetchFrames]);
 
   const canStartSingle = inputMode === 'single' && !!imageBase64;
   const canStartMulti = inputMode === 'multi' && uploadedImages.length > 0;
-  const canStartFigma = inputMode === 'figma' && frames.length > 0;
-  const canStart = canStartSingle || canStartMulti || canStartFigma;
+  const canStart = canStartSingle || canStartMulti;
 
   const handleStart = () => {
     const config: AuditConfig = {
       fidelity,
       purpose,
-      frameCount: inputMode === 'figma' ? frames.length : inputMode === 'multi' ? uploadedImages.length : 1,
+      frameCount: inputMode === 'multi' ? uploadedImages.length : 1,
     };
 
     if (canStartSingle && imagePreviewUrl) {
       onStart(config, imageBase64!, imagePreviewUrl);
     } else if (canStartMulti && onStartMultiImage) {
       onStartMultiImage(config, uploadedImages);
-    } else if (canStartFigma) {
-      onStartFigma(config, frames);
     }
   };
 
   const getButtonLabel = () => {
     if (!canStart) {
-      if (inputMode === 'figma') return 'Paste a Figma link to start';
       if (inputMode === 'multi') return 'Upload images to start';
       return 'Upload a design to start';
     }
-    if (inputMode === 'figma') return `Audit ${frames.length} Screen${frames.length > 1 ? 's' : ''} →`;
     if (inputMode === 'multi') return `Audit ${uploadedImages.length} Image${uploadedImages.length > 1 ? 's' : ''} →`;
     return 'Run AI Audit →';
   };
@@ -156,16 +143,6 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma
             >
               🖼️ Multi (5)
             </button>
-            <button
-              onClick={() => setInputMode('figma')}
-              className={`flex-1 py-2.5 text-sm font-medium transition-all ${
-                inputMode === 'figma'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              🎨 Figma
-            </button>
           </div>
         </div>
 
@@ -176,23 +153,13 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma
               onImageSelect={handleImageSelect}
               previewUrl={imagePreviewUrl}
             />
-          ) : inputMode === 'multi' ? (
+          ) : (
             <ImageUpload
               onImageSelect={() => {}}
               onMultiImageSelect={setUploadedImages}
               previewUrl={null}
               multiMode={true}
               uploadedImages={uploadedImages}
-            />
-          ) : (
-            <FigmaUrlInput
-              onFramesFetched={() => {}}
-              isLoading={figmaLoading}
-              error={figmaError}
-              frames={frames}
-              fileName={fileName}
-              onFetch={handleFigmaFetch}
-              onReset={resetFigma}
             />
           )}
         </div>
