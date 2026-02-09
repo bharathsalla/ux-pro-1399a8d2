@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { type PersonaId, type ScreenAuditResult, type AuditIssue, personas } from "@/types/audit";
 import ScoreRing from "./ScoreRing";
 import IssueOverlay from "./IssueOverlay";
-import FunctionalityFeedback from "./FunctionalityFeedback";
 import FigmaAnalyzing from "./FigmaAnalyzing";
 
 interface MultiScreenResultsProps {
@@ -231,14 +230,6 @@ const MultiScreenResults = ({
                         issues={currentIssues}
                         imageUrl={currentScreen.screenImageUrl}
                         imageAlt={currentScreen.screenName}
-                      />
-                    </div>
-
-                    {/* Functionality Feedback */}
-                    <div className="mb-5">
-                      <FunctionalityFeedback
-                        imageUrl={currentScreen.screenImageUrl}
-                        screenName={currentScreen.screenName}
                       />
                     </div>
 
