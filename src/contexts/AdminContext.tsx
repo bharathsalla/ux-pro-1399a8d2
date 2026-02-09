@@ -23,7 +23,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         setIsCheckingAdmin(false);
-        return { success: false, error: "This area is restricted to administrators." };
+        const msg = error.message?.includes("401") || error.message?.includes("Unauthorized")
+          ? "Please log in first to access admin."
+          : "This area is restricted to administrators.";
+        return { success: false, error: msg };
       }
 
       if (data?.success) {
