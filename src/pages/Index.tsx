@@ -15,14 +15,15 @@ import ImageAuditResults from "@/components/ImageAuditResults";
 import MultiScreenResults from "@/components/MultiScreenResults";
 import HeaderProfile from "@/components/auth/HeaderProfile";
 import CountryModal from "@/components/auth/CountryModal";
-import FeedbackModal from "@/components/auth/FeedbackModal";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import CommentsWidget from "@/components/feedback/CommentsWidget";
+import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
 import { useAuditDesign } from "@/hooks/useAuditDesign";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useAdminContext } from "@/contexts/AdminContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { MessageCircle, ShieldCheck } from "lucide-react";
 
 interface UploadedImage {
   base64: string;
@@ -32,7 +33,7 @@ interface UploadedImage {
 
 const Index = () => {
   const { profile, user, loading: authLoading } = useAuthContext();
-  const navigate = useNavigate();
+  const { isAdmin } = useAdminContext();
   const [step, setStep] = useState<AuditStep>('persona');
   const [selectedPersona, setSelectedPersona] = useState<PersonaId | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -46,8 +47,10 @@ const Index = () => {
   const [completedScreens, setCompletedScreens] = useState(0);
 
   // Engagement gate state
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showCommentsGate, setShowCommentsGate] = useState(false);
+  
+  // Admin modal state
+  const [showAdminModal, setShowAdminModal] = useState(false);
 
   const { runAudit, runMultiScreenAudit } = useAuditDesign();
 
@@ -57,7 +60,7 @@ const Index = () => {
   const needsComment = !!profile && profile.has_submitted_feedback && !profile.has_commented && profile.login_count > 1;
 
   // Show the right gate
-  const shouldShowFeedbackModal = needsFeedback && !showCommentsGate;
+  const shouldShowFeedbackWidget = needsFeedback && !showCommentsGate;
   const shouldShowCommentsGate = needsComment || showCommentsGate;
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
@@ -205,6 +208,11 @@ const Index = () => {
     );
   }
 
+  // Feedback widget gate (second login)
+  if (shouldShowFeedbackWidget) {
+    return <FeedbackWidget onComplete={handleFeedbackComplete} />;
+  }
+
   // Comments gate
   if (shouldShowCommentsGate) {
     return (
@@ -232,23 +240,24 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <HeaderProfile />
 
-      {/* Feedback modal */}
-      <FeedbackModal
-        open={shouldShowFeedbackModal}
-        onComplete={handleFeedbackComplete}
+      {/* Admin modal */}
+      <AdminPasscodeModal
+        open={showAdminModal}
+        onOpenChange={setShowAdminModal}
+        onSuccess={() => {}}
       />
 
-      {/* Testimonials link */}
+      {/* Admin access button */}
       {user && (
         <div className="fixed top-4 left-4 z-50">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate("/testimonials")}
+            onClick={() => setShowAdminModal(true)}
             className="gap-1"
           >
-            <MessageCircle className="h-4 w-4" />
-            Testimonials
+            <ShieldCheck className="h-4 w-4" />
+            Admin
           </Button>
         </div>
       )}
