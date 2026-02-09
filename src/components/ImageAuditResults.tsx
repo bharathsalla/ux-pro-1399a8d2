@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { type PersonaId, type AuditResult, type AuditIssue, personas } from "@/types/audit";
 import ScoreRing from "./ScoreRing";
 import IssueOverlay from "./IssueOverlay";
+import FunctionalityFeedback from "./FunctionalityFeedback";
 
 interface ImageAuditResultsProps {
   personaId: PersonaId;
@@ -196,6 +197,20 @@ const ImageAuditResults = ({
               </motion.div>
             );
           })}
+        </motion.div>
+
+        {/* Functionality Feedback — post-analysis */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mb-6"
+        >
+          <FunctionalityFeedback
+            imageBase64={imageBase64}
+            imageUrl={imageUrl}
+            screenName="Uploaded Design"
+          />
         </motion.div>
 
         {/* New audit button */}
