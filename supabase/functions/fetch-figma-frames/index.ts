@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -59,21 +60,15 @@ async function fetchWithRetry(
 ): Promise<Response> {
   for (let attempt = 0; attempt < retries; attempt++) {
     const response = await fetch(url, { headers });
-
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
-      const waitMs = retryAfter
-        ? parseInt(retryAfter, 10) * 1000
-        : 1000 * (attempt + 1); // 1s, 2s, 3s
+      const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 1000 * (attempt + 1);
       console.log(`Rate limited (429). Waiting ${waitMs}ms (attempt ${attempt + 1}/${retries})`);
       await delay(waitMs);
       continue;
     }
-
     return response;
   }
-
-  // Final attempt
   return await fetch(url, { headers });
 }
 
@@ -83,6 +78,31 @@ serve(async (req) => {
   }
 
   try {
+    // --- Auth check ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // --- End auth check ---
+
     const { figmaUrl } = await req.json();
 
     if (!figmaUrl) {
@@ -111,9 +131,6 @@ serve(async (req) => {
     const { fileKey } = parsed;
     const figmaHeaders = { "X-Figma-Token": FIGMA_ACCESS_TOKEN };
 
-    // ────────────────────────────────────────────
-    // STEP 1: Fetch entire file tree in ONE call
-    // ────────────────────────────────────────────
     console.log("Fetching Figma file tree:", fileKey);
     const fileResponse = await fetchWithRetry(
       `https://api.figma.com/v1/files/${fileKey}?depth=2`,
@@ -144,9 +161,6 @@ serve(async (req) => {
     const fileData = await fileResponse.json();
     const fileName = fileData.name || "Untitled";
 
-    // ────────────────────────────────────────────
-    // STEP 2: Parse frames locally (zero API calls)
-    // ────────────────────────────────────────────
     const allFrames: { id: string; name: string }[] = [];
     if (fileData.document?.children) {
       for (const page of fileData.document.children) {
@@ -161,34 +175,24 @@ serve(async (req) => {
       );
     }
 
-    // Cap at 8 frames max
     const framesToExport = allFrames.slice(0, 8);
-
-    // ────────────────────────────────────────────
-    // STEP 3: Export images SEQUENTIALLY with delay
-    // No parallel requests. No Promise.all.
-    // ────────────────────────────────────────────
-    await delay(500); // Breathe after file fetch
+    await delay(500);
 
     const allImages: Record<string, string> = {};
 
-    // Process ONE frame at a time with 400ms gap
     for (const frame of framesToExport) {
       await delay(400);
-      
       try {
         const imgResponse = await fetchWithRetry(
           `https://api.figma.com/v1/images/${fileKey}?ids=${encodeURIComponent(frame.id)}&format=png&scale=1`,
           figmaHeaders
         );
-
         if (imgResponse.ok) {
           const imgData = await imgResponse.json();
           if (imgData.images?.[frame.id]) {
             allImages[frame.id] = imgData.images[frame.id];
           }
         } else if (imgResponse.status === 429) {
-          // Hit rate limit mid-export, return what we have so far
           console.log("Hit rate limit during export, returning partial results");
           break;
         } else {
@@ -199,9 +203,6 @@ serve(async (req) => {
       }
     }
 
-    // ────────────────────────────────────────────
-    // STEP 4: Build response
-    // ────────────────────────────────────────────
     const frames = framesToExport
       .map((frame) => ({
         id: frame.id,
