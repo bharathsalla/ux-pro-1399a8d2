@@ -14,7 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      comments: {
+        Row: {
+          comment_text: string
+          created_at: string
+          feedback_id: string
+          id: string
+          user_avatar_url: string | null
+          user_country: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          comment_text: string
+          created_at?: string
+          feedback_id: string
+          id?: string
+          user_avatar_url?: string | null
+          user_country?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          comment_text?: string
+          created_at?: string
+          feedback_id?: string
+          id?: string
+          user_avatar_url?: string | null
+          user_country?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_and_testimonials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_and_testimonials: {
+        Row: {
+          comments_count: number
+          created_at: string
+          feedback_text: string
+          id: string
+          likes_count: number
+          reactions_breakdown: Json
+          user_avatar_url: string | null
+          user_country: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          comments_count?: number
+          created_at?: string
+          feedback_text: string
+          id?: string
+          likes_count?: number
+          reactions_breakdown?: Json
+          user_avatar_url?: string | null
+          user_country?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          comments_count?: number
+          created_at?: string
+          feedback_text?: string
+          id?: string
+          likes_count?: number
+          reactions_breakdown?: Json
+          user_avatar_url?: string | null
+          user_country?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_and_testimonials_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          auth_provider: string
+          avatar_url: string | null
+          country: string
+          created_at: string
+          email: string
+          has_commented: boolean
+          has_submitted_feedback: boolean
+          id: string
+          last_login_at: string | null
+          login_count: number
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          auth_provider?: string
+          avatar_url?: string | null
+          country?: string
+          created_at?: string
+          email?: string
+          has_commented?: boolean
+          has_submitted_feedback?: boolean
+          id: string
+          last_login_at?: string | null
+          login_count?: number
+          name?: string
+          updated_at?: string
+        }
+        Update: {
+          auth_provider?: string
+          avatar_url?: string | null
+          country?: string
+          created_at?: string
+          email?: string
+          has_commented?: boolean
+          has_submitted_feedback?: boolean
+          id?: string
+          last_login_at?: string | null
+          login_count?: number
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reactions: {
+        Row: {
+          created_at: string
+          feedback_id: string
+          id: string
+          reaction_type: Database["public"]["Enums"]["reaction_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_id: string
+          id?: string
+          reaction_type: Database["public"]["Enums"]["reaction_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback_id?: string
+          id?: string
+          reaction_type?: Database["public"]["Enums"]["reaction_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactions_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_and_testimonials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +201,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      reaction_type: "like" | "clap" | "love"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +328,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      reaction_type: ["like", "clap", "love"],
+    },
   },
 } as const

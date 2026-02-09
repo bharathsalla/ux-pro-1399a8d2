@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   type PersonaId,
   type AuditConfig,
@@ -13,8 +13,16 @@ import AuditConfigScreen from "@/components/AuditConfigScreen";
 import AuditRunning from "@/components/AuditRunning";
 import ImageAuditResults from "@/components/ImageAuditResults";
 import MultiScreenResults from "@/components/MultiScreenResults";
+import HeaderProfile from "@/components/auth/HeaderProfile";
+import CountryModal from "@/components/auth/CountryModal";
+import FeedbackModal from "@/components/auth/FeedbackModal";
+import CommentsWidget from "@/components/feedback/CommentsWidget";
 import { useAuditDesign } from "@/hooks/useAuditDesign";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface UploadedImage {
   base64: string;
@@ -23,6 +31,8 @@ interface UploadedImage {
 }
 
 const Index = () => {
+  const { profile, user, loading: authLoading } = useAuthContext();
+  const navigate = useNavigate();
   const [step, setStep] = useState<AuditStep>('persona');
   const [selectedPersona, setSelectedPersona] = useState<PersonaId | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -35,14 +45,26 @@ const Index = () => {
   const [screenResults, setScreenResults] = useState<ScreenAuditResult[]>([]);
   const [completedScreens, setCompletedScreens] = useState(0);
 
+  // Engagement gate state
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showCommentsGate, setShowCommentsGate] = useState(false);
+
   const { runAudit, runMultiScreenAudit } = useAuditDesign();
+
+  // Determine engagement gates
+  const needsCountry = !!profile && !profile.country;
+  const needsFeedback = !!profile && profile.login_count > 1 && !profile.has_submitted_feedback;
+  const needsComment = !!profile && profile.has_submitted_feedback && !profile.has_commented && profile.login_count > 1;
+
+  // Show the right gate
+  const shouldShowFeedbackModal = needsFeedback && !showCommentsGate;
+  const shouldShowCommentsGate = needsComment || showCommentsGate;
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
     setSelectedPersona(id);
     setStep('config');
   }, []);
 
-  // Single image audit
   const handleConfigStart = useCallback(async (cfg: AuditConfig, base64: string, previewUrl: string) => {
     if (!selectedPersona) return;
     setIsMultiScreen(false);
@@ -61,12 +83,10 @@ const Index = () => {
     }
   }, [selectedPersona, runAudit]);
 
-  // Multi-image audit (up to 5 images)
   const handleMultiImageStart = useCallback(async (cfg: AuditConfig, images: UploadedImage[]) => {
     if (!selectedPersona) return;
     setIsMultiScreen(true);
 
-    // Convert uploaded images to FigmaFrame-like format for multi-screen results
     const frames: FigmaFrame[] = images.map((img, idx) => ({
       id: `upload-${idx}`,
       name: `Image ${idx + 1}`,
@@ -85,7 +105,6 @@ const Index = () => {
     setCompletedScreens(0);
     setStep('results');
 
-    // Audit each image sequentially
     for (let i = 0; i < images.length; i++) {
       try {
         const result = await runAudit(images[i].base64, selectedPersona, cfg);
@@ -117,7 +136,6 @@ const Index = () => {
     }
   }, [selectedPersona, runAudit]);
 
-  // Figma multi-screen audit
   const handleFigmaStart = useCallback(async (cfg: AuditConfig, frames: FigmaFrame[]) => {
     if (!selectedPersona) return;
     setIsMultiScreen(true);
@@ -160,8 +178,81 @@ const Index = () => {
     setSelectedPersona(null);
   }, []);
 
+  // Show comments gate after feedback submission
+  const handleFeedbackComplete = () => {
+    setShowCommentsGate(true);
+  };
+
+  const handleCommentComplete = () => {
+    setShowCommentsGate(false);
+  };
+
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  // Country modal for social auth users
+  if (needsCountry) {
+    return (
+      <div className="min-h-screen bg-background">
+        <CountryModal open={true} />
+      </div>
+    );
+  }
+
+  // Comments gate
+  if (shouldShowCommentsGate) {
+    return (
+      <div className="min-h-screen bg-background">
+        <HeaderProfile />
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
+          >
+            <MessageCircle className="h-12 w-12 mx-auto mb-4 text-primary" />
+            <h2 className="text-2xl font-bold mb-2 text-foreground">Join the conversation 💬</h2>
+            <p className="text-muted-foreground">
+              Comment on at least one feedback below to continue using the app.
+            </p>
+          </motion.div>
+          <CommentsWidget requireComment onCommentComplete={handleCommentComplete} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      <HeaderProfile />
+
+      {/* Feedback modal */}
+      <FeedbackModal
+        open={shouldShowFeedbackModal}
+        onComplete={handleFeedbackComplete}
+      />
+
+      {/* Testimonials link */}
+      {user && (
+        <div className="fixed top-4 left-4 z-50">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/testimonials")}
+            className="gap-1"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Testimonials
+          </Button>
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         {step === 'persona' && (
           <PersonaSelect key="persona" onSelect={handlePersonaSelect} />
