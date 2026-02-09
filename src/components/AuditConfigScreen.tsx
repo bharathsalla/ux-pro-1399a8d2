@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { type PersonaId, type AuditConfig, type InputMode, type FigmaFrame, personas } from "@/types/audit";
+import { type PersonaId, type AuditConfig, type FigmaFrame, personas } from "@/types/audit";
 import ImageUpload from "./ImageUpload";
 import FigmaUrlInput from "./FigmaUrlInput";
 import { useFigmaFrames } from "@/hooks/useFigmaFrames";
@@ -20,71 +20,117 @@ interface AuditConfigScreenProps {
 }
 
 const fidelityOptions = [
-  { value: 'wireframe' as const, label: 'Wireframe', desc: 'Low-fidelity sketch' },
-  { value: 'mvp' as const, label: 'MVP', desc: 'Functional prototype' },
-  { value: 'high-fidelity' as const, label: 'High-Fidelity', desc: 'Production-ready' },
+  { value: "wireframe" as const, label: "Wireframe", desc: "Low-fidelity sketch" },
+  { value: "mvp" as const, label: "MVP", desc: "Functional prototype" },
+  { value: "high-fidelity" as const, label: "High-Fidelity", desc: "Production-ready" },
 ];
 
-const purposeOptions: Record<PersonaId, { value: AuditConfig['purpose']; label: string }[]> = {
+const purposeOptions: Record<PersonaId, { value: AuditConfig["purpose"]; label: string }[]> = {
   solo: [
-    { value: 'pre-handoff', label: 'Pre-Handoff Check' },
-    { value: 'portfolio', label: 'Portfolio Polish' },
-    { value: 'review', label: 'Self Review' },
+    { value: "pre-handoff", label: "Pre-Handoff Check" },
+    { value: "portfolio", label: "Portfolio Polish" },
+    { value: "review", label: "Self Review" },
   ],
   lead: [
-    { value: 'review', label: 'Team Review' },
-    { value: 'pre-handoff', label: 'Pre-Handoff Gate' },
-    { value: 'stakeholder', label: 'Quality Report' },
+    { value: "review", label: "Team Review" },
+    { value: "pre-handoff", label: "Pre-Handoff Gate" },
+    { value: "stakeholder", label: "Quality Report" },
   ],
   a11y: [
-    { value: 'review', label: 'Compliance Check' },
-    { value: 'pre-handoff', label: 'Pre-Launch Audit' },
-    { value: 'stakeholder', label: 'Accessibility Report' },
+    { value: "review", label: "Compliance Check" },
+    { value: "pre-handoff", label: "Pre-Launch Audit" },
+    { value: "stakeholder", label: "Accessibility Report" },
   ],
   founder: [
-    { value: 'stakeholder', label: 'Stakeholder Review' },
-    { value: 'pre-handoff', label: 'Dev Readiness' },
-    { value: 'review', label: 'Quick Check' },
+    { value: "stakeholder", label: "Stakeholder Review" },
+    { value: "pre-handoff", label: "Dev Readiness" },
+    { value: "review", label: "Quick Check" },
   ],
   consultant: [
-    { value: 'stakeholder', label: 'Client Report' },
-    { value: 'review', label: 'Heuristic Evaluation' },
-    { value: 'pre-handoff', label: 'Formal Audit' },
+    { value: "stakeholder", label: "Client Report" },
+    { value: "review", label: "Heuristic Evaluation" },
+    { value: "pre-handoff", label: "Formal Audit" },
   ],
 };
 
-type ExtInputMode = 'single' | 'multi' | 'figma';
+// Persona-specific background accent colors
+const personaBgConfig: Record<PersonaId, { gradient: string; dot: string }> = {
+  solo: {
+    gradient: "from-emerald-50/80 via-transparent to-emerald-50/40",
+    dot: "bg-emerald-200/30",
+  },
+  lead: {
+    gradient: "from-blue-50/80 via-transparent to-blue-50/40",
+    dot: "bg-blue-200/30",
+  },
+  a11y: {
+    gradient: "from-purple-50/80 via-transparent to-purple-50/40",
+    dot: "bg-purple-200/30",
+  },
+  founder: {
+    gradient: "from-amber-50/80 via-transparent to-amber-50/40",
+    dot: "bg-amber-200/30",
+  },
+  consultant: {
+    gradient: "from-rose-50/80 via-transparent to-rose-50/40",
+    dot: "bg-rose-200/30",
+  },
+};
 
-const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma, onBack }: AuditConfigScreenProps) => {
-  const persona = personas.find(p => p.id === personaId)!;
-  const [inputMode, setInputMode] = useState<ExtInputMode>('single');
-  const [fidelity, setFidelity] = useState<AuditConfig['fidelity']>('high-fidelity');
-  const [purpose, setPurpose] = useState<AuditConfig['purpose']>(purposeOptions[personaId][0].value);
+type ExtInputMode = "single" | "multi" | "figma";
+
+const AuditConfigScreen = ({
+  personaId,
+  onStart,
+  onStartMultiImage,
+  onStartFigma,
+  onBack,
+}: AuditConfigScreenProps) => {
+  const persona = personas.find((p) => p.id === personaId)!;
+  const bgConfig = personaBgConfig[personaId];
+  const [inputMode, setInputMode] = useState<ExtInputMode>("single");
+  const [fidelity, setFidelity] = useState<AuditConfig["fidelity"]>("high-fidelity");
+  const [purpose, setPurpose] = useState<AuditConfig["purpose"]>(purposeOptions[personaId][0].value);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
-  const { isLoading: figmaLoading, error: figmaError, frames, fileName, fetchFrames, reset: resetFigma } = useFigmaFrames();
+  const {
+    isLoading: figmaLoading,
+    error: figmaError,
+    frames,
+    fileName,
+    fetchFrames,
+    reset: resetFigma,
+  } = useFigmaFrames();
 
   const handleImageSelect = (base64: string, previewUrl: string) => {
     setImageBase64(base64);
     setImagePreviewUrl(previewUrl);
   };
 
-  const handleFigmaFetch = useCallback(async (url: string) => {
-    await fetchFrames(url);
-  }, [fetchFrames]);
+  const handleFigmaFetch = useCallback(
+    async (url: string) => {
+      await fetchFrames(url);
+    },
+    [fetchFrames]
+  );
 
-  const canStartSingle = inputMode === 'single' && !!imageBase64;
-  const canStartMulti = inputMode === 'multi' && uploadedImages.length > 0;
-  const canStartFigma = inputMode === 'figma' && frames.length > 0;
+  const canStartSingle = inputMode === "single" && !!imageBase64;
+  const canStartMulti = inputMode === "multi" && uploadedImages.length > 0;
+  const canStartFigma = inputMode === "figma" && frames.length > 0;
   const canStart = canStartSingle || canStartMulti || canStartFigma;
 
   const handleStart = () => {
     const config: AuditConfig = {
       fidelity,
       purpose,
-      frameCount: inputMode === 'figma' ? frames.length : inputMode === 'multi' ? uploadedImages.length : 1,
+      frameCount:
+        inputMode === "figma"
+          ? frames.length
+          : inputMode === "multi"
+          ? uploadedImages.length
+          : 1,
     };
 
     if (canStartSingle && imagePreviewUrl) {
@@ -98,13 +144,15 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma
 
   const getButtonLabel = () => {
     if (!canStart) {
-      if (inputMode === 'figma') return 'Paste a Figma link to start';
-      if (inputMode === 'multi') return 'Upload images to start';
-      return 'Upload a design to start';
+      if (inputMode === "figma") return "Paste a Figma link to start";
+      if (inputMode === "multi") return "Upload images to start";
+      return "Upload a design to start";
     }
-    if (inputMode === 'figma') return `Audit ${frames.length} Screen${frames.length > 1 ? 's' : ''} →`;
-    if (inputMode === 'multi') return `Audit ${uploadedImages.length} Image${uploadedImages.length > 1 ? 's' : ''} →`;
-    return 'Run AI Audit →';
+    if (inputMode === "figma")
+      return `Audit ${frames.length} Screen${frames.length > 1 ? "s" : ""} →`;
+    if (inputMode === "multi")
+      return `Audit ${uploadedImages.length} Image${uploadedImages.length > 1 ? "s" : ""} →`;
+    return "Run AI Audit →";
   };
 
   return (
@@ -112,9 +160,29 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
-      className="flex flex-col items-center justify-center min-h-screen px-4 py-12"
+      className="flex flex-col items-center justify-center min-h-screen px-4 py-12 relative overflow-hidden"
     >
-      <div className="max-w-lg w-full">
+      {/* Persona-specific background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${bgConfig.gradient} pointer-events-none`} />
+      {/* Decorative dots */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: i * 0.05 }}
+            className={`absolute w-24 h-24 ${bgConfig.dot}`}
+            style={{
+              top: `${10 + (i % 4) * 25}%`,
+              left: `${5 + (i % 3) * 35}%`,
+              transform: `rotate(${i * 15}deg)`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="max-w-lg w-full relative z-10">
         <button
           onClick={onBack}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
@@ -125,58 +193,50 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma
           Change persona
         </button>
 
-        <div className="flex items-center gap-3 mb-8">
-          <span className="text-3xl">{persona.icon}</span>
+        {/* Header with persona badge */}
+        <div className="flex items-center gap-4 mb-8">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            className="w-14 h-14 bg-card border border-border flex items-center justify-center"
+          >
+            <span className="text-3xl">{persona.icon}</span>
+          </motion.div>
           <div>
             <h2 className="text-2xl font-bold text-foreground">{persona.title} Mode</h2>
             <p className="text-sm text-muted-foreground">{persona.subtitle}</p>
           </div>
         </div>
 
-        {/* Input Mode Toggle - 3 modes */}
+        {/* Input Mode Toggle */}
         <div className="mb-6">
           <div className="flex border border-border bg-card p-1 gap-1">
-            <button
-              onClick={() => setInputMode('single')}
-              className={`flex-1 py-2.5 text-sm font-medium transition-all ${
-                inputMode === 'single'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              📸 Single
-            </button>
-            <button
-              onClick={() => setInputMode('multi')}
-              className={`flex-1 py-2.5 text-sm font-medium transition-all ${
-                inputMode === 'multi'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              🖼️ Multi (5)
-            </button>
-            <button
-              onClick={() => setInputMode('figma')}
-              className={`flex-1 py-2.5 text-sm font-medium transition-all ${
-                inputMode === 'figma'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              🎨 Figma
-            </button>
+            {[
+              { mode: "single" as const, label: "📸 Single" },
+              { mode: "multi" as const, label: "🖼️ Multi (5)" },
+              { mode: "figma" as const, label: "🎨 Figma" },
+            ].map((item) => (
+              <button
+                key={item.mode}
+                onClick={() => setInputMode(item.mode)}
+                className={`flex-1 py-2.5 text-sm font-medium transition-all relative ${
+                  inputMode === item.mode
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Input Area */}
         <div className="mb-8">
-          {inputMode === 'single' ? (
-            <ImageUpload
-              onImageSelect={handleImageSelect}
-              previewUrl={imagePreviewUrl}
-            />
-          ) : inputMode === 'multi' ? (
+          {inputMode === "single" ? (
+            <ImageUpload onImageSelect={handleImageSelect} previewUrl={imagePreviewUrl} />
+          ) : inputMode === "multi" ? (
             <ImageUpload
               onImageSelect={() => {}}
               onMultiImageSelect={setUploadedImages}
@@ -197,52 +257,55 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma
           )}
         </div>
 
-        {/* Fidelity */}
-        <div className="mb-8">
-          <label className="text-sm font-semibold text-foreground mb-3 block">
-            Design Fidelity
-          </label>
-          <div className="grid grid-cols-3 gap-3">
-            {fidelityOptions.map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => setFidelity(opt.value)}
-                className={`p-3 border text-left transition-all ${
-                  fidelity === opt.value
-                    ? 'border-primary bg-primary/5 text-foreground'
-                    : 'border-border bg-card text-muted-foreground hover:border-muted-foreground'
-                }`}
-              >
-                <div className="text-sm font-medium">{opt.label}</div>
-                <div className="text-xs opacity-70 mt-0.5">{opt.desc}</div>
-              </button>
-            ))}
+        {/* Config section with card */}
+        <div className="bg-card border border-border p-5 mb-6">
+          {/* Fidelity */}
+          <div className="mb-6">
+            <label className="text-sm font-semibold text-foreground mb-3 block">
+              Design Fidelity
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              {fidelityOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setFidelity(opt.value)}
+                  className={`p-3 border text-left transition-all ${
+                    fidelity === opt.value
+                      ? "border-primary bg-primary/5 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:border-muted-foreground"
+                  }`}
+                >
+                  <div className="text-sm font-medium">{opt.label}</div>
+                  <div className="text-xs opacity-70 mt-0.5">{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Purpose */}
+          <div>
+            <label className="text-sm font-semibold text-foreground mb-3 block">
+              Audit Purpose
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {purposeOptions[personaId].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setPurpose(opt.value)}
+                  className={`px-4 py-2 text-sm border transition-all ${
+                    purpose === opt.value
+                      ? "border-primary bg-primary/5 text-foreground"
+                      : "border-border bg-card text-muted-foreground hover:border-muted-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Purpose */}
-        <div className="mb-8">
-          <label className="text-sm font-semibold text-foreground mb-3 block">
-            Audit Purpose
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {purposeOptions[personaId].map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => setPurpose(opt.value)}
-                className={`px-4 py-2 text-sm border transition-all ${
-                  purpose === opt.value
-                    ? 'border-primary bg-primary/5 text-foreground'
-                    : 'border-border bg-card text-muted-foreground hover:border-muted-foreground'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Start */}
+        {/* Start button */}
         <motion.button
           whileHover={canStart ? { scale: 1.02 } : undefined}
           whileTap={canStart ? { scale: 0.98 } : undefined}
@@ -250,8 +313,8 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onStartFigma
           disabled={!canStart}
           className={`w-full py-4 font-semibold text-lg transition-all ${
             canStart
-              ? 'bg-primary text-primary-foreground glow-primary hover:brightness-110'
-              : 'bg-surface-3 text-muted-foreground cursor-not-allowed'
+              ? "bg-primary text-primary-foreground hover:brightness-110"
+              : "bg-surface-3 text-muted-foreground cursor-not-allowed"
           }`}
         >
           {getButtonLabel()}
