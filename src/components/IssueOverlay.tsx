@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X, Lightbulb } from "lucide-react";
 import { type AuditIssue } from "@/types/audit";
 
 interface IssueOverlayProps {
@@ -10,122 +11,189 @@ interface IssueOverlayProps {
   onPinClick?: (issueId: string) => void;
 }
 
-const severityConfig: Record<string, { bg: string; ring: string; text: string; label: string }> = {
+const severityConfig: Record<string, { bg: string; border: string; text: string; label: string; pinBg: string }> = {
   critical: {
     bg: "bg-destructive",
-    ring: "ring-destructive/30",
+    border: "border-destructive",
     text: "text-destructive",
     label: "CRITICAL",
+    pinBg: "bg-red-600",
   },
   warning: {
     bg: "bg-score-medium",
-    ring: "ring-score-medium/30",
+    border: "border-score-medium",
     text: "text-score-medium",
     label: "WARNING",
+    pinBg: "bg-amber-500",
   },
   info: {
     bg: "bg-primary",
-    ring: "ring-primary/30",
+    border: "border-primary",
     text: "text-primary",
     label: "INFO",
+    pinBg: "bg-blue-500",
   },
 };
 
-const IssueOverlay = ({ issues, imageUrl, imageAlt = "Design screenshot", activeIssueId: externalActiveId, onPinClick }: IssueOverlayProps) => {
+/** Determine if the card should open left/right/up based on pin position */
+function getCardPosition(x: number, y: number) {
+  const isRight = x > 65;
+  const isLeft = x < 35;
+  const isBottom = y > 65;
+
+  let horizontal = "left-1/2 -translate-x-1/2";
+  if (isRight) horizontal = "right-0 translate-x-0";
+  if (isLeft) horizontal = "left-0 translate-x-0";
+
+  const vertical = isBottom ? "bottom-14" : "top-14";
+
+  return `${vertical} ${horizontal}`;
+}
+
+const IssueOverlay = ({
+  issues,
+  imageUrl,
+  imageAlt = "Design screenshot",
+  activeIssueId: externalActiveId,
+  onPinClick,
+}: IssueOverlayProps) => {
   const [internalActive, setInternalActive] = useState<string | null>(null);
   const activeIssue = externalActiveId !== undefined ? externalActiveId : internalActive;
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const handlePinClick = (issueId: string) => {
-    if (onPinClick) {
-      onPinClick(issueId);
-    } else {
-      setInternalActive(internalActive === issueId ? null : issueId);
-    }
-  };
+  const handlePinClick = useCallback(
+    (issueId: string) => {
+      if (onPinClick) {
+        onPinClick(issueId);
+      } else {
+        setInternalActive(internalActive === issueId ? null : issueId);
+      }
+    },
+    [onPinClick, internalActive]
+  );
+
+  const handleClose = useCallback(() => {
+    if (onPinClick) onPinClick("");
+    else setInternalActive(null);
+  }, [onPinClick]);
 
   return (
-    <div className="relative bg-card border border-border overflow-hidden group">
-      <img
-        src={imageUrl}
-        alt={imageAlt}
-        className="w-full h-auto block"
-      />
+    <div ref={containerRef} className="relative bg-card border border-border overflow-visible rounded-lg">
+      {/* Image */}
+      <img src={imageUrl} alt={imageAlt} className="w-full h-auto block rounded-lg" />
+
+      {/* Dark overlay when a pin is active */}
+      <AnimatePresence>
+        {activeIssue && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/40 rounded-lg z-10"
+            onClick={handleClose}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Issue pins */}
       {issues.map((issue, idx) => {
-        const x = issue.x ?? 50;
-        const y = issue.y ?? 50;
+        const x = issue.x ?? (15 + ((idx * 17) % 70));
+        const y = issue.y ?? (15 + ((idx * 23) % 70));
         const config = severityConfig[issue.severity] || severityConfig.info;
         const isActive = activeIssue === issue.id;
+        const cardPos = getCardPosition(x, y);
 
         return (
-          <motion.div
+          <div
             key={issue.id}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 + idx * 0.1, type: "spring", stiffness: 300, damping: 20 }}
-            className="absolute z-10"
+            className="absolute"
             style={{
               left: `${x}%`,
               top: `${y}%`,
               transform: "translate(-50%, -50%)",
+              zIndex: isActive ? 30 : 20,
             }}
           >
-            {/* Pulse ring */}
+            {/* Outer pulse ring */}
             <motion.div
-              animate={{ scale: [1, 1.8, 1], opacity: [0.4, 0, 0.4] }}
-              transition={{ duration: 2, repeat: Infinity, delay: idx * 0.3 }}
-              className={`absolute inset-0 ${config.bg} rounded-full`}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: [1, 2, 1],
+                opacity: [0.5, 0, 0.5],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                delay: idx * 0.2,
+              }}
+              className={`absolute inset-0 rounded-full ${config.pinBg}`}
+              style={{ width: 40, height: 40, top: -4, left: -4 }}
             />
 
-            {/* Pin button */}
-            <button
-              onClick={() => handlePinClick(issue.id)}
-              className={`relative w-8 h-8 rounded-full ${config.bg} border-2 border-card shadow-lg flex items-center justify-center text-xs font-bold text-card cursor-pointer transition-transform hover:scale-125 ring-4 ${config.ring}`}
+            {/* Pin */}
+            <motion.button
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: isActive ? 1.3 : 1, opacity: 1 }}
+              whileHover={{ scale: 1.25 }}
+              transition={{
+                delay: 0.15 + idx * 0.06,
+                type: "spring",
+                stiffness: 400,
+                damping: 15,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePinClick(issue.id);
+              }}
+              className={`relative w-9 h-9 rounded-full ${config.pinBg} border-[3px] border-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] flex items-center justify-center text-sm font-extrabold text-white cursor-pointer select-none`}
+              style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
             >
               {idx + 1}
-            </button>
+            </motion.button>
 
-            {/* Issue detail card */}
+            {/* Detail card */}
             <AnimatePresence>
               {isActive && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.92 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  className="absolute z-50 top-10 left-1/2 -translate-x-1/2 w-72 bg-card border border-border shadow-2xl"
+                  exit={{ opacity: 0, y: 8, scale: 0.92 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                  className={`absolute z-50 ${cardPos} w-80 bg-card rounded-xl border-2 ${config.border} shadow-[0_8px_32px_rgba(0,0,0,0.3)]`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Severity header */}
-                  <div className={`px-4 py-2 ${config.bg} flex items-center justify-between`}>
-                    <span className="text-xs font-bold text-card tracking-wide">
-                      {config.label}
-                    </span>
+                  {/* Header */}
+                  <div className={`px-4 py-2.5 ${config.bg} rounded-t-[10px] flex items-center justify-between`}>
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-extrabold text-white">
+                        {idx + 1}
+                      </span>
+                      <span className="text-xs font-bold text-white tracking-wider uppercase">
+                        {config.label}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2">
                       {issue.ruleId && (
-                        <span className="text-[10px] font-mono text-card/80 bg-card/20 px-1.5 py-0.5">
+                        <span className="text-[10px] font-mono text-white/80 bg-white/15 px-2 py-0.5 rounded">
                           {issue.ruleId}
                         </span>
                       )}
                       <button
-                        onClick={() => { if (onPinClick) onPinClick(''); else setInternalActive(null); }}
-                        className="text-card/60 hover:text-card transition-colors"
+                        onClick={handleClose}
+                        className="text-white/70 hover:text-white transition-colors p-0.5"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
 
-                  {/* Content */}
+                  {/* Body */}
                   <div className="p-4">
-                    <h4 className="text-sm font-bold text-foreground mb-1.5 leading-tight">
+                    <h4 className="text-sm font-bold text-foreground mb-1 leading-snug">
                       {issue.title}
                     </h4>
                     {issue.principle && (
-                      <span className="inline-block text-[10px] text-muted-foreground bg-surface-2 border border-border px-1.5 py-0.5 mb-2 font-mono">
+                      <span className="inline-block text-[10px] text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded mb-2 font-mono">
                         {issue.principle}
                       </span>
                     )}
@@ -133,12 +201,10 @@ const IssueOverlay = ({ issues, imageUrl, imageAlt = "Design screenshot", active
                       {issue.description}
                     </p>
 
-                    {/* Fix suggestion */}
-                    <div className="bg-primary/5 border border-primary/20 p-3">
+                    {/* Fix */}
+                    <div className="bg-primary/8 border border-primary/25 rounded-lg p-3">
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
+                        <Lightbulb className="w-3.5 h-3.5 text-primary" />
                         <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
                           How to fix
                         </span>
@@ -151,17 +217,18 @@ const IssueOverlay = ({ issues, imageUrl, imageAlt = "Design screenshot", active
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         );
       })}
 
       {/* Issue count badge */}
       {issues.length > 0 && (
-        <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 bg-card/90 backdrop-blur-sm border border-border px-3 py-1.5">
-          <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-2 bg-card/95 backdrop-blur-sm border border-border px-3 py-2 rounded-lg shadow-lg">
+          <span className="w-2.5 h-2.5 bg-destructive rounded-full animate-pulse" />
           <span className="text-xs font-bold text-foreground">
             {issues.length} issue{issues.length !== 1 ? "s" : ""} found
           </span>
+          <span className="text-[10px] text-muted-foreground">— click pins to see details</span>
         </div>
       )}
     </div>
