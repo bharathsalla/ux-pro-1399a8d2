@@ -57,6 +57,7 @@ type ExtInputMode = "single" | "multi";
 const navItems: { id: SectionId; label: string }[] = [
   { id: "flowcheck", label: "FlowCheck" },
   { id: "testimonials", label: "Testimonials" },
+  { id: "about", label: "About Fix UX" },
   { id: "contact", label: "Contact Us" },
   { id: "why-free", label: "Why It Is Free" },
 ];

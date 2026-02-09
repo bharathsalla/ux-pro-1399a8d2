@@ -7,10 +7,11 @@ import { LinkThumbnail } from "./LinkThumbnail";
 import { StarRating } from "@/components/StarRating";
 import { getAvatarUrl } from "@/lib/avatar";
 import { FixUxLogo } from "@/components/FixUxLogo";
+import AboutFixUxContent from "./AboutFixUxContent";
 import auditFlowImg from "@/assets/platform-audit-flow.jpg";
 import reportPreviewImg from "@/assets/platform-report-preview.jpg";
 
-export type SectionId = "flowcheck" | "testimonials" | "contact" | "why-free";
+export type SectionId = "flowcheck" | "testimonials" | "contact" | "why-free" | "about";
 
 interface SectionOverlayProps {
   activeSection: SectionId | null;
@@ -50,6 +51,7 @@ export function SectionOverlay({ activeSection, onClose }: SectionOverlayProps) 
             {activeSection === "testimonials" && <TestimonialsContent />}
             {activeSection === "contact" && <ContactContent />}
             {activeSection === "why-free" && <WhyFreeContent />}
+            {activeSection === "about" && <AboutFixUxContent />}
           </main>
         </motion.div>
       )}
