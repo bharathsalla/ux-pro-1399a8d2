@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { FunctionalityResult } from "@/types/functionality";
 import FunctionalityReport from "./functionality/FunctionalityReport";
@@ -43,57 +44,100 @@ const FunctionalityFeedback = ({ imageBase64, imageUrl, screenName }: Functional
     }
   };
 
-  // Initial state — show button to trigger analysis
-  if (!result && !isLoading) {
+  // Show results with image
+  if (result) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card border border-border p-5"
-      >
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <span className="text-lg">🧠</span>
-              Functionality Feedback
-            </h4>
-            <p className="text-xs text-muted-foreground mt-1">
-              Deep product strategy analysis — missing features, workflow gaps &amp; business value.
-            </p>
-          </div>
-          <button
-            onClick={runCheck}
-            disabled={!imageBase64 && !imageUrl}
-            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Analyze
-          </button>
-        </div>
-        {error && (
-          <p className="text-xs text-destructive mt-2">{error}</p>
-        )}
-      </motion.div>
+      <FunctionalityReport
+        result={result}
+        onRecheck={runCheck}
+        imageUrl={imageUrl}
+        imageBase64={imageBase64}
+      />
     );
   }
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="bg-card border border-border p-5">
-        <div className="flex items-center gap-3">
-          <span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card border-2 border-primary/20 p-6 relative overflow-hidden"
+      >
+        {/* Animated background shimmer */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-[shimmer_2s_infinite] pointer-events-none" />
+        <div className="relative flex items-center gap-4">
+          <div className="w-12 h-12 bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+            <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+          </div>
           <div>
-            <span className="text-sm font-medium text-foreground">Analyzing product functionality...</span>
-            <p className="text-xs text-muted-foreground mt-0.5">Evaluating workflows, gaps &amp; enterprise readiness</p>
+            <h4 className="text-sm font-bold text-foreground">AI Analyzing Product Functionality...</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Evaluating workflows, feature gaps, enterprise readiness &amp; business value
+            </p>
+            <div className="flex gap-2 mt-2">
+              {["Workflows", "Features", "Scalability", "Business"].map((label, i) => (
+                <span
+                  key={label}
+                  className="text-[10px] px-2 py-0.5 bg-surface-2 border border-border text-muted-foreground animate-pulse"
+                  style={{ animationDelay: `${i * 200}ms` }}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
-  if (!result) return null;
+  // Initial CTA state — prominent AI card
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-card border-2 border-dashed border-primary/30 hover:border-primary/50 transition-all group cursor-pointer relative overflow-hidden"
+      onClick={runCheck}
+    >
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
 
-  return <FunctionalityReport result={result} onRecheck={runCheck} />;
+      <div className="relative p-5 flex items-center gap-4">
+        <div className="w-12 h-12 bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+          <Sparkles className="w-6 h-6 text-primary" />
+        </div>
+        <div className="flex-1">
+          <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+            Functionality Feedback
+            <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 font-semibold uppercase tracking-wider">
+              AI
+            </span>
+          </h4>
+          <p className="text-xs text-muted-foreground mt-1">
+            Deep product strategy analysis — missing features, workflow gaps, enterprise readiness &amp; business value.
+          </p>
+        </div>
+        <button
+          disabled={!imageBase64 && !imageUrl}
+          className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            runCheck();
+          }}
+        >
+          <Sparkles className="w-4 h-4" />
+          Analyze
+        </button>
+      </div>
+
+      {error && (
+        <div className="px-5 pb-4">
+          <p className="text-xs text-destructive">{error}</p>
+        </div>
+      )}
+    </motion.div>
+  );
 };
 
 export default FunctionalityFeedback;

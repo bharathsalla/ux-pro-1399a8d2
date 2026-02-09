@@ -120,6 +120,20 @@ const ImageAuditResults = ({
           </div>
         </motion.div>
 
+        {/* Functionality Feedback — prominent first-fold placement */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mb-6"
+        >
+          <FunctionalityFeedback
+            imageBase64={imageBase64}
+            imageUrl={imageUrl}
+            screenName="Uploaded Design"
+          />
+        </motion.div>
+
         {/* Image with interactive issue overlay */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -199,19 +213,7 @@ const ImageAuditResults = ({
           })}
         </motion.div>
 
-        {/* Functionality Feedback — post-analysis */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="mb-6"
-        >
-          <FunctionalityFeedback
-            imageBase64={imageBase64}
-            imageUrl={imageUrl}
-            screenName="Uploaded Design"
-          />
-        </motion.div>
+
 
         {/* New audit button */}
         <div className="text-center pb-8">

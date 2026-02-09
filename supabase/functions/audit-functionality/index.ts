@@ -115,7 +115,8 @@ Respond with ONLY valid JSON in this exact structure:
       "issue": "<what is missing or weak>",
       "impact": "<user/business impact>",
       "industryExpectation": "<what is standard in this domain>",
-      "severity": "critical" | "major" | "minor"
+      "severity": "critical" | "major" | "minor",
+      "area": "<describe WHERE on the screen this gap relates to, e.g. 'top navigation bar', 'data table section', 'sidebar filters area', 'header actions area', 'form input section'>"
     }
   ],
   "recommendations": [

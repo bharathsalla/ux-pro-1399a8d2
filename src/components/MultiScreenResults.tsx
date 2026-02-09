@@ -225,6 +225,14 @@ const MultiScreenResults = ({
                       </div>
                     </div>
 
+                    {/* Functionality Feedback — first fold */}
+                    <div className="mb-5">
+                      <FunctionalityFeedback
+                        imageUrl={currentScreen.screenImageUrl}
+                        screenName={currentScreen.screenName}
+                      />
+                    </div>
+
                     {/* Annotated Image with IssueOverlay */}
                     <div className="mb-5">
                       <IssueOverlay
@@ -282,14 +290,6 @@ const MultiScreenResults = ({
                           </motion.div>
                         );
                       })}
-                    </div>
-
-                    {/* Functionality Feedback — post-analysis */}
-                    <div className="mt-5">
-                      <FunctionalityFeedback
-                        imageUrl={currentScreen.screenImageUrl}
-                        screenName={currentScreen.screenName}
-                      />
                     </div>
                   </>
                 ) : null}
