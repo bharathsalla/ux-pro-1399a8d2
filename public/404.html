@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting…</title>
+    <script>
+      // GitHub Pages SPA redirect: converts path to hash-based route
+      var pathSegmentsToKeep = 1; // repo is served under /repo-name/
+      var loc = window.location;
+      var repoPath = loc.pathname.split('/').slice(0, pathSegmentsToKeep + 1).join('/');
+      var remainingPath = loc.pathname.slice(repoPath.length) || '/';
+      loc.replace(
+        loc.protocol + '//' + loc.hostname + (loc.port ? ':' + loc.port : '') +
+        repoPath + '/#' + remainingPath + (loc.search || '') + (loc.hash || '')
+      );
+    </script>
+  </head>
+  <body>
+    Redirecting&hellip;
+  </body>
+</html>
