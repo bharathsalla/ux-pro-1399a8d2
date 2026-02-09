@@ -45,8 +45,9 @@ const Index = () => {
 
   const { runAudit, runMultiScreenAudit } = useAuditDesign();
 
-  // Determine engagement gates
-  const needsCountry = !!profile && !profile.country;
+  // Determine engagement gates — only manual users need country (social providers skip it)
+  const isManualUser = profile?.auth_provider === 'manual';
+  const needsCountry = !!profile && !profile.country && isManualUser;
   const needsFeedback = !!profile && profile.login_count > 1 && !profile.has_submitted_feedback;
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
