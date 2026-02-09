@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LinkThumbnail } from "./LinkThumbnail";
 import { StarRating } from "@/components/StarRating";
 import { getAvatarUrl } from "@/lib/avatar";
+import { FixUxLogo } from "@/components/FixUxLogo";
 import auditFlowImg from "@/assets/platform-audit-flow.jpg";
 import reportPreviewImg from "@/assets/platform-report-preview.jpg";
 
@@ -33,9 +34,7 @@ export function SectionOverlay({ activeSection, onClose }: SectionOverlayProps) 
           {/* Minimal header */}
           <header className="sticky top-0 z-10 bg-background border-b border-border">
             <div className="max-w-[680px] mx-auto px-6 py-4 flex items-center justify-between">
-              <span className="text-[11px] tracking-[0.2em] uppercase text-muted-foreground font-medium">
-                FixUx
-              </span>
+              <FixUxLogo size="sm" />
               <button
                 onClick={onClose}
                 className="text-[11px] tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
@@ -270,7 +269,7 @@ function TestimonialsContent() {
           <p className="text-sm text-muted-foreground">No testimonials yet. Be the first to share.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 -mx-6 md:mx-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 -mx-6 md:mx-0">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.id}

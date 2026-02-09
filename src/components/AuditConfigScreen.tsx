@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { type PersonaId, type AuditConfig, personas } from "@/types/audit";
 import ImageUpload from "./ImageUpload";
 import { SectionOverlay, type SectionId } from "./landing/SectionOverlay";
+import { FixUxLogo } from "./FixUxLogo";
 
 interface UploadedImage {
   base64: string;
@@ -125,11 +126,9 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
           {/* Left: Brand */}
           <button
             onClick={onBack}
-            className="flex items-center gap-2 mr-8 group shrink-0"
+            className="flex items-center mr-8 shrink-0"
           >
-            <span className="text-[18px] font-extrabold text-foreground tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              Fix<span className="text-primary">Ux</span>
-            </span>
+            <FixUxLogo size="sm" />
           </button>
 
           {/* Center: Navigation links */}
