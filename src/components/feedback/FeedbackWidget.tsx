@@ -9,6 +9,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, ThumbsUp, Award, Heart, Sparkles, Globe, Link2, AlertCircle } from "lucide-react";
+import { LinkThumbnail } from "@/components/landing/LinkThumbnail";
 
 interface FeedbackWidgetProps {
   onComplete: () => void;
@@ -194,6 +195,9 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
                   <AlertCircle className="w-3 h-3" />
                   Please enter a valid URL (e.g. https://linkedin.com/in/...)
                 </p>
+              )}
+              {hasValidLink && (
+                <LinkThumbnail url={profileLink.trim()} compact className="mt-2" />
               )}
             </div>
 

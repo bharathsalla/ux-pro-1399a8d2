@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Globe, ThumbsUp, Award, Heart, MessageCircle, Loader2, LogOut, ExternalLink, Check, X, Link2, ShieldCheck, ShieldX } from "lucide-react";
+import { LinkThumbnail } from "@/components/landing/LinkThumbnail";
 import { useNavigate } from "react-router-dom";
 import { useAdminContext } from "@/contexts/AdminContext";
 import { formatDistanceToNow } from "date-fns";
@@ -300,25 +301,9 @@ export default function AdminDashboard() {
 
                       {/* Profile link with thumbnail */}
                       {fb.profile_link && (
-                        <a
-                          href={fb.profile_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 p-2 bg-surface-2 border border-border mb-3 hover:border-primary/30 transition-colors group"
-                        >
-                          <div className="w-8 h-8 bg-card border border-border flex items-center justify-center shrink-0">
-                            <Link2 className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
-                              {getDomainFromUrl(fb.profile_link)}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground truncate">
-                              {fb.profile_link}
-                            </p>
-                          </div>
-                          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                        </a>
+                        <div className="mb-3">
+                          <LinkThumbnail url={fb.profile_link} compact />
+                        </div>
                       )}
 
                       {/* Reactions */}

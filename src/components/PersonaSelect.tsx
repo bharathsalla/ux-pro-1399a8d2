@@ -1,15 +1,6 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
 import heroCharacters from "@/assets/hero-characters.png";
-import {
-  SectionNav,
-  HowItWorksSection,
-  FunctionalFeedbackSection,
-  TestimonialsSection,
-  ContactSection,
-  WhyFreeSection,
-} from "./landing/LandingSections";
 
 interface PersonaSelectProps {
   onSelect: (id: PersonaId) => void;
@@ -32,28 +23,6 @@ const personaIconBg: Record<string, string> = {
 };
 
 const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
-  const [activeSection, setActiveSection] = useState("");
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    const sections = ["how-it-works", "functional-feedback", "testimonials", "contact", "why-free"];
-    sections.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <motion.div
@@ -184,27 +153,6 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
         </div>
       </div>
 
-      {/* Landing Page Sections */}
-      <div className="border-t border-border">
-        <div className="max-w-5xl mx-auto px-6">
-          {/* Sticky section nav */}
-          <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm py-3 border-b border-border -mx-6 px-6">
-            <SectionNav activeSection={activeSection} />
-          </div>
-
-          <HowItWorksSection />
-          <FunctionalFeedbackSection />
-          <TestimonialsSection />
-          <ContactSection />
-          <WhyFreeSection />
-
-          <div className="py-8 text-center">
-            <p className="text-xs text-muted-foreground">
-              UX Audit Pro · AI-powered functional & design feedback for product teams
-            </p>
-          </div>
-        </div>
-      </div>
     </motion.div>
   );
 };
