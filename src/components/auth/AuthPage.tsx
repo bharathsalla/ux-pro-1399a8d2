@@ -6,6 +6,7 @@ import ManualRegisterForm from "./ManualRegisterForm";
 import LoginForm from "./LoginForm";
 import SocialAuthButtons from "./SocialAuthButtons";
 import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
+import { FixUxLogo } from "@/components/FixUxLogo";
 import { ShieldCheck, User } from "lucide-react";
 
 export default function AuthPage() {
@@ -62,8 +63,8 @@ export default function AuthPage() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">UX Pro</h1>
+          <div className="text-center mb-8 flex flex-col items-center gap-2">
+            <FixUxLogo size="lg" />
             <p className="text-muted-foreground">
               AI-powered UX audit for your designs
             </p>
