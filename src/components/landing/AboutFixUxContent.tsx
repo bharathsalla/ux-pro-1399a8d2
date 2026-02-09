@@ -65,6 +65,36 @@ export default function AboutFixUxContent() {
         Fix UX is a free platform that gives designers instant, structured feedback — without waiting for peers, seniors, or reviews.
       </motion.p>
 
+      {/* About the Creator — FIRST */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12 }}
+        className="mb-16"
+      >
+        <h2 className="text-2xl font-bold text-foreground mb-6">About the Creator</h2>
+        <div className="flex flex-col gap-6 items-start">
+          <div className="w-full max-w-[280px] aspect-square border-2 border-dashed border-primary/40 overflow-hidden">
+            <img
+              src={creatorAvatar}
+              alt="Bharath Salla"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="space-y-4">
+            <p className="text-[14px] text-muted-foreground leading-[1.7]">
+              <strong className="text-foreground">Bharath Salla</strong> is a Senior Product Designer with 12+ years of experience designing enterprise B2B platforms, analytics tools, and complex operational systems across healthcare, fintech, telecom, and AI-driven products.
+            </p>
+            <p className="text-[14px] text-muted-foreground leading-[1.7]">
+              He specialises in simplifying dense data, multi-step workflows, and large-scale systems into intuitive, scalable user experiences. Bharath has worked closely with engineering, data, and product teams in highly regulated, high-impact environments — where clarity and usability directly affect business outcomes.
+            </p>
+            <p className="text-[14px] text-muted-foreground leading-[1.7]">
+              Having mentored designers and worked across all experience levels, Bharath saw first-hand how difficult it is to get timely, unbiased feedback. Fix UX was built from that experience — to help designers improve faster, independently, and confidently.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
       {/* What is Fix UX */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
@@ -144,35 +174,8 @@ export default function AboutFixUxContent() {
         </div>
       </motion.div>
 
-      {/* About the Creator */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.24 }}
-        className="mb-16"
-      >
-        <h2 className="text-2xl font-bold text-foreground mb-6">About the Creator</h2>
-        <div className="flex flex-col sm:flex-row gap-6 items-start">
-          <div className="w-28 h-28 shrink-0 border border-border overflow-hidden">
-            <img
-              src={creatorAvatar}
-              alt="Bharath Salla"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="space-y-4">
-            <p className="text-[14px] text-muted-foreground leading-[1.7]">
-              <strong className="text-foreground">Bharath Salla</strong> is a Senior Product Designer with 12+ years of experience designing enterprise B2B platforms, analytics tools, and complex operational systems across healthcare, fintech, telecom, and AI-driven products.
-            </p>
-            <p className="text-[14px] text-muted-foreground leading-[1.7]">
-              He specialises in simplifying dense data, multi-step workflows, and large-scale systems into intuitive, scalable user experiences. Bharath has worked closely with engineering, data, and product teams in highly regulated, high-impact environments — where clarity and usability directly affect business outcomes.
-            </p>
-            <p className="text-[14px] text-muted-foreground leading-[1.7]">
-              Having mentored designers and worked across all experience levels, Bharath saw first-hand how difficult it is to get timely, unbiased feedback. Fix UX was built from that experience — to help designers improve faster, independently, and confidently.
-            </p>
-          </div>
-        </div>
-      </motion.div>
+
+
 
       {/* Feedback Request + Widget */}
       <motion.div

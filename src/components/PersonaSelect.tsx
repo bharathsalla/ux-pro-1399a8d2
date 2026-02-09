@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
+import { FixUxLogo } from "./FixUxLogo";
 import heroCharacters from "@/assets/hero-characters.png";
 
 interface PersonaSelectProps {
@@ -82,10 +83,9 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.15, type: "spring", stiffness: 200 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 border border-primary/30 bg-primary/5 text-sm text-primary font-semibold mb-6"
+              className="mb-6"
             >
-              <span className="w-2 h-2 bg-primary animate-pulse" />
-              FixUx
+              <FixUxLogo size="lg" />
             </motion.div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground mb-4 leading-[1.1]">
               Who are you
