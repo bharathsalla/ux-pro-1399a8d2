@@ -111,7 +111,7 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
       className="min-h-screen"
     >
       {/* ═══ Row 1: Top announcement banner ═══ */}
-      <div className="bg-foreground">
+      <div className="bg-foreground border-b border-muted-foreground/20">
         <div className="max-w-[1400px] mx-auto px-6 py-2.5 flex items-center justify-center">
           <p className="text-[12px] text-background tracking-wide">
             Free AI-powered UX & functional audits · No credit card · No usage limits
@@ -125,13 +125,10 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
           {/* Left: Brand */}
           <button
             onClick={onBack}
-            className="flex items-center gap-2.5 mr-8 group shrink-0"
+            className="flex items-center gap-2 mr-8 group shrink-0"
           >
-            <svg className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            <span className="text-[15px] font-bold text-foreground tracking-tight">
-              UX Audit Pro
+            <span className="text-[18px] font-extrabold text-foreground tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              Fix<span className="text-primary">Ux</span>
             </span>
           </button>
 
