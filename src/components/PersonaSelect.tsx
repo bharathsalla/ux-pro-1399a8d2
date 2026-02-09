@@ -47,7 +47,7 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
             >
               <img
                 src={heroCharacters}
-                alt="UX Audit Pro characters"
+                alt="FixUx characters"
                 className="w-full h-auto max-h-[400px] object-contain"
               />
             </motion.div>
@@ -85,7 +85,7 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
               className="inline-flex items-center gap-2 px-4 py-1.5 border border-primary/30 bg-primary/5 text-sm text-primary font-semibold mb-6"
             >
               <span className="w-2 h-2 bg-primary animate-pulse" />
-              UX Audit Pro
+              FixUx
             </motion.div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground mb-4 leading-[1.1]">
               Who are you
