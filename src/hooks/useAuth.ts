@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -19,6 +19,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const isSigningUpRef = useRef(false);
 
   const fetchProfile = useCallback(async (userId: string) => {
     const { data, error } = await supabase
@@ -69,7 +70,7 @@ export function useAuth() {
         if (session?.user) {
           // Use setTimeout to avoid Supabase deadlock
           setTimeout(async () => {
-            if (event === "SIGNED_IN") {
+            if (event === "SIGNED_IN" && !isSigningUpRef.current) {
               await trackLogin(session.user.id);
             }
             const p = await fetchProfile(session.user.id);
@@ -109,6 +110,7 @@ export function useAuth() {
 
   const signUpManual = useCallback(
     async (email: string, password: string, name: string, country: string) => {
+      isSigningUpRef.current = true;
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -117,18 +119,19 @@ export function useAuth() {
           data: {
             full_name: name,
             provider: "manual",
+            country: country,
           },
         },
       });
 
-      if (error) return { error: error.message };
+      // Reset flag after auth state change has processed
+      setTimeout(() => {
+        isSigningUpRef.current = false;
+      }, 3000);
 
-      // Update the profile with country
-      if (data.user) {
-        await supabase
-          .from("profiles")
-          .update({ country, name })
-          .eq("id", data.user.id);
+      if (error) {
+        isSigningUpRef.current = false;
+        return { error: error.message };
       }
 
       return { error: null };
