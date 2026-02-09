@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Home, RotateCcw } from "lucide-react";
 import { type PersonaId, type ScreenAuditResult, type AuditIssue, personas } from "@/types/audit";
 import ScoreRing from "./ScoreRing";
 import IssueOverlay from "./IssueOverlay";
 import FigmaAnalyzing from "./FigmaAnalyzing";
 import FunctionalityFeedback from "./FunctionalityFeedback";
+import { FixUxLogo } from "./FixUxLogo";
 
 interface MultiScreenResultsProps {
   personaId: PersonaId;
@@ -67,15 +69,19 @@ const MultiScreenResults = ({
       {/* Top Bar */}
       <div className="border-b border-border bg-card sticky top-0 z-30">
         <div className="max-w-[1600px] mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-xl">{persona.icon}</span>
-            <div>
-              <h2 className="text-base font-bold text-foreground">{persona.title} Audit</h2>
-              <p className="text-xs text-muted-foreground">
-                {isComplete
-                  ? `${screens.length} screens analyzed`
-                  : `Analyzing ${completedScreens}/${totalScreens} screens...`}
-              </p>
+          <div className="flex items-center gap-4">
+            <FixUxLogo size="sm" />
+            <div className="h-5 w-px bg-border" />
+            <div className="flex items-center gap-2">
+              <span className="text-xl">{persona.icon}</span>
+              <div>
+                <h2 className="text-base font-bold text-foreground">{persona.title} Audit</h2>
+                <p className="text-xs text-muted-foreground">
+                  {isComplete
+                    ? `${screens.length} screens analyzed`
+                    : `Analyzing ${completedScreens}/${totalScreens} screens...`}
+                </p>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -98,8 +104,16 @@ const MultiScreenResults = ({
             </div>
             <button
               onClick={onRestart}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 border border-border hover:bg-accent"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 border border-border hover:bg-accent flex items-center gap-1.5"
             >
+              <Home className="w-3.5 h-3.5" />
+              Home
+            </button>
+            <button
+              onClick={onRestart}
+              className="text-xs text-foreground hover:text-primary transition-colors px-3 py-1.5 border border-border hover:border-primary/30 bg-card flex items-center gap-1.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
               New Audit
             </button>
           </div>
