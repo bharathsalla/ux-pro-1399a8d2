@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   type PersonaId,
   type AuditConfig,
@@ -16,13 +16,11 @@ import MultiScreenResults from "@/components/MultiScreenResults";
 import HeaderProfile from "@/components/auth/HeaderProfile";
 import CountryModal from "@/components/auth/CountryModal";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
-import CommentsWidget from "@/components/feedback/CommentsWidget";
 
 import { useAuditDesign } from "@/hooks/useAuditDesign";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 import { toast } from "sonner";
-import { MessageCircle } from "lucide-react";
 
 interface UploadedImage {
   base64: string;
@@ -45,19 +43,11 @@ const Index = () => {
   const [screenResults, setScreenResults] = useState<ScreenAuditResult[]>([]);
   const [completedScreens, setCompletedScreens] = useState(0);
 
-  // Engagement gate state
-  const [showCommentsGate, setShowCommentsGate] = useState(false);
-  
   const { runAudit, runMultiScreenAudit } = useAuditDesign();
 
   // Determine engagement gates
   const needsCountry = !!profile && !profile.country;
   const needsFeedback = !!profile && profile.login_count > 1 && !profile.has_submitted_feedback;
-  const needsComment = !!profile && profile.has_submitted_feedback && !profile.has_commented && profile.login_count > 1;
-
-  // Show the right gate
-  const shouldShowFeedbackWidget = needsFeedback && !showCommentsGate;
-  const shouldShowCommentsGate = needsComment || showCommentsGate;
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
     setSelectedPersona(id);
@@ -177,15 +167,6 @@ const Index = () => {
     setSelectedPersona(null);
   }, []);
 
-  // Show comments gate after feedback submission
-  const handleFeedbackComplete = () => {
-    setShowCommentsGate(true);
-  };
-
-  const handleCommentComplete = () => {
-    setShowCommentsGate(false);
-  };
-
   // Loading state
   if (authLoading) {
     return (
@@ -204,32 +185,9 @@ const Index = () => {
     );
   }
 
-  // Feedback widget gate (second login)
-  if (shouldShowFeedbackWidget) {
-    return <FeedbackWidget onComplete={handleFeedbackComplete} />;
-  }
-
-  // Comments gate
-  if (shouldShowCommentsGate) {
-    return (
-      <div className="min-h-screen bg-background">
-        <HeaderProfile />
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
-          >
-            <MessageCircle className="h-12 w-12 mx-auto mb-4 text-primary" />
-            <h2 className="text-2xl font-bold mb-2 text-foreground">Join the conversation 💬</h2>
-            <p className="text-muted-foreground">
-              Comment on at least one feedback below to continue using the app.
-            </p>
-          </motion.div>
-          <CommentsWidget requireComment onCommentComplete={handleCommentComplete} />
-        </div>
-      </div>
-    );
+  // Feedback widget gate (second login only)
+  if (needsFeedback) {
+    return <FeedbackWidget onComplete={() => {}} />;
   }
 
   return (
