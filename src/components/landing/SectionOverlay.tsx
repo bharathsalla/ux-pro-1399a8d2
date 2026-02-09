@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LinkThumbnail } from "./LinkThumbnail";
+import { StarRating } from "@/components/StarRating";
+import { getAvatarUrl } from "@/lib/avatar";
 import auditFlowImg from "@/assets/platform-audit-flow.jpg";
 import reportPreviewImg from "@/assets/platform-report-preview.jpg";
 
@@ -232,6 +234,7 @@ interface Testimonial {
   user_avatar_url: string | null;
   feedback_text: string;
   profile_link: string;
+  rating: number;
   created_at: string;
 }
 
@@ -243,7 +246,7 @@ function TestimonialsContent() {
     const fetchApproved = async () => {
       const { data } = await supabase
         .from("feedback_and_testimonials")
-        .select("id, user_name, user_country, user_avatar_url, feedback_text, profile_link, created_at")
+        .select("id, user_name, user_country, user_avatar_url, feedback_text, profile_link, rating, created_at")
         .eq("is_approved", true)
         .order("created_at", { ascending: false })
         .limit(12);
@@ -292,9 +295,11 @@ function TestimonialsContent() {
               transition={{ delay: i * 0.05 }}
               className="bg-card border border-border p-4 flex flex-col hover:border-primary/20 transition-all"
             >
-              <div className="flex items-center gap-3 mb-3">
+              <StarRating rating={t.rating || 5} readonly size="sm" />
+              <p className="text-xs text-foreground leading-relaxed flex-1 my-3">"{t.feedback_text}"</p>
+              <div className="flex items-center gap-3 mt-auto pt-3 border-t border-border">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={t.user_avatar_url || ""} />
+                  <AvatarImage src={getAvatarUrl(t.user_name, t.user_avatar_url)} />
                   <AvatarFallback className="bg-primary/10 text-primary text-xs">
                     {getInitials(t.user_name)}
                   </AvatarFallback>
@@ -307,7 +312,6 @@ function TestimonialsContent() {
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-foreground leading-relaxed flex-1 mb-3">"{t.feedback_text}"</p>
               {t.profile_link && <LinkThumbnail url={t.profile_link} compact />}
             </motion.div>
           ))}
