@@ -286,7 +286,39 @@ export default function AdminDashboard() {
                     }`}
                   >
                     <CardContent className="p-5 flex flex-col h-full">
-                      {/* Header */}
+                      {/* Category badges */}
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {fb.rating >= 4 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-score-high/10 text-score-high border border-score-high/20">
+                            ⭐ Top Rated
+                          </span>
+                        )}
+                        {fb.rating <= 2 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
+                            ⚠️ Low Rating
+                          </span>
+                        )}
+                        {(breakdown?.like || 0) > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
+                            👍 Liked
+                          </span>
+                        )}
+                        {(breakdown?.clap || 0) > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-score-medium/10 text-score-medium border border-score-medium/20">
+                            👏 Clapped
+                          </span>
+                        )}
+                        {(breakdown?.love || 0) > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-pink-500/10 text-pink-600 border border-pink-500/20">
+                            ❤️ Loved
+                          </span>
+                        )}
+                        {fb.comments_count > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                            💬 {fb.comments_count} comment{fb.comments_count !== 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-start gap-3 mb-4">
                         <Avatar className="h-11 w-11">
                           <AvatarImage src={getAvatarUrl(fb.user_name, fb.user_avatar_url)} />
