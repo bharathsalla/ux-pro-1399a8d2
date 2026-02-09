@@ -136,4 +136,9 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 30px -8px hsl(var(--foreground) / 0.08);
   }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
 }

@@ -8,6 +8,7 @@ export interface FunctionalityGap {
   impact: string;
   industryExpectation: string;
   severity: "critical" | "major" | "minor";
+  area?: string; // description of where on screen this relates to
 }
 
 export interface FunctionalityRecommendation {

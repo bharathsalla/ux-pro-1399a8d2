@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { FunctionalityResult } from "@/types/functionality";
+import { Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import type { FunctionalityResult, FunctionalityGap } from "@/types/functionality";
 
 interface FunctionalityReportProps {
   result: FunctionalityResult;
   onRecheck: () => void;
+  imageUrl?: string;
+  imageBase64?: string;
 }
 
 const verdictConfig = {
@@ -32,16 +35,20 @@ const verdictConfig = {
 };
 
 const severityConfig = {
-  critical: { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/20" },
-  major: { bg: "bg-score-medium/10", text: "text-score-medium", border: "border-score-medium/20" },
-  minor: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  critical: { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/20", dot: "bg-destructive" },
+  major: { bg: "bg-score-medium/10", text: "text-score-medium", border: "border-score-medium/20", dot: "bg-score-medium" },
+  minor: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20", dot: "bg-primary" },
 };
 
 type Tab = "overview" | "gaps" | "recommendations" | "enterprise";
 
-const FunctionalityReport = ({ result, onRecheck }: FunctionalityReportProps) => {
+const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: FunctionalityReportProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [showImage, setShowImage] = useState(false);
+  const [hoveredGap, setHoveredGap] = useState<number | null>(null);
   const config = verdictConfig[result.verdict];
+
+  const displayImageUrl = imageBase64 ? `data:image/png;base64,${imageBase64}` : imageUrl;
 
   const tabs: { id: Tab; label: string; icon: string; count?: number }[] = [
     { id: "overview", label: "Overview", icon: "📋" },
@@ -56,24 +63,104 @@ const FunctionalityReport = ({ result, onRecheck }: FunctionalityReportProps) =>
       animate={{ opacity: 1, y: 0 }}
       className="bg-card border border-border overflow-hidden"
     >
-      {/* Verdict header */}
+      {/* Verdict header with AI branding */}
       <div className={`px-5 py-3 ${config.bg} border-b ${config.border} flex items-center justify-between`}>
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{config.icon}</span>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-card border border-border flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-primary" />
+          </div>
           <div>
-            <h4 className={`text-sm font-bold ${config.text}`}>{config.label}</h4>
+            <h4 className={`text-sm font-bold ${config.text} flex items-center gap-2`}>
+              {config.icon} {config.label}
+              <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 font-semibold uppercase tracking-wider">
+                AI
+              </span>
+            </h4>
             <p className="text-xs text-muted-foreground">
               Functionality Score: {result.score}/100
             </p>
           </div>
         </div>
-        <button
-          onClick={onRecheck}
-          className="text-xs text-muted-foreground hover:text-foreground border border-border px-3 py-1 bg-card transition-colors"
-        >
-          Re-analyze
-        </button>
+        <div className="flex items-center gap-2">
+          {displayImageUrl && (
+            <button
+              onClick={() => setShowImage(!showImage)}
+              className="text-xs text-muted-foreground hover:text-foreground border border-border px-3 py-1 bg-card transition-colors flex items-center gap-1"
+            >
+              {showImage ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              {showImage ? "Hide Screen" : "Show Screen"}
+            </button>
+          )}
+          <button
+            onClick={onRecheck}
+            className="text-xs text-muted-foreground hover:text-foreground border border-border px-3 py-1 bg-card transition-colors"
+          >
+            Re-analyze
+          </button>
+        </div>
       </div>
+
+      {/* Annotated image panel */}
+      <AnimatePresence>
+        {showImage && displayImageUrl && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-b border-border overflow-hidden"
+          >
+            <div className="p-4 bg-surface-2">
+              <div className="relative inline-block w-full">
+                <img
+                  src={displayImageUrl}
+                  alt="Analyzed screen"
+                  className="w-full max-h-[400px] object-contain border border-border bg-card"
+                />
+                {/* Area annotations overlay */}
+                {result.gaps && result.gaps.length > 0 && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    {result.gaps.map((gap, i) => {
+                      if (!gap.area) return null;
+                      const isHovered = hoveredGap === i;
+                      const sev = severityConfig[gap.severity] || severityConfig.minor;
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: isHovered ? 1 : 0.7, scale: 1 }}
+                          className={`absolute pointer-events-auto cursor-default ${
+                            isHovered ? "z-20" : "z-10"
+                          }`}
+                          style={{
+                            // Distribute annotations along the right edge with spacing
+                            top: `${10 + (i * 80) / Math.max(result.gaps.length, 1)}%`,
+                            right: "8px",
+                          }}
+                        >
+                          <div className={`flex items-center gap-1 px-2 py-1 text-[10px] font-medium border ${sev.bg} ${sev.text} ${sev.border} bg-card/90 backdrop-blur-sm shadow-sm max-w-[180px]`}>
+                            <span className={`w-2 h-2 shrink-0 ${sev.dot}`} />
+                            <span className="truncate">{gap.area}</span>
+                          </div>
+                          {isHovered && (
+                            <div className="absolute right-0 top-full mt-1 p-2 bg-card border border-border shadow-md text-xs text-foreground max-w-[220px] z-30">
+                              {gap.issue}
+                            </div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              {result.gaps && result.gaps.some(g => g.area) && (
+                <p className="text-[10px] text-muted-foreground mt-2 text-center">
+                  Hover over gap cards below to highlight areas on the screen
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Context bar */}
       <div className="px-5 py-2.5 bg-surface-2 border-b border-border flex flex-wrap gap-3">
@@ -169,7 +256,12 @@ const FunctionalityReport = ({ result, onRecheck }: FunctionalityReportProps) =>
                 result.gaps.map((gap, i) => {
                   const sev = severityConfig[gap.severity] || severityConfig.minor;
                   return (
-                    <div key={i} className="bg-card border border-border p-4">
+                    <div
+                      key={i}
+                      className="bg-card border border-border p-4 transition-all hover:border-primary/30"
+                      onMouseEnter={() => setHoveredGap(i)}
+                      onMouseLeave={() => setHoveredGap(null)}
+                    >
                       <div className="flex items-start gap-3">
                         <span className="w-6 h-6 bg-surface-2 flex items-center justify-center text-xs font-bold text-foreground shrink-0 border border-border">
                           {i + 1}
@@ -179,6 +271,15 @@ const FunctionalityReport = ({ result, onRecheck }: FunctionalityReportProps) =>
                             <span className={`px-2 py-0.5 text-xs font-medium ${sev.bg} ${sev.text} border ${sev.border}`}>
                               {gap.severity}
                             </span>
+                            {gap.area && (
+                              <span className="px-2 py-0.5 text-[10px] font-medium bg-surface-2 text-muted-foreground border border-border flex items-center gap-1">
+                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                {gap.area}
+                              </span>
+                            )}
                           </div>
                           <h4 className="text-sm font-medium text-foreground">{gap.issue}</h4>
                           <p className="text-xs text-muted-foreground mt-1">
