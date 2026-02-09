@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ArrowLeft, Globe, ThumbsUp, Award, Heart, MessageCircle,
-  Loader2, LogOut, Check, X, ShieldCheck, ShieldX,
+  Loader2, LogOut, Check, X, ShieldCheck, ShieldX, Trash2,
 } from "lucide-react";
 import { LinkThumbnail } from "@/components/landing/LinkThumbnail";
 import { StarRating } from "@/components/StarRating";
@@ -112,6 +112,33 @@ export default function AdminDashboard() {
     });
 
     toast.success(currentStatus ? "Testimonial unapproved" : "Testimonial approved ✓");
+  };
+
+  const deleteFeedback = async (id: string) => {
+    if (!window.confirm("Delete this testimonial permanently?")) return;
+
+    const fb = feedbacks.find((f) => f.id === id);
+    const { error } = await supabase
+      .from("feedback_and_testimonials")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Failed to delete");
+      return;
+    }
+
+    setFeedbacks((prev) => prev.filter((f) => f.id !== id));
+    setAnalytics((prev) => {
+      if (!prev || !fb) return prev;
+      return {
+        ...prev,
+        totalFeedbacks: prev.totalFeedbacks - 1,
+        approvedCount: fb.is_approved ? prev.approvedCount - 1 : prev.approvedCount,
+        pendingCount: fb.is_approved ? prev.pendingCount : prev.pendingCount - 1,
+      };
+    });
+    toast.success("Testimonial deleted");
   };
 
   const handleExit = () => {
@@ -330,24 +357,34 @@ export default function AdminDashboard() {
                             {fb.comments_count}
                           </span>
                         </div>
-                        <Button
-                          size="sm"
-                          variant={fb.is_approved ? "outline" : "default"}
-                          className="gap-1 text-xs h-7"
-                          onClick={() => toggleApproval(fb.id, fb.is_approved)}
-                        >
-                          {fb.is_approved ? (
-                            <>
-                              <X className="w-3 h-3" />
-                              Revoke
-                            </>
-                          ) : (
-                            <>
-                              <Check className="w-3 h-3" />
-                              Approve
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="gap-1 text-xs h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => deleteFeedback(fb.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={fb.is_approved ? "outline" : "default"}
+                            className="gap-1 text-xs h-7"
+                            onClick={() => toggleApproval(fb.id, fb.is_approved)}
+                          >
+                            {fb.is_approved ? (
+                              <>
+                                <X className="w-3 h-3" />
+                                Revoke
+                              </>
+                            ) : (
+                              <>
+                                <Check className="w-3 h-3" />
+                                Approve
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
