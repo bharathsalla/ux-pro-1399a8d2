@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { type PersonaId, type AuditConfig, personas } from "@/types/audit";
-import { Target, MessageSquare, Mail, HelpCircle } from "lucide-react";
 import ImageUpload from "./ImageUpload";
 import { SectionOverlay, type SectionId } from "./landing/SectionOverlay";
 
@@ -54,11 +53,11 @@ const purposeOptions: Record<PersonaId, { value: AuditConfig["purpose"]; label: 
 
 type ExtInputMode = "single" | "multi";
 
-const navItems: { id: SectionId; label: string; icon: typeof Target }[] = [
-  { id: "flowcheck", label: "FlowCheck", icon: Target },
-  { id: "testimonials", label: "Testimonials", icon: MessageSquare },
-  { id: "contact", label: "Contact Us", icon: Mail },
-  { id: "why-free", label: "Why Free", icon: HelpCircle },
+const navItems: { id: SectionId; label: string }[] = [
+  { id: "flowcheck", label: "FlowCheck" },
+  { id: "testimonials", label: "Testimonials" },
+  { id: "contact", label: "Contact Us" },
+  { id: "why-free", label: "Why It Is Free" },
 ];
 
 const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: AuditConfigScreenProps) => {
@@ -111,42 +110,66 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
       exit={{ opacity: 0, x: -40 }}
       className="min-h-screen"
     >
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-20 bg-card/95 backdrop-blur-md border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{persona.icon}</span>
-              <span className="text-sm font-semibold text-foreground hidden sm:block">{persona.title}</span>
-            </div>
-          </div>
+      {/* ═══ Row 1: Top announcement banner ═══ */}
+      <div className="bg-foreground">
+        <div className="max-w-[1400px] mx-auto px-6 py-2.5 flex items-center justify-center">
+          <p className="text-[12px] text-background tracking-wide">
+            Free AI-powered UX & functional audits · No credit card · No usage limits
+          </p>
+        </div>
+      </div>
+
+      {/* ═══ Row 2: Main navigation bar ═══ */}
+      <header className="sticky top-0 z-20 bg-background border-b border-border">
+        <div className="max-w-[1400px] mx-auto px-6 py-3.5 flex items-center">
+          {/* Left: Brand */}
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2.5 mr-8 group shrink-0"
+          >
+            <svg className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="text-[15px] font-bold text-foreground tracking-tight">
+              UX Audit Pro
+            </span>
+          </button>
+
+          {/* Center: Navigation links */}
           <nav className="flex items-center gap-1">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-surface-2 border border-transparent hover:border-border transition-all"
+                className="px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
               >
-                <item.icon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{item.label}</span>
+                {item.label}
+                <span className="absolute bottom-0 left-3.5 right-3.5 h-[1.5px] bg-foreground scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </button>
             ))}
           </nav>
+
+          {/* Right: CTA */}
+          <div className="ml-auto flex items-center gap-4">
+            <button
+              onClick={handleStart}
+              disabled={!canStart}
+              className={`px-5 py-2 text-[13px] font-semibold transition-all ${
+                canStart
+                  ? "bg-primary text-primary-foreground hover:brightness-110"
+                  : "bg-surface-3 text-muted-foreground cursor-not-allowed"
+              }`}
+            >
+              Start Audit
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* ═══ Main Content ═══ */}
       <div
-        className="flex flex-col items-center justify-center px-4 py-12"
-        style={{ minHeight: "calc(100vh - 52px)" }}
+        className="flex flex-col items-center justify-center px-6 py-12"
+        style={{ minHeight: "calc(100vh - 96px)" }}
       >
         <div className="max-w-lg w-full">
           <div className="flex items-center gap-3 mb-8">
