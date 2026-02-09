@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface AdminContextType {
   isAdmin: boolean;
   isCheckingAdmin: boolean;
+  adminPasscode: string | null;
   verifyPasscode: (passcode: string) => Promise<{ success: boolean; error?: string }>;
   exitAdminMode: () => void;
 }
@@ -13,6 +14,7 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
+  const [adminPasscode, setAdminPasscode] = useState<string | null>(null);
 
   const verifyPasscode = useCallback(async (passcode: string): Promise<{ success: boolean; error?: string }> => {
     setIsCheckingAdmin(true);
@@ -28,6 +30,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
       if (data?.success) {
         setIsAdmin(true);
+        setAdminPasscode(passcode);
         setIsCheckingAdmin(false);
         return { success: true };
       }
@@ -42,10 +45,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const exitAdminMode = useCallback(() => {
     setIsAdmin(false);
+    setAdminPasscode(null);
   }, []);
 
   return (
-    <AdminContext.Provider value={{ isAdmin, isCheckingAdmin, verifyPasscode, exitAdminMode }}>
+    <AdminContext.Provider value={{ isAdmin, isCheckingAdmin, adminPasscode, verifyPasscode, exitAdminMode }}>
       {children}
     </AdminContext.Provider>
   );

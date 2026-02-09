@@ -12,6 +12,7 @@ import { Loader2, ThumbsUp, Award, Heart, Sparkles, Globe, Link2, AlertCircle } 
 import { LinkThumbnail } from "@/components/landing/LinkThumbnail";
 import { StarRating } from "@/components/StarRating";
 import { getAvatarUrl } from "@/lib/avatar";
+import { countries } from "@/data/countries";
 
 interface FeedbackWidgetProps {
   onComplete: () => void;
@@ -44,6 +45,7 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
   const [profileLink, setProfileLink] = useState("");
   const [selectedReaction, setSelectedReaction] = useState<EmojiReaction | null>(null);
   const [rating, setRating] = useState(5);
+  const [country, setCountry] = useState(profile?.country || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -67,7 +69,7 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
     const { error: insertError } = await supabase.from("feedback_and_testimonials").insert({
       user_id: user.id,
       user_name: profile.name,
-      user_country: profile.country,
+      user_country: country || profile.country,
       user_avatar_url: profile.avatar_url,
       feedback_text: feedbackText.trim() || `Reacted with ${selectedReaction}`,
       reactions_breakdown: selectedReaction ? { [selectedReaction]: 1 } : {},
@@ -152,6 +154,24 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Country selector */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Globe className="h-4 w-4 text-primary" />
+                Your Country
+              </label>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full h-10 px-3 border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="">Select your country</option>
+                {countries.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
             {/* Feedback textarea */}
             <Textarea
               value={feedbackText}

@@ -42,7 +42,7 @@ interface AnalyticsData {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { exitAdminMode } = useAdminContext();
+  const { exitAdminMode, adminPasscode } = useAdminContext();
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,46 +53,63 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchData = async () => {
-    const { data: feedbackData } = await supabase
-      .from("feedback_and_testimonials")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (feedbackData) {
-      const items = feedbackData as unknown as FeedbackItem[];
-      setFeedbacks(items);
-
-      const countryDist: Record<string, number> = {};
-      let totalReactions = 0;
-      let totalComments = 0;
-      let approvedCount = 0;
-
-      items.forEach((fb) => {
-        countryDist[fb.user_country] = (countryDist[fb.user_country] || 0) + 1;
-        totalReactions += fb.likes_count;
-        totalComments += fb.comments_count;
-        if (fb.is_approved) approvedCount++;
-      });
-
-      setAnalytics({
-        totalFeedbacks: items.length,
-        totalReactions,
-        totalComments,
-        approvedCount,
-        pendingCount: items.length - approvedCount,
-        countryDistribution: countryDist,
-      });
+    if (!adminPasscode) {
+      setLoading(false);
+      return;
     }
+
+    const { data, error } = await supabase.functions.invoke("admin-fetch-feedback", {
+      body: { passcode: adminPasscode },
+    });
+
+    if (error || !data?.feedbacks) {
+      console.error("Failed to fetch feedback:", error);
+      setLoading(false);
+      return;
+    }
+
+    const items = data.feedbacks as FeedbackItem[];
+    setFeedbacks(items);
+
+    const countryDist: Record<string, number> = {};
+    let totalReactions = 0;
+    let totalComments = 0;
+    let approvedCount = 0;
+
+    items.forEach((fb) => {
+      if (fb.user_country) {
+        countryDist[fb.user_country] = (countryDist[fb.user_country] || 0) + 1;
+      }
+      totalReactions += fb.likes_count;
+      totalComments += fb.comments_count;
+      if (fb.is_approved) approvedCount++;
+    });
+
+    setAnalytics({
+      totalFeedbacks: items.length,
+      totalReactions,
+      totalComments,
+      approvedCount,
+      pendingCount: items.length - approvedCount,
+      countryDistribution: countryDist,
+    });
+
     setLoading(false);
   };
 
   const toggleApproval = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from("feedback_and_testimonials")
-      .update({ is_approved: !currentStatus })
-      .eq("id", id);
+    if (!adminPasscode) return;
 
-    if (error) {
+    const { data, error } = await supabase.functions.invoke("admin-update-feedback", {
+      body: {
+        passcode: adminPasscode,
+        action: "approve",
+        feedbackId: id,
+        updates: { is_approved: !currentStatus },
+      },
+    });
+
+    if (error || !data?.success) {
       toast.error("Failed to update approval status");
       return;
     }
@@ -116,14 +133,19 @@ export default function AdminDashboard() {
 
   const deleteFeedback = async (id: string) => {
     if (!window.confirm("Delete this testimonial permanently?")) return;
+    if (!adminPasscode) return;
 
     const fb = feedbacks.find((f) => f.id === id);
-    const { error } = await supabase
-      .from("feedback_and_testimonials")
-      .delete()
-      .eq("id", id);
 
-    if (error) {
+    const { data, error } = await supabase.functions.invoke("admin-update-feedback", {
+      body: {
+        passcode: adminPasscode,
+        action: "delete",
+        feedbackId: id,
+      },
+    });
+
+    if (error || !data?.success) {
       toast.error("Failed to delete");
       return;
     }
@@ -250,7 +272,7 @@ export default function AdminDashboard() {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted text-[12px] border border-border"
                   >
                     <Globe className="h-3 w-3 text-muted-foreground" />
-                    <span className="font-medium text-foreground">{country}</span>
+                    <span className="font-medium text-foreground">{country || "Unknown"}</span>
                     <span className="text-muted-foreground">({count})</span>
                   </span>
                 ))}
@@ -309,7 +331,7 @@ export default function AdminDashboard() {
                           </span>
                         )}
                         {(breakdown?.love || 0) > 0 && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-pink-500/10 text-pink-600 border border-pink-500/20">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-accent text-accent-foreground border border-border">
                             ❤️ Loved
                           </span>
                         )}
@@ -319,6 +341,8 @@ export default function AdminDashboard() {
                           </span>
                         )}
                       </div>
+
+                      {/* Header */}
                       <div className="flex items-start gap-3 mb-4">
                         <Avatar className="h-11 w-11">
                           <AvatarImage src={getAvatarUrl(fb.user_name, fb.user_avatar_url)} />
@@ -330,7 +354,7 @@ export default function AdminDashboard() {
                           <p className="font-semibold text-sm text-foreground">{fb.user_name}</p>
                           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                             <Globe className="h-3 w-3" />
-                            <span>{fb.user_country}</span>
+                            <span>{fb.user_country || "Unknown"}</span>
                             <span className="mx-0.5">·</span>
                             <span>
                               {formatDistanceToNow(new Date(fb.created_at), { addSuffix: true })}
