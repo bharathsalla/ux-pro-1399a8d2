@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface AdminContextType {
   isAdmin: boolean;
   isCheckingAdmin: boolean;
-  verifyAdmin: () => Promise<boolean>;
+  verifyPasscode: (passcode: string) => Promise<{ success: boolean; error?: string }>;
   exitAdminMode: () => void;
 }
 
@@ -14,33 +14,29 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
 
-  const verifyAdmin = useCallback(async (): Promise<boolean> => {
+  const verifyPasscode = useCallback(async (passcode: string): Promise<{ success: boolean; error?: string }> => {
     setIsCheckingAdmin(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data, error } = await supabase.functions.invoke("verify-admin", {
+        body: { passcode },
+      });
+
+      if (error) {
         setIsCheckingAdmin(false);
-        return false;
+        return { success: false, error: "This area is restricted to administrators." };
       }
 
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (error || !data) {
+      if (data?.success) {
+        setIsAdmin(true);
         setIsCheckingAdmin(false);
-        return false;
+        return { success: true };
       }
 
-      setIsAdmin(true);
       setIsCheckingAdmin(false);
-      return true;
+      return { success: false, error: data?.error || "This area is restricted to administrators." };
     } catch {
       setIsCheckingAdmin(false);
-      return false;
+      return { success: false, error: "Verification failed. Please try again." };
     }
   }, []);
 
@@ -49,7 +45,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AdminContext.Provider value={{ isAdmin, isCheckingAdmin, verifyAdmin, exitAdminMode }}>
+    <AdminContext.Provider value={{ isAdmin, isCheckingAdmin, verifyPasscode, exitAdminMode }}>
       {children}
     </AdminContext.Provider>
   );
