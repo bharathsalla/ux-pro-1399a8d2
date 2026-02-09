@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, ThumbsUp, Award, Heart, Link2, AlertCircle, Globe, CheckCircle2 } from "lucide-react";
 import creatorAvatar from "@/assets/creator-avatar.png";
+import { countries } from "@/data/countries";
 
 type EmojiReaction = "like" | "clap" | "love";
 
@@ -202,6 +203,7 @@ function InlineFeedbackWidget() {
   const [profileLink, setProfileLink] = useState("");
   const [selectedReaction, setSelectedReaction] = useState<EmojiReaction | null>(null);
   const [rating, setRating] = useState(5);
+  const [country, setCountry] = useState(profile?.country || "");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -243,7 +245,7 @@ function InlineFeedbackWidget() {
     const { error: insertError } = await supabase.from("feedback_and_testimonials").insert({
       user_id: user.id,
       user_name: profile.name,
-      user_country: profile.country,
+      user_country: country || profile.country,
       user_avatar_url: profile.avatar_url,
       feedback_text: feedbackText.trim() || `Reacted with ${selectedReaction}`,
       reactions_breakdown: selectedReaction ? { [selectedReaction]: 1 } : {},
@@ -287,6 +289,24 @@ function InlineFeedbackWidget() {
             {profile.country}
           </div>
         </div>
+      </div>
+
+      {/* Country selector */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <Globe className="h-4 w-4 text-primary" />
+          Your Country
+        </label>
+        <select
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          className="w-full h-10 px-3 border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+        >
+          <option value="">Select your country</option>
+          {countries.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
       </div>
 
       {/* Textarea */}
