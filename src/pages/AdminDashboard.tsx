@@ -4,12 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Globe, ThumbsUp, Award, Heart, MessageCircle, Loader2, LogOut, ExternalLink, Check, X, Link2, ShieldCheck, ShieldX } from "lucide-react";
+import {
+  ArrowLeft, Globe, ThumbsUp, Award, Heart, MessageCircle,
+  Loader2, LogOut, Check, X, ShieldCheck, ShieldX,
+} from "lucide-react";
 import { LinkThumbnail } from "@/components/landing/LinkThumbnail";
+import { StarRating } from "@/components/StarRating";
 import { useNavigate } from "react-router-dom";
 import { useAdminContext } from "@/contexts/AdminContext";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { getAvatarUrl } from "@/lib/avatar";
 
 interface FeedbackItem {
   id: string;
@@ -23,6 +28,7 @@ interface FeedbackItem {
   created_at: string;
   profile_link: string;
   is_approved: boolean;
+  rating: number;
 }
 
 interface AnalyticsData {
@@ -94,7 +100,7 @@ export default function AdminDashboard() {
     setFeedbacks((prev) =>
       prev.map((fb) => (fb.id === id ? { ...fb, is_approved: !currentStatus } : fb))
     );
-    
+
     setAnalytics((prev) => {
       if (!prev) return prev;
       const delta = currentStatus ? -1 : 1;
@@ -116,14 +122,6 @@ export default function AdminDashboard() {
   const getInitials = (name: string) =>
     name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
-  const getDomainFromUrl = (url: string): string => {
-    try {
-      return new URL(url).hostname.replace("www.", "");
-    } catch {
-      return url;
-    }
-  };
-
   const filteredFeedbacks = feedbacks.filter((fb) => {
     if (filter === "approved") return fb.is_approved;
     if (filter === "pending") return !fb.is_approved;
@@ -142,13 +140,16 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={handleExit}>
               <ArrowLeft className="h-4 w-4 mr-1" />
-              Exit Admin
+              Exit
             </Button>
-            <h1 className="text-xl font-bold text-foreground">Admin Dashboard</h1>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Testimonial Management</h1>
+              <p className="text-xs text-muted-foreground">Curate trusted reviews for your product</p>
+            </div>
           </div>
           <Button variant="outline" size="sm" onClick={handleExit}>
             <LogOut className="h-4 w-4 mr-1" />
@@ -157,63 +158,49 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Analytics Cards */}
         {analytics && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8"
+            className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8"
           >
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-2xl font-bold text-foreground">{analytics.totalFeedbacks}</p>
-                <p className="text-sm text-muted-foreground">Total Feedbacks</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-2xl font-bold text-score-high">{analytics.approvedCount}</p>
-                <p className="text-sm text-muted-foreground">Approved</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-2xl font-bold text-score-medium">{analytics.pendingCount}</p>
-                <p className="text-sm text-muted-foreground">Pending</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-2xl font-bold text-foreground">{analytics.totalReactions}</p>
-                <p className="text-sm text-muted-foreground">Reactions</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-2xl font-bold text-foreground">
-                  {Object.keys(analytics.countryDistribution).length}
-                </p>
-                <p className="text-sm text-muted-foreground">Countries</p>
-              </CardContent>
-            </Card>
+            {[
+              { label: "Total", value: analytics.totalFeedbacks, color: "text-foreground" },
+              { label: "Approved", value: analytics.approvedCount, color: "text-score-high" },
+              { label: "Pending", value: analytics.pendingCount, color: "text-score-medium" },
+              { label: "Reactions", value: analytics.totalReactions, color: "text-foreground" },
+              { label: "Countries", value: Object.keys(analytics.countryDistribution).length, color: "text-foreground" },
+            ].map((stat) => (
+              <Card key={stat.label} className="border-border">
+                <CardContent className="pt-5 pb-4">
+                  <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
+                </CardContent>
+              </Card>
+            ))}
           </motion.div>
         )}
 
         {/* Filter bar */}
         <div className="flex items-center gap-2 mb-6">
-          <span className="text-sm text-muted-foreground mr-2">Filter:</span>
+          <span className="text-[11px] tracking-[0.1em] uppercase text-muted-foreground mr-2 font-medium">Filter</span>
           {(["all", "approved", "pending"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-xs font-medium border transition-all capitalize ${
+              className={`px-3.5 py-1.5 text-xs font-medium border transition-all capitalize ${
                 filter === f
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-muted-foreground border-border hover:border-primary/30"
               }`}
             >
-              {f === "all" ? `All (${feedbacks.length})` : f === "approved" ? `Approved (${analytics?.approvedCount || 0})` : `Pending (${analytics?.pendingCount || 0})`}
+              {f === "all"
+                ? `All (${feedbacks.length})`
+                : f === "approved"
+                ? `Approved (${analytics?.approvedCount || 0})`
+                : `Pending (${analytics?.pendingCount || 0})`}
             </button>
           ))}
         </div>
@@ -226,17 +213,18 @@ export default function AdminDashboard() {
             transition={{ delay: 0.1 }}
             className="mb-8"
           >
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Country Distribution</h2>
+            <p className="text-[11px] tracking-[0.1em] uppercase text-muted-foreground font-medium mb-3">Regions</p>
             <div className="flex flex-wrap gap-2">
               {Object.entries(analytics.countryDistribution)
                 .sort((a, b) => b[1] - a[1])
                 .map(([country, count]) => (
                   <span
                     key={country}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-sm border border-border"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted text-[12px] border border-border"
                   >
-                    <Globe className="h-3 w-3" />
-                    {country}: {count}
+                    <Globe className="h-3 w-3 text-muted-foreground" />
+                    <span className="font-medium text-foreground">{country}</span>
+                    <span className="text-muted-foreground">({count})</span>
                   </span>
                 ))}
             </div>
@@ -249,9 +237,12 @@ export default function AdminDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="text-lg font-semibold mb-4 text-foreground">
-            Testimonials ({filteredFeedbacks.length})
-          </h2>
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-[11px] tracking-[0.1em] uppercase text-muted-foreground font-medium">
+              Testimonials · {filteredFeedbacks.length}
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredFeedbacks.map((fb, index) => {
               const breakdown = fb.reactions_breakdown as Record<string, number>;
@@ -262,71 +253,83 @@ export default function AdminDashboard() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.03 * index }}
                 >
-                  <Card className={`border transition-all h-full ${
-                    fb.is_approved ? "border-score-high/30" : "border-border"
-                  }`}>
-                    <CardContent className="p-4 flex flex-col h-full">
-                      {/* Header with avatar */}
-                      <div className="flex items-start gap-3 mb-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={fb.user_avatar_url || ""} />
+                  <Card
+                    className={`border transition-all h-full ${
+                      fb.is_approved ? "border-score-high/30 bg-score-high/[0.02]" : "border-border"
+                    }`}
+                  >
+                    <CardContent className="p-5 flex flex-col h-full">
+                      {/* Header */}
+                      <div className="flex items-start gap-3 mb-4">
+                        <Avatar className="h-11 w-11">
+                          <AvatarImage src={getAvatarUrl(fb.user_name, fb.user_avatar_url)} />
                           <AvatarFallback className="bg-primary/10 text-primary text-xs">
                             {getInitials(fb.user_name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm text-foreground">{fb.user_name}</p>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                             <Globe className="h-3 w-3" />
                             <span>{fb.user_country}</span>
-                            <span>·</span>
+                            <span className="mx-0.5">·</span>
                             <span>
                               {formatDistanceToNow(new Date(fb.created_at), { addSuffix: true })}
                             </span>
                           </div>
+                          <div className="mt-1">
+                            <StarRating rating={fb.rating || 5} readonly size="sm" />
+                          </div>
                         </div>
-                        {/* Approval status badge */}
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold ${
-                          fb.is_approved
-                            ? "bg-score-high/10 text-score-high border border-score-high/20"
-                            : "bg-score-medium/10 text-score-medium border border-score-medium/20"
-                        }`}>
-                          {fb.is_approved ? <ShieldCheck className="w-3 h-3" /> : <ShieldX className="w-3 h-3" />}
-                          {fb.is_approved ? "Approved" : "Pending"}
+                        {/* Badge */}
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold ${
+                            fb.is_approved
+                              ? "bg-score-high/10 text-score-high border border-score-high/20"
+                              : "bg-score-medium/10 text-score-medium border border-score-medium/20"
+                          }`}
+                        >
+                          {fb.is_approved ? (
+                            <ShieldCheck className="w-3 h-3" />
+                          ) : (
+                            <ShieldX className="w-3 h-3" />
+                          )}
+                          {fb.is_approved ? "Live" : "Pending"}
                         </span>
                       </div>
 
-                      {/* Feedback text */}
-                      <p className="text-sm text-foreground mb-3 leading-relaxed flex-1">{fb.feedback_text}</p>
+                      {/* Text */}
+                      <p className="text-[13px] text-foreground mb-4 leading-relaxed flex-1">
+                        "{fb.feedback_text}"
+                      </p>
 
-                      {/* Profile link with thumbnail */}
+                      {/* Profile link */}
                       {fb.profile_link && (
                         <div className="mb-3">
                           <LinkThumbnail url={fb.profile_link} compact />
                         </div>
                       )}
 
-                      {/* Reactions */}
-                      <div className="flex items-center justify-between border-t border-border pt-3">
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      {/* Footer */}
+                      <div className="flex items-center justify-between border-t border-border pt-3 mt-auto">
+                        <div className="flex items-center gap-4 text-[12px] text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <ThumbsUp className="h-3.5 w-3.5" />
+                            <ThumbsUp className="h-3 w-3" />
                             {breakdown?.like || 0}
                           </span>
                           <span className="flex items-center gap-1">
-                            <Award className="h-3.5 w-3.5" />
+                            <Award className="h-3 w-3" />
                             {breakdown?.clap || 0}
                           </span>
                           <span className="flex items-center gap-1">
-                            <Heart className="h-3.5 w-3.5" />
+                            <Heart className="h-3 w-3" />
                             {breakdown?.love || 0}
                           </span>
                           <span className="flex items-center gap-1">
-                            <MessageCircle className="h-3.5 w-3.5" />
+                            <MessageCircle className="h-3 w-3" />
                             {fb.comments_count}
                           </span>
                         </div>
-                        {/* Approve/Reject buttons */}
                         <Button
                           size="sm"
                           variant={fb.is_approved ? "outline" : "default"}
@@ -353,9 +356,9 @@ export default function AdminDashboard() {
             })}
 
             {filteredFeedbacks.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground col-span-2">
-                <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No {filter !== "all" ? filter : ""} feedback yet.</p>
+              <div className="text-center py-16 text-muted-foreground col-span-2">
+                <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                <p className="text-sm">No {filter !== "all" ? filter : ""} testimonials yet.</p>
               </div>
             )}
           </div>

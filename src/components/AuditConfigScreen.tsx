@@ -149,20 +149,8 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
             ))}
           </nav>
 
-          {/* Right: CTA */}
-          <div className="ml-auto flex items-center gap-4">
-            <button
-              onClick={handleStart}
-              disabled={!canStart}
-              className={`px-5 py-2 text-[13px] font-semibold transition-all ${
-                canStart
-                  ? "bg-primary text-primary-foreground hover:brightness-110"
-                  : "bg-surface-3 text-muted-foreground cursor-not-allowed"
-              }`}
-            >
-              Start Audit
-            </button>
-          </div>
+          {/* Right spacer */}
+          <div className="ml-auto" />
         </div>
       </header>
 
