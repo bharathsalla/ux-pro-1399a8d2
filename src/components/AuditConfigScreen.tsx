@@ -141,7 +141,7 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
                 className="px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
               >
                 {item.label}
-                <span className="absolute bottom-0 left-3.5 right-3.5 h-[1.5px] bg-foreground scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <span className="absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-foreground scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
               </button>
             ))}
           </nav>

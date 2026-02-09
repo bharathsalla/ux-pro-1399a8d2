@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Home, RotateCcw } from "lucide-react";
 import { type PersonaId, type AuditResult, type AuditIssue, personas } from "@/types/audit";
 import ScoreRing from "./ScoreRing";
 import IssueOverlay from "./IssueOverlay";
 import FunctionalityFeedback from "./FunctionalityFeedback";
+import { FixUxLogo } from "./FixUxLogo";
 
 interface ImageAuditResultsProps {
   personaId: PersonaId;
@@ -46,18 +48,30 @@ const ImageAuditResults = ({
       {/* Top Bar */}
       <div className="border-b border-border bg-card sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-xl">{persona.icon}</span>
-            <div>
-              <h2 className="text-base font-bold text-foreground">{persona.title} Audit</h2>
-              <p className="text-xs text-muted-foreground">AI-powered analysis complete</p>
+          <div className="flex items-center gap-4">
+            <FixUxLogo size="sm" />
+            <div className="h-5 w-px bg-border" />
+            <div className="flex items-center gap-2">
+              <span className="text-xl">{persona.icon}</span>
+              <div>
+                <h2 className="text-base font-bold text-foreground">{persona.title} Audit</h2>
+                <p className="text-xs text-muted-foreground">AI-powered analysis complete</p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={onRestart}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 border border-border hover:bg-accent"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 border border-border hover:bg-accent flex items-center gap-1.5"
             >
+              <Home className="w-3.5 h-3.5" />
+              Home
+            </button>
+            <button
+              onClick={onRestart}
+              className="text-xs text-foreground hover:text-primary transition-colors px-3 py-1.5 border border-border hover:border-primary/30 bg-card flex items-center gap-1.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
               New Audit
             </button>
           </div>

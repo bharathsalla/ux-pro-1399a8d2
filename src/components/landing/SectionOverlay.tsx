@@ -10,6 +10,8 @@ import { FixUxLogo } from "@/components/FixUxLogo";
 import AboutFixUxContent from "./AboutFixUxContent";
 import auditFlowImg from "@/assets/platform-audit-flow.jpg";
 import reportPreviewImg from "@/assets/platform-report-preview.jpg";
+import contactAvatarImg from "@/assets/contact-avatar.png";
+import whyFreeAvatarImg from "@/assets/why-free-avatar.png";
 
 export type SectionId = "flowcheck" | "testimonials" | "contact" | "why-free" | "about";
 
@@ -338,6 +340,18 @@ function ContactContent() {
         Contact Us
       </motion.h1>
 
+      {/* Contact avatar image */}
+      <motion.figure
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.06 }}
+        className="mb-12 flex justify-center"
+      >
+        <div className="w-40 h-40 border-2 border-dashed border-primary/30 overflow-hidden">
+          <img src={contactAvatarImg} alt="Contact us" className="w-full h-full object-cover" />
+        </div>
+      </motion.figure>
+
       <motion.p
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -403,6 +417,18 @@ function WhyFreeContent() {
       >
         Why It Is Free
       </motion.h1>
+
+      {/* Why free avatar */}
+      <motion.figure
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.06 }}
+        className="mb-12 flex justify-center"
+      >
+        <div className="w-40 h-40 border-2 border-dashed border-primary/30 overflow-hidden">
+          <img src={whyFreeAvatarImg} alt="Why it is free" className="w-full h-full object-cover" />
+        </div>
+      </motion.figure>
 
       <motion.p
         initial={{ opacity: 0, y: 8 }}

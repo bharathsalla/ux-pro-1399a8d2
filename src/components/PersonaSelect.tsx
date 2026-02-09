@@ -2,6 +2,19 @@ import { motion } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
 import { FixUxLogo } from "./FixUxLogo";
 import heroCharacters from "@/assets/hero-characters.png";
+import personaSoloImg from "@/assets/persona-solo.png";
+import personaLeadImg from "@/assets/persona-lead.png";
+import personaA11yImg from "@/assets/persona-a11y.png";
+import personaFounderImg from "@/assets/persona-founder.png";
+import personaConsultantImg from "@/assets/persona-consultant.png";
+
+const personaAvatars: Record<string, string> = {
+  solo: personaSoloImg,
+  lead: personaLeadImg,
+  a11y: personaA11yImg,
+  founder: personaFounderImg,
+  consultant: personaConsultantImg,
+};
 
 interface PersonaSelectProps {
   onSelect: (id: PersonaId) => void;
@@ -109,8 +122,8 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
                 onClick={() => onSelect(persona.id)}
                 className={`group relative flex items-center gap-4 p-5 border border-border bg-card text-left transition-all duration-300 card-hover focus:outline-none focus:ring-2 focus:ring-primary/50 ${personaAccentBorder[persona.id]}`}
               >
-                <span className={`w-12 h-12 flex items-center justify-center text-2xl shrink-0 ${personaIconBg[persona.id]}`}>
-                  {persona.icon}
+                <span className="w-12 h-12 shrink-0 overflow-hidden border border-border">
+                  <img src={personaAvatars[persona.id]} alt={persona.title} className="w-full h-full object-cover" />
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
