@@ -84,15 +84,21 @@ export default function AuthPage() {
                 </TabsList>
 
                 <TabsContent value="login" className="space-y-4">
+                  <p className="text-sm font-medium text-muted-foreground text-center">
+                    If you registered manually, sign in with your credentials
+                  </p>
                   <LoginForm />
                   <div className="relative my-4">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t border-border" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">or continue with</span>
+                      <span className="bg-card px-2 text-muted-foreground">or</span>
                     </div>
                   </div>
+                  <p className="text-sm font-medium text-muted-foreground text-center">
+                    Continue with your social account
+                  </p>
                   <SocialAuthButtons />
                 </TabsContent>
 
