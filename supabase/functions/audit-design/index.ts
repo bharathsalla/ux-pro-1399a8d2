@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,9 +7,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// ──────────────────────────────────────────────
-// MASTER AUDIT RULES LIBRARY
-// ──────────────────────────────────────────────
 const MASTER_RULES = `
 ## MASTER UX/UI AUDIT RULES LIBRARY
 
@@ -105,9 +103,6 @@ E6. Cognitive Load — estimation of mental effort required per screen.
 E7. Motion & Delight — animations purposeful, not distracting; respect reduced motion.
 `;
 
-// ──────────────────────────────────────────────
-// PERSONA-SPECIFIC CONFIGURATIONS
-// ──────────────────────────────────────────────
 const PERSONA_CONFIGS: Record<string, { focus: string; priorities: string; tone: string; ruleWeights: string }> = {
   solo: {
     focus: "Pre-handoff quality validation and portfolio-grade polish",
@@ -142,35 +137,17 @@ const PERSONA_CONFIGS: Record<string, { focus: string; priorities: string; tone:
 };
 
 function tryParseJSON(content: string): Record<string, unknown> | null {
-  // Strip markdown code fences
   let cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
-  // First try direct parse
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    // noop
-  }
-
-  // Try to extract JSON object from the response
+  try { return JSON.parse(cleaned); } catch { /* noop */ }
   const jsonStart = cleaned.indexOf("{");
   const jsonEnd = cleaned.lastIndexOf("}");
   if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-    try {
-      return JSON.parse(cleaned.substring(jsonStart, jsonEnd + 1));
-    } catch {
-      // noop
-    }
+    try { return JSON.parse(cleaned.substring(jsonStart, jsonEnd + 1)); } catch { /* noop */ }
   }
-
-  // Try fixing common issues: trailing commas
   try {
     cleaned = cleaned.replace(/,\s*([\]}])/g, "$1");
     return JSON.parse(cleaned);
-  } catch {
-    // noop
-  }
-
+  } catch { /* noop */ }
   return null;
 }
 
@@ -180,6 +157,31 @@ serve(async (req) => {
   }
 
   try {
+    // --- Auth check ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // --- End auth check ---
+
     const { imageBase64, imageUrl, personaId, fidelity, purpose, screenName } = await req.json();
 
     if (!imageBase64 && !imageUrl) {
@@ -196,12 +198,10 @@ serve(async (req) => {
       );
     }
 
-    // Validate image URL is still accessible if provided
     if (imageUrl) {
       try {
         const imgCheck = await fetch(imageUrl, { method: "HEAD" });
         if (!imgCheck.ok) {
-          console.error("Image URL not accessible:", imgCheck.status);
           return new Response(
             JSON.stringify({ error: "Design image is no longer accessible. Figma image URLs may have expired. Please re-extract the frames." }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -209,7 +209,6 @@ serve(async (req) => {
         }
       } catch (e) {
         console.error("Image URL check failed:", e);
-        // Continue anyway — might work with the AI gateway
       }
     }
 
@@ -275,7 +274,6 @@ You MUST respond with ONLY a valid JSON object (no markdown, no backticks, no tr
 
 CRITICAL: Return ONLY the JSON object. No text before or after. No markdown fences. Return 4-8 categories with 1-4 issues each. Every issue MUST have x,y coordinates, ruleId, and principle.`;
 
-    // Build image content — support both base64 and URL
     const imageContent = imageBase64
       ? { type: "image_url", image_url: { url: `data:image/png;base64,${imageBase64}` } }
       : { type: "image_url", image_url: { url: imageUrl } };
@@ -334,7 +332,6 @@ CRITICAL: Return ONLY the JSON object. No text before or after. No markdown fenc
     const auditResult = tryParseJSON(content);
     if (!auditResult) {
       console.error("Failed to parse AI response after all attempts. Content length:", content.length);
-      // Return a fallback result instead of crashing
       return new Response(
         JSON.stringify({
           overallScore: 0,
