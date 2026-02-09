@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, ThumbsUp, Award, Heart, Sparkles, Globe, Link2, AlertCircle } from "lucide-react";
 import { LinkThumbnail } from "@/components/landing/LinkThumbnail";
+import { StarRating } from "@/components/StarRating";
+import { getAvatarUrl } from "@/lib/avatar";
 
 interface FeedbackWidgetProps {
   onComplete: () => void;
@@ -41,6 +43,7 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
   const [feedbackText, setFeedbackText] = useState("");
   const [profileLink, setProfileLink] = useState("");
   const [selectedReaction, setSelectedReaction] = useState<EmojiReaction | null>(null);
+  const [rating, setRating] = useState(5);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -69,6 +72,7 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
       feedback_text: feedbackText.trim() || `Reacted with ${selectedReaction}`,
       reactions_breakdown: selectedReaction ? { [selectedReaction]: 1 } : {},
       profile_link: profileLink.trim(),
+      rating,
     });
 
     if (insertError) {
@@ -133,7 +137,7 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={profile?.avatar_url || ""} />
+                <AvatarImage src={getAvatarUrl(profile?.name || "User", profile?.avatar_url)} />
                 <AvatarFallback className="bg-primary/10 text-primary">
                   {profile ? getInitials(profile.name) : "U"}
                 </AvatarFallback>
@@ -199,6 +203,12 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
               {hasValidLink && (
                 <LinkThumbnail url={profileLink.trim()} compact className="mt-2" />
               )}
+            </div>
+
+            {/* Star Rating */}
+            <div className="space-y-2 pt-2 border-t border-border">
+              <label className="text-sm font-semibold text-foreground">Your Rating</label>
+              <StarRating rating={rating} onChange={(r) => { setRating(r); setError(""); }} />
             </div>
 
             {/* Reaction buttons */}

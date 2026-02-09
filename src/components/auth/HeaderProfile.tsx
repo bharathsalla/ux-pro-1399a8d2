@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Globe } from "lucide-react";
+import { getAvatarUrl } from "@/lib/avatar";
 
 export default function HeaderProfile() {
   const { profile, signOut } = useAuthContext();
@@ -30,7 +31,7 @@ export default function HeaderProfile() {
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-2 rounded-full border border-border bg-card p-1 pr-3 shadow-sm hover:shadow-md transition-shadow">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={profile.avatar_url || ""} alt={profile.name} />
+              <AvatarImage src={getAvatarUrl(profile.name, profile.avatar_url)} alt={profile.name} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                 {initials}
               </AvatarFallback>

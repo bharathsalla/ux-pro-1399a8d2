@@ -1,0 +1,1 @@
+ALTER TABLE public.feedback_and_testimonials ADD COLUMN rating integer NOT NULL DEFAULT 5 CHECK (rating >= 1 AND rating <= 5);
