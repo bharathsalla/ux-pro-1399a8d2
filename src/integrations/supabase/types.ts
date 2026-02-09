@@ -68,7 +68,9 @@ export type Database = {
           created_at: string
           feedback_text: string
           id: string
+          is_approved: boolean
           likes_count: number
+          profile_link: string
           reactions_breakdown: Json
           user_avatar_url: string | null
           user_country: string
@@ -80,7 +82,9 @@ export type Database = {
           created_at?: string
           feedback_text: string
           id?: string
+          is_approved?: boolean
           likes_count?: number
+          profile_link?: string
           reactions_breakdown?: Json
           user_avatar_url?: string | null
           user_country?: string
@@ -92,7 +96,9 @@ export type Database = {
           created_at?: string
           feedback_text?: string
           id?: string
+          is_approved?: boolean
           likes_count?: number
+          profile_link?: string
           reactions_breakdown?: Json
           user_avatar_url?: string | null
           user_country?: string
