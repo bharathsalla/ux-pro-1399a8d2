@@ -26,11 +26,11 @@ const ImageAuditResults = ({
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activeIssueId, setActiveIssueId] = useState<string | null>(null);
 
-  const allIssues = result.categories.flatMap((cat) => cat.issues);
+  const allIssues = (result.categories ?? []).flatMap((cat) => cat?.issues ?? []).filter(Boolean) as AuditIssue[];
   const filteredIssues = activeCategory
-    ? allIssues.filter((i) => i.category === activeCategory)
+    ? allIssues.filter((i) => i?.category === activeCategory)
     : allIssues;
-  const criticalCount = allIssues.filter((i) => i.severity === "critical").length;
+  const criticalCount = allIssues.filter((i) => i?.severity === "critical").length;
 
   const scrollToIssue = (issueId: string) => {
     setActiveIssueId(issueId);
