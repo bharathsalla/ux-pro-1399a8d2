@@ -9,6 +9,11 @@ import AuthPage from "@/components/auth/AuthPage";
 import Index from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import FlowCheckPage from "./pages/FlowCheckPage";
+import TestimonialsPage from "./pages/TestimonialsPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import WhyFreePage from "./pages/WhyFreePage";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +47,11 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
+      <Route path="/flowcheck" element={<FlowCheckPage />} />
+      <Route path="/testimonials" element={<TestimonialsPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/why-it-is-free" element={<WhyFreePage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
