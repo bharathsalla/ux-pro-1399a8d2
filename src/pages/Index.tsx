@@ -14,8 +14,6 @@ import AuditRunning from "@/components/AuditRunning";
 import ImageAuditResults from "@/components/ImageAuditResults";
 import MultiScreenResults from "@/components/MultiScreenResults";
 import HeaderProfile from "@/components/auth/HeaderProfile";
-import CountryModal from "@/components/auth/CountryModal";
-import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 
 import { useAuditDesign } from "@/hooks/useAuditDesign";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -32,7 +30,7 @@ interface UploadedImage {
 }
 
 const Index = () => {
-  const { profile, user, loading: authLoading } = useAuthContext();
+  const { user } = useAuthContext();
   const { showLimitPopup, checkAndIncrement, dismissPopup, remainingToday } = useAuditLimit(user?.id ?? null);
   
   const [step, setStep] = useState<AuditStep>('persona');
@@ -49,10 +47,6 @@ const Index = () => {
 
   const { runAudit, runMultiScreenAudit } = useAuditDesign();
 
-  // Determine engagement gates — only manual users need country (social providers skip it)
-  const isManualUser = profile?.auth_provider === 'manual';
-  const needsCountry = !!profile && !profile.country && isManualUser;
-  const needsFeedback = !!profile && profile.login_count > 1 && !profile.has_submitted_feedback;
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
     setSelectedPersona(id);
@@ -181,29 +175,6 @@ const Index = () => {
     setStep('persona');
     setSelectedPersona(null);
   }, []);
-
-  // Loading state
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
-
-  // Country modal for social auth users
-  if (needsCountry) {
-    return (
-      <div className="min-h-screen bg-background">
-        <CountryModal open={true} />
-      </div>
-    );
-  }
-
-  // Feedback widget gate (second login only)
-  if (needsFeedback) {
-    return <FeedbackWidget onComplete={() => {}} />;
-  }
 
   return (
     <div className="min-h-screen bg-background">

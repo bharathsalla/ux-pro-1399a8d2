@@ -2,10 +2,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
 import { FixUxLogo } from "./FixUxLogo";
-import { X } from "lucide-react";
+import { X, User, ShieldCheck, MessageCircleHeart, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
-import { useAuthContext } from "@/contexts/AuthContext";
+import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
 import heroCharacters from "@/assets/hero-characters.png";
 import personaSoloImg from "@/assets/persona-solo.png";
 import personaLeadImg from "@/assets/persona-lead.png";
@@ -34,8 +34,9 @@ const personaAccentBorder: Record<string, string> = {
 };
 
 const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
-  const { user } = useAuthContext();
   const [showFeedback, setShowFeedback] = useState(false);
+  const [mode, setMode] = useState<"user" | "admin">("user");
+  const [showAdminPasscode, setShowAdminPasscode] = useState(false);
 
   return (
     <motion.div
@@ -44,6 +45,45 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
       exit={{ opacity: 0 }}
       className="min-h-screen"
     >
+      {/* User / Admin toggle — top-right */}
+      <div className="fixed top-4 right-4 z-50 flex rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+        <button
+          onClick={() => setMode("user")}
+          className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors ${
+            mode === "user"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <User className="h-4 w-4" />
+          User
+        </button>
+        <button
+          onClick={() => {
+            setMode("admin");
+            setShowAdminPasscode(true);
+          }}
+          className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors ${
+            mode === "admin"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <ShieldCheck className="h-4 w-4" />
+          Admin
+        </button>
+      </div>
+
+      {/* Admin Passcode Modal */}
+      <AdminPasscodeModal
+        open={showAdminPasscode}
+        onOpenChange={(open) => {
+          setShowAdminPasscode(open);
+          if (!open) setMode("user");
+        }}
+        onSuccess={() => {}}
+      />
+
       {/* Hero + Persona Selection */}
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left Column – Hero */}
@@ -163,32 +203,55 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
             Each persona adapts the audit depth, language & scoring.
           </motion.p>
 
-          {/* Feedback CTA for logged-in users */}
-          {user && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1, type: "spring", stiffness: 200 }}
-              className="mt-8 w-full max-w-lg"
+          {/* Feedback CTA — cartoon-style card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, type: "spring", stiffness: 180 }}
+            className="mt-10 w-full max-w-lg"
+          >
+            <motion.button
+              onClick={() => setShowFeedback(true)}
+              whileHover={{ scale: 1.02, y: -3 }}
+              whileTap={{ scale: 0.97 }}
+              className="group w-full relative overflow-hidden rounded-2xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 hover:border-primary/60 hover:shadow-xl transition-all duration-300 text-left"
             >
-              <motion.button
-                onClick={() => setShowFeedback(true)}
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.97 }}
-                className="group w-full relative overflow-hidden flex items-center gap-4 p-5 border-2 border-dashed border-primary/40 bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5 hover:border-primary hover:shadow-lg transition-all duration-300 text-left"
-              >
-                {/* Floating speech bubble emoji */}
-                <motion.span
-                  animate={{ y: [0, -6, 0], rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  className="text-3xl shrink-0 select-none"
-                  aria-hidden
-                >
-                  💬
-                </motion.span>
+              {/* Decorative floating shapes */}
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-primary/5 blur-sm"
+              />
+              <motion.div
+                animate={{ rotate: [360, 0] }}
+                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-accent/10 blur-sm"
+              />
+
+              <div className="relative z-10 p-6 flex items-center gap-5">
+                {/* Animated icon cluster */}
+                <div className="relative shrink-0">
+                  <motion.div
+                    animate={{ y: [0, -5, 0], rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20"
+                  >
+                    <MessageCircleHeart className="w-7 h-7 text-primary" />
+                  </motion.div>
+                  {/* Floating star */}
+                  <motion.div
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+                    transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                    className="absolute -top-1 -right-1"
+                  >
+                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                  </motion.div>
+                </div>
+
+                {/* Text content */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                    We'd love your thoughts!
+                  <p className="text-sm font-bold text-foreground flex items-center gap-2">
+                    Share your experience!
                     <motion.span
                       animate={{ rotate: [0, 14, -8, 0] }}
                       transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
@@ -197,18 +260,22 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
                       ✨
                     </motion.span>
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Share feedback & help shape Fix UX</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Your feedback helps us build a better Fix UX for everyone
+                  </p>
                 </div>
-                <motion.span
+
+                {/* Arrow */}
+                <motion.div
                   animate={{ x: [0, 4, 0] }}
                   transition={{ duration: 1.2, repeat: Infinity }}
-                  className="text-primary font-bold text-lg shrink-0"
+                  className="shrink-0"
                 >
-                  →
-                </motion.span>
-              </motion.button>
-            </motion.div>
-          )}
+                  <ArrowRight className="w-5 h-5 text-primary group-hover:text-primary/80" />
+                </motion.div>
+              </div>
+            </motion.button>
+          </motion.div>
         </div>
       </div>
 
