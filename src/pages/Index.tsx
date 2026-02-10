@@ -55,17 +55,17 @@ const Index = () => {
   const needsFeedback = !!profile && profile.login_count > 1 && !profile.has_submitted_feedback;
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
-    // Check daily limit for logged-in users
+    setSelectedPersona(id);
+    setStep('config');
+  }, []);
+
+  const handleConfigStart = useCallback(async (cfg: AuditConfig, base64: string, previewUrl: string) => {
+    if (!selectedPersona) return;
+    // Check daily limit before running audit
     if (user) {
       const allowed = checkAndIncrement();
       if (!allowed) return;
     }
-    setSelectedPersona(id);
-    setStep('config');
-  }, [user, checkAndIncrement]);
-
-  const handleConfigStart = useCallback(async (cfg: AuditConfig, base64: string, previewUrl: string) => {
-    if (!selectedPersona) return;
     setIsMultiScreen(false);
     setImagePreviewUrl(previewUrl);
     setImageBase64(base64);
@@ -80,10 +80,15 @@ const Index = () => {
       toast.error("Audit failed. Please try again.");
       setStep('config');
     }
-  }, [selectedPersona, runAudit]);
+  }, [selectedPersona, runAudit, user, checkAndIncrement]);
 
   const handleMultiImageStart = useCallback(async (cfg: AuditConfig, images: UploadedImage[]) => {
     if (!selectedPersona) return;
+    // Check daily limit before running audit
+    if (user) {
+      const allowed = checkAndIncrement();
+      if (!allowed) return;
+    }
     setIsMultiScreen(true);
 
     const frames: FigmaFrame[] = images.map((img, idx) => ({
@@ -133,7 +138,7 @@ const Index = () => {
       }
       setCompletedScreens((prev) => prev + 1);
     }
-  }, [selectedPersona, runAudit]);
+  }, [selectedPersona, runAudit, user, checkAndIncrement]);
 
   const handleFigmaStart = useCallback(async (cfg: AuditConfig, frames: FigmaFrame[]) => {
     if (!selectedPersona) return;
