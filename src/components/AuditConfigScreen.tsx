@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { type PersonaId, type AuditConfig, personas } from "@/types/audit";
 import ImageUpload from "./ImageUpload";
-import { SectionOverlay, type SectionId } from "./landing/SectionOverlay";
 import { FixUxLogo } from "./FixUxLogo";
 
 interface UploadedImage {
@@ -54,23 +54,23 @@ const purposeOptions: Record<PersonaId, { value: AuditConfig["purpose"]; label: 
 
 type ExtInputMode = "single" | "multi";
 
-const navItems: { id: SectionId; label: string }[] = [
-  { id: "flowcheck", label: "FlowCheck" },
-  { id: "testimonials", label: "Testimonials" },
-  { id: "about", label: "About Fix UX" },
-  { id: "contact", label: "Contact Us" },
-  { id: "why-free", label: "Why It Is Free" },
+const navItems: { path: string; label: string }[] = [
+  { path: "/flowcheck", label: "FlowCheck" },
+  { path: "/testimonials", label: "Testimonials" },
+  { path: "/about", label: "About Fix UX" },
+  { path: "/contact", label: "Contact Us" },
+  { path: "/why-it-is-free", label: "Why It Is Free" },
 ];
 
 const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: AuditConfigScreenProps) => {
   const persona = personas.find((p) => p.id === personaId)!;
+  const navigate = useNavigate();
   const [inputMode, setInputMode] = useState<ExtInputMode>("single");
   const [fidelity, setFidelity] = useState<AuditConfig["fidelity"]>("high-fidelity");
   const [purpose, setPurpose] = useState<AuditConfig["purpose"]>(purposeOptions[personaId][0].value);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
-  const [activeSection, setActiveSection] = useState<SectionId | null>(null);
 
   const handleImageSelect = (base64: string, previewUrl: string) => {
     setImageBase64(base64);
@@ -136,8 +136,8 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
           <nav className="flex items-center gap-1">
             {navItems.map((item) => (
               <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                key={item.path}
+                onClick={() => navigate(item.path)}
                 className="px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
               >
                 {item.label}
@@ -264,8 +264,7 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
         </div>
       </div>
 
-      {/* Section Overlay */}
-      <SectionOverlay activeSection={activeSection} onClose={() => setActiveSection(null)} />
+      {/* Navigation now uses routes instead of overlay */}
     </motion.div>
   );
 };
