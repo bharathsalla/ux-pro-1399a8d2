@@ -47,7 +47,7 @@ export default function TestimonialsPage() {
         <div className="max-w-[680px] mx-auto px-6 py-4 flex items-center justify-between">
           <FixUxLogo size="sm" />
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="text-[11px] tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back
