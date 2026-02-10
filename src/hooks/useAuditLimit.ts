@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
 const DAILY_LIMIT = 2;
-const STORAGE_KEY = "fixux_audit_usage";
+const STORAGE_PREFIX = "fixux_audit_";
 
 interface AuditUsage {
   date: string;
@@ -12,9 +12,13 @@ function getTodayKey(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function getUsage(): AuditUsage {
+function getStorageKey(userId: string | null): string {
+  return `${STORAGE_PREFIX}${userId || "anon"}`;
+}
+
+function getUsage(userId: string | null): AuditUsage {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey(userId));
     if (raw) {
       const parsed = JSON.parse(raw) as AuditUsage;
       if (parsed.date === getTodayKey()) return parsed;
@@ -23,29 +27,30 @@ function getUsage(): AuditUsage {
   return { date: getTodayKey(), count: 0 };
 }
 
-function setUsage(usage: AuditUsage) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(usage));
+function setUsage(userId: string | null, usage: AuditUsage) {
+  localStorage.setItem(getStorageKey(userId), JSON.stringify(usage));
 }
 
-export function useAuditLimit() {
+export function useAuditLimit(userId: string | null) {
   const [showLimitPopup, setShowLimitPopup] = useState(false);
 
   const checkAndIncrement = useCallback((): boolean => {
-    const usage = getUsage();
+    if (!userId) return true; // no limit for non-logged-in
+    const usage = getUsage(userId);
     if (usage.count >= DAILY_LIMIT) {
       setShowLimitPopup(true);
-      return false; // blocked
+      return false;
     }
-    setUsage({ date: getTodayKey(), count: usage.count + 1 });
-    return true; // allowed
-  }, []);
+    setUsage(userId, { date: getTodayKey(), count: usage.count + 1 });
+    return true;
+  }, [userId]);
 
   const dismissPopup = useCallback(() => {
     setShowLimitPopup(false);
   }, []);
 
   const remainingToday = (() => {
-    const usage = getUsage();
+    const usage = getUsage(userId);
     return Math.max(0, DAILY_LIMIT - usage.count);
   })();
 

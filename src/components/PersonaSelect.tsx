@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
 import { FixUxLogo } from "./FixUxLogo";
-import { MessageSquareHeart, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -166,26 +166,47 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
           {/* Feedback CTA for logged-in users */}
           {user && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 }}
-              className="mt-6 w-full max-w-lg"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1, type: "spring", stiffness: 200 }}
+              className="mt-8 w-full max-w-lg"
             >
-              <button
+              <motion.button
                 onClick={() => setShowFeedback(true)}
-                className="group w-full flex items-center gap-3 p-4 border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 text-left"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className="group w-full relative overflow-hidden flex items-center gap-4 p-5 border-2 border-dashed border-primary/40 bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5 hover:border-primary hover:shadow-lg transition-all duration-300 text-left"
               >
-                <span className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full shrink-0 group-hover:scale-110 transition-transform">
-                  <MessageSquareHeart className="w-5 h-5 text-primary" />
-                </span>
+                {/* Floating speech bubble emoji */}
+                <motion.span
+                  animate={{ y: [0, -6, 0], rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-3xl shrink-0 select-none"
+                  aria-hidden
+                >
+                  💬
+                </motion.span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Share your feedback</p>
-                  <p className="text-xs text-muted-foreground">Help us improve Fix UX for the community</p>
+                  <p className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                    We'd love your thoughts!
+                    <motion.span
+                      animate={{ rotate: [0, 14, -8, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                      className="inline-block text-base"
+                    >
+                      ✨
+                    </motion.span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Share feedback & help shape Fix UX</p>
                 </div>
-                <svg className="w-4 h-4 text-primary/50 group-hover:translate-x-1 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+                <motion.span
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ duration: 1.2, repeat: Infinity }}
+                  className="text-primary font-bold text-lg shrink-0"
+                >
+                  →
+                </motion.span>
+              </motion.button>
             </motion.div>
           )}
         </div>
