@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, ThumbsUp, Award, Heart, Sparkles, Globe, Link2, AlertCircle } from "lucide-react";
+import { Loader2, ThumbsUp, Award, Heart, Sparkles, Globe, Link2, AlertCircle, Briefcase, Building2, User } from "lucide-react";
 import { LinkThumbnail } from "@/components/landing/LinkThumbnail";
 import { StarRating } from "@/components/StarRating";
 import { getAvatarUrl } from "@/lib/avatar";
@@ -46,14 +46,21 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
   const [selectedReaction, setSelectedReaction] = useState<EmojiReaction | null>(null);
   const [rating, setRating] = useState(5);
   const [country, setCountry] = useState(profile?.country || "");
+  const [fullName, setFullName] = useState(profile?.name || "");
+  const [jobTitle, setJobTitle] = useState("");
+  const [company, setCompany] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const hasContent = feedbackText.trim().length > 0 || selectedReaction !== null;
   const hasValidLink = isValidUrl(profileLink.trim());
-  const canSubmit = hasContent && hasValidLink;
+  const canSubmit = hasContent && hasValidLink && fullName.trim().length > 0;
 
   const handleSubmit = async () => {
+    if (!fullName.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
     if (!hasContent) {
       setError("Please share your feedback or select a reaction.");
       return;
@@ -66,12 +73,21 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
 
     setLoading(true);
 
+    const feedbackMeta = [
+      jobTitle.trim() && `Job Title: ${jobTitle.trim()}`,
+      company.trim() && `Company: ${company.trim()}`,
+    ].filter(Boolean).join(" | ");
+
+    const finalText = feedbackMeta
+      ? `${feedbackText.trim() || `Reacted with ${selectedReaction}`}\n\n---\n${feedbackMeta}`
+      : feedbackText.trim() || `Reacted with ${selectedReaction}`;
+
     const { error: insertError } = await supabase.from("feedback_and_testimonials").insert({
       user_id: user.id,
-      user_name: profile.name,
+      user_name: fullName.trim(),
       user_country: country || profile.country,
       user_avatar_url: profile.avatar_url,
-      feedback_text: feedbackText.trim() || `Reacted with ${selectedReaction}`,
+      feedback_text: finalText,
       reactions_breakdown: selectedReaction ? { [selectedReaction]: 1 } : {},
       profile_link: profileLink.trim(),
       rating,
@@ -154,6 +170,48 @@ export default function FeedbackWidget({ onComplete }: FeedbackWidgetProps) {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Name */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <User className="h-4 w-4 text-primary" />
+                Full Name <span className="text-destructive">*</span>
+              </label>
+              <Input
+                value={fullName}
+                onChange={(e) => { setFullName(e.target.value); setError(""); }}
+                placeholder="Your full name"
+                className="text-sm"
+              />
+            </div>
+
+            {/* Job Title */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-primary" />
+                Job Title
+              </label>
+              <Input
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                placeholder="e.g. Senior Product Designer"
+                className="text-sm"
+              />
+            </div>
+
+            {/* Company */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-primary" />
+                Company
+              </label>
+              <Input
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="e.g. Google, Freelance, etc."
+                className="text-sm"
+              />
+            </div>
+
             {/* Country selector */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground flex items-center gap-2">

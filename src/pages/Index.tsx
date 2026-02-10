@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   type PersonaId,
   type AuditConfig,
@@ -19,8 +19,11 @@ import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 
 import { useAuditDesign } from "@/hooks/useAuditDesign";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuditLimit } from "@/hooks/useAuditLimit";
 
 import { toast } from "sonner";
+import { Clock, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface UploadedImage {
   base64: string;
@@ -30,6 +33,7 @@ interface UploadedImage {
 
 const Index = () => {
   const { profile, user, loading: authLoading } = useAuthContext();
+  const { showLimitPopup, checkAndIncrement, dismissPopup, remainingToday } = useAuditLimit();
   
   const [step, setStep] = useState<AuditStep>('persona');
   const [selectedPersona, setSelectedPersona] = useState<PersonaId | null>(null);
@@ -51,9 +55,14 @@ const Index = () => {
   const needsFeedback = !!profile && profile.login_count > 1 && !profile.has_submitted_feedback;
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
+    // Check daily limit for logged-in users
+    if (user) {
+      const allowed = checkAndIncrement();
+      if (!allowed) return;
+    }
     setSelectedPersona(id);
     setStep('config');
-  }, []);
+  }, [user, checkAndIncrement]);
 
   const handleConfigStart = useCallback(async (cfg: AuditConfig, base64: string, previewUrl: string) => {
     if (!selectedPersona) return;
@@ -236,6 +245,46 @@ const Index = () => {
             completedScreens={completedScreens}
             onRestart={handleRestart}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Daily Limit Popup */}
+      <AnimatePresence>
+        {showLimitPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={dismissPopup}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-md bg-background border border-border rounded-lg p-8 text-center shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-5">
+                <Clock className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold text-foreground mb-2">Daily Limit Reached</h2>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-2">
+                You've used your <strong className="text-foreground">2 free audits</strong> for today.
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                We appreciate your enthusiasm! Your audit quota will reset tomorrow. Come back then to continue improving your designs.
+              </p>
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mb-6 p-3 bg-muted/50 rounded-md">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span>Each day you get <strong className="text-foreground">2 audits</strong> to review your designs</span>
+              </div>
+              <Button onClick={dismissPopup} className="w-full" size="lg">
+                Got it, I'll come back tomorrow
+              </Button>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

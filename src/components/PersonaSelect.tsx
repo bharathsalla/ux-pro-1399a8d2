@@ -1,6 +1,11 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
 import { FixUxLogo } from "./FixUxLogo";
+import { MessageSquareHeart, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
+import { useAuthContext } from "@/contexts/AuthContext";
 import heroCharacters from "@/assets/hero-characters.png";
 import personaSoloImg from "@/assets/persona-solo.png";
 import personaLeadImg from "@/assets/persona-lead.png";
@@ -28,15 +33,9 @@ const personaAccentBorder: Record<string, string> = {
   consultant: "hover:border-persona-consultant",
 };
 
-const personaIconBg: Record<string, string> = {
-  solo: "bg-persona-solo/10 text-persona-solo",
-  lead: "bg-persona-lead/10 text-persona-lead",
-  a11y: "bg-persona-a11y/10 text-persona-a11y",
-  founder: "bg-persona-founder/10 text-persona-founder",
-  consultant: "bg-persona-consultant/10 text-persona-consultant",
-};
-
 const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
+  const { user } = useAuthContext();
+  const [showFeedback, setShowFeedback] = useState(false);
 
   return (
     <motion.div
@@ -163,9 +162,64 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
           >
             Each persona adapts the audit depth, language & scoring.
           </motion.p>
+
+          {/* Feedback CTA for logged-in users */}
+          {user && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="mt-6 w-full max-w-lg"
+            >
+              <button
+                onClick={() => setShowFeedback(true)}
+                className="group w-full flex items-center gap-3 p-4 border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 text-left"
+              >
+                <span className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full shrink-0 group-hover:scale-110 transition-transform">
+                  <MessageSquareHeart className="w-5 h-5 text-primary" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">Share your feedback</p>
+                  <p className="text-xs text-muted-foreground">Help us improve Fix UX for the community</p>
+                </div>
+                <svg className="w-4 h-4 text-primary/50 group-hover:translate-x-1 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </motion.div>
+          )}
         </div>
       </div>
 
+      {/* Feedback Modal Overlay */}
+      <AnimatePresence>
+        {showFeedback && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowFeedback(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-background rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowFeedback(false)}
+                className="absolute top-4 right-4 z-10 p-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+              <FeedbackWidget onComplete={() => setShowFeedback(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
