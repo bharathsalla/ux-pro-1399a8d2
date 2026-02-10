@@ -33,7 +33,7 @@ interface UploadedImage {
 
 const Index = () => {
   const { profile, user, loading: authLoading } = useAuthContext();
-  const { showLimitPopup, checkAndIncrement, dismissPopup, remainingToday } = useAuditLimit();
+  const { showLimitPopup, checkAndIncrement, dismissPopup, remainingToday } = useAuditLimit(user?.id ?? null);
   
   const [step, setStep] = useState<AuditStep>('persona');
   const [selectedPersona, setSelectedPersona] = useState<PersonaId | null>(null);
