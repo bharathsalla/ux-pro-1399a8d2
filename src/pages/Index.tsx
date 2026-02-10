@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   type PersonaId,
@@ -33,8 +33,14 @@ const Index = () => {
   const { user } = useAuthContext();
   const { showLimitPopup, checkAndIncrement, dismissPopup, remainingToday } = useAuditLimit(user?.id ?? null);
   
-  const [step, setStep] = useState<AuditStep>('persona');
-  const [selectedPersona, setSelectedPersona] = useState<PersonaId | null>(null);
+  // Restore step & persona from sessionStorage so Back navigation works
+  const [step, setStep] = useState<AuditStep>(() => {
+    const saved = sessionStorage.getItem('fixux_step');
+    return (saved === 'config' ? 'config' : 'persona') as AuditStep;
+  });
+  const [selectedPersona, setSelectedPersona] = useState<PersonaId | null>(() => {
+    return (sessionStorage.getItem('fixux_persona') as PersonaId) || null;
+  });
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
@@ -47,6 +53,17 @@ const Index = () => {
 
   const { runAudit, runMultiScreenAudit } = useAuditDesign();
 
+
+  // Persist step & persona to sessionStorage
+  useEffect(() => {
+    if (step === 'config' && selectedPersona) {
+      sessionStorage.setItem('fixux_step', 'config');
+      sessionStorage.setItem('fixux_persona', selectedPersona);
+    } else if (step === 'persona') {
+      sessionStorage.removeItem('fixux_step');
+      sessionStorage.removeItem('fixux_persona');
+    }
+  }, [step, selectedPersona]);
 
   const handlePersonaSelect = useCallback((id: PersonaId) => {
     setSelectedPersona(id);
@@ -169,6 +186,8 @@ const Index = () => {
     setFigmaFrames([]);
     setScreenResults([]);
     setCompletedScreens(0);
+    sessionStorage.removeItem('fixux_step');
+    sessionStorage.removeItem('fixux_persona');
   }, []);
 
   const handleBack = useCallback(() => {
