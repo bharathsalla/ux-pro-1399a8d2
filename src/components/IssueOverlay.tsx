@@ -97,8 +97,15 @@ const IssueOverlay = ({
 
       {/* Issue pins */}
       {issues.map((issue, idx) => {
-        const x = issue.x ?? (15 + ((idx * 17) % 70));
-        const y = issue.y ?? (15 + ((idx * 23) % 70));
+        // Golden-angle scatter for non-overlapping distribution
+        const goldenAngle = 137.508;
+        const radius = 30;
+        const angle = idx * goldenAngle * (Math.PI / 180);
+        const spiralR = radius * Math.sqrt(idx + 1) / Math.sqrt(issues.length);
+        const cx = 50 + spiralR * Math.cos(angle);
+        const cy = 50 + spiralR * Math.sin(angle);
+        const x = issue.x != null && issue.x > 0 ? issue.x : Math.max(5, Math.min(95, cx));
+        const y = issue.y != null && issue.y > 0 ? issue.y : Math.max(5, Math.min(95, cy));
         const config = severityConfig[issue.severity] || severityConfig.info;
         const isActive = activeIssue === issue.id;
         const cardPos = getCardPosition(x, y);

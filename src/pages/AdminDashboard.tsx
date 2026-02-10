@@ -381,10 +381,36 @@ export default function AdminDashboard() {
                         </span>
                       </div>
 
-                      {/* Text */}
-                      <p className="text-[13px] text-foreground mb-4 leading-relaxed flex-1">
-                        "{fb.feedback_text}"
-                      </p>
+                      {/* Structured feedback display */}
+                      {(() => {
+                        const parts = fb.feedback_text.split("\n\n---\n");
+                        const mainText = parts[0] || "";
+                        const metaLine = parts[1] || "";
+                        const metaItems = metaLine
+                          ? metaLine.split(" | ").map((s) => {
+                              const [key, ...rest] = s.split(": ");
+                              return { label: key?.trim(), value: rest.join(": ")?.trim() };
+                            }).filter((m) => m.label && m.value)
+                          : [];
+
+                        return (
+                          <div className="mb-4 flex-1 space-y-3">
+                            <p className="text-[13px] text-foreground leading-relaxed italic">
+                              "{mainText}"
+                            </p>
+                            {metaItems.length > 0 && (
+                              <div className="border border-border bg-muted/30 p-3 space-y-1.5">
+                                {metaItems.map((m) => (
+                                  <div key={m.label} className="flex items-center gap-2 text-xs">
+                                    <span className="font-semibold text-muted-foreground min-w-[80px]">{m.label}</span>
+                                    <span className="text-foreground">{m.value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       {/* Profile link */}
                       {fb.profile_link && (
