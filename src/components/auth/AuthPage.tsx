@@ -34,19 +34,19 @@ export default function AuthPage() {
       />
 
       {/* ═══ Left Branding Panel ═══ */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-primary relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-gradient-to-br from-background via-background to-muted relative overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
 
         <div className="relative z-10 flex flex-col justify-between w-full p-12 xl:p-16">
           {/* Top: Logo */}
           <div>
-            <div className="flex items-center gap-3 mb-16">
-              <div className="w-8 h-8 bg-primary-foreground/20 border border-primary-foreground/30 flex items-center justify-center">
-                <span className="text-primary-foreground text-xs font-black tracking-tight">Fx</span>
-              </div>
-              <span className="text-primary-foreground font-extrabold text-lg tracking-tight">FixUx</span>
+            <div className="mb-16">
+              <FixUxLogo size="sm" />
             </div>
 
             {/* Illustration above text */}
@@ -54,16 +54,15 @@ export default function AuthPage() {
               src={loginIllustration}
               alt="FixUx character"
               className="w-56 xl:w-64 h-auto object-contain mb-10"
-              style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.18)) drop-shadow(0 4px 12px rgba(0,0,0,0.1))" }}
             />
 
             {/* Headline */}
-            <h1 className="text-3xl xl:text-4xl font-extrabold text-primary-foreground leading-[1.15] tracking-tight mb-6">
+            <h1 className="text-3xl xl:text-4xl font-extrabold text-foreground leading-[1.15] tracking-tight mb-6">
               Build better
               <br />
               interfaces, faster.
             </h1>
-            <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-sm mb-10">
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mb-10">
               Join thousands of designers and developers using AI to ship polished, user-tested products.
             </p>
 
@@ -71,15 +70,15 @@ export default function AuthPage() {
             <div className="space-y-3">
               {features.map((f) => (
                 <div key={f} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-primary-foreground/60 shrink-0" />
-                  <span className="text-sm text-primary-foreground/80 font-medium">{f}</span>
+                  <CheckCircle2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm text-foreground/80 font-medium">{f}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Bottom */}
-          <p className="text-[10px] text-primary-foreground/40 uppercase tracking-[0.2em] font-medium mt-10">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium mt-10">
             Free to use · No credit card
           </p>
         </div>
@@ -146,37 +145,50 @@ export default function AuthPage() {
               {/* Social first */}
               <SocialAuthButtons />
 
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
+              {/* Email + password section */}
+              <motion.div
+                whileHover={{ rotateX: -1.25, rotateY: 1.25 }}
+                transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                style={{
+                  transformStyle: "preserve-3d",
+                  backgroundImage: `radial-gradient(90% 80% at 10% 0%, hsl(var(--primary) / 0.10) 0%, transparent 60%),
+                    radial-gradient(80% 70% at 100% 20%, hsl(var(--accent) / 0.14) 0%, transparent 55%),
+                    linear-gradient(180deg, hsl(var(--card) / 0.55), hsl(var(--card) / 0.92))`,
+                }}
+                className="rounded-xl border border-border/60 p-5 sm:p-6"
+              >
+                {/* Divider */}
+                <div className="relative mb-5">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-[10px] uppercase tracking-[0.15em]">
+                    <span className="bg-background/70 px-3 text-muted-foreground font-medium backdrop-blur">
+                      or continue with email
+                    </span>
+                  </div>
                 </div>
-                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.15em]">
-                  <span className="bg-background px-3 text-muted-foreground font-medium">
-                    or continue with email
-                  </span>
-                </div>
-              </div>
 
-              {/* Tabs */}
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-5 h-9">
-                  <TabsTrigger value="login" className="text-xs font-semibold uppercase tracking-wide">
-                    Sign In
-                  </TabsTrigger>
-                  <TabsTrigger value="register" className="text-xs font-semibold uppercase tracking-wide">
-                    Register
-                  </TabsTrigger>
-                </TabsList>
+                {/* Tabs */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-5 h-9">
+                    <TabsTrigger value="login" className="text-xs font-semibold uppercase tracking-wide">
+                      Sign In
+                    </TabsTrigger>
+                    <TabsTrigger value="register" className="text-xs font-semibold uppercase tracking-wide">
+                      Register
+                    </TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="login">
-                  <LoginForm />
-                </TabsContent>
+                  <TabsContent value="login">
+                    <LoginForm />
+                  </TabsContent>
 
-                <TabsContent value="register">
-                  <ManualRegisterForm onSuccess={() => setActiveTab("login")} />
-                </TabsContent>
-              </Tabs>
+                  <TabsContent value="register">
+                    <ManualRegisterForm onSuccess={() => setActiveTab("login")} />
+                  </TabsContent>
+                </Tabs>
+              </motion.div>
 
               {/* Footer text */}
               <p className="mt-8 text-center text-[11px] text-muted-foreground leading-relaxed">
