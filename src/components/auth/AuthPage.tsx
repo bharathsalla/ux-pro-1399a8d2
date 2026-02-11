@@ -34,27 +34,13 @@ export default function AuthPage() {
       />
 
       {/* ═══ Left Branding Panel ═══ */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] relative overflow-hidden"
-        style={{
-          background: `radial-gradient(ellipse 120% 80% at 20% 10%, hsl(var(--primary) / 0.12) 0%, transparent 50%),
-            radial-gradient(ellipse 80% 60% at 80% 90%, hsl(var(--primary) / 0.08) 0%, transparent 50%),
-            hsl(var(--background))`,
-        }}
-      >
-        {/* Star/cross pattern with primary (green) color */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] relative overflow-hidden bg-primary">
+        {/* Star/cross pattern — white on green */}
         <div
-          className="absolute inset-0 opacity-[0.08]"
+          className="absolute inset-0 opacity-[0.1]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2330a06e' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}
-        />
-
-        {/* Floating green glow orbs */}
-        <div className="absolute top-20 left-10 w-32 h-32 rounded-full opacity-20"
-          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.4), transparent 70%)" }}
-        />
-        <div className="absolute bottom-32 right-16 w-48 h-48 rounded-full opacity-15"
-          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.3), transparent 70%)" }}
         />
 
         <div className="relative z-10 flex flex-col justify-between w-full p-12 xl:p-16">
@@ -72,12 +58,12 @@ export default function AuthPage() {
             />
 
             {/* Headline */}
-            <h1 className="text-3xl xl:text-4xl font-extrabold text-foreground leading-[1.15] tracking-tight mb-6">
+            <h1 className="text-3xl xl:text-4xl font-extrabold text-primary-foreground leading-[1.15] tracking-tight mb-6">
               Build better
               <br />
               interfaces, faster.
             </h1>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mb-10">
+            <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-sm mb-10">
               Join thousands of designers and developers using AI to ship polished, user-tested products.
             </p>
 
@@ -91,17 +77,17 @@ export default function AuthPage() {
                   transition={{ delay: 0.3 + i * 0.1 }}
                   className="flex items-center gap-3"
                 >
-                  <div className="w-7 h-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                    <f.icon className="w-3.5 h-3.5 text-primary" />
+                  <div className="w-7 h-7 rounded-md bg-primary-foreground/10 border border-primary-foreground/20 flex items-center justify-center shrink-0">
+                    <f.icon className="w-3.5 h-3.5 text-primary-foreground" />
                   </div>
-                  <span className="text-sm text-foreground/80 font-medium">{f.text}</span>
+                  <span className="text-sm text-primary-foreground/90 font-medium">{f.text}</span>
                 </motion.div>
               ))}
             </div>
           </div>
 
           {/* Bottom */}
-          <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium mt-10">
+          <p className="text-[10px] text-primary-foreground/50 uppercase tracking-[0.2em] font-medium mt-10">
             Free to use · No credit card
           </p>
         </div>
@@ -155,14 +141,6 @@ export default function AuthPage() {
             >
               {/* Header */}
               <div className="mb-8 text-center">
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center"
-                >
-                  <Sparkles className="w-5 h-5 text-primary" />
-                </motion.div>
                 <h2 className="text-2xl font-extrabold text-foreground tracking-tight mb-1.5">
                   {activeTab === "login" ? "Welcome back" : "Create account"}
                 </h2>
