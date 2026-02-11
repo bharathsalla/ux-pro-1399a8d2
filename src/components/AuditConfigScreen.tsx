@@ -146,20 +146,7 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
             ))}
           </nav>
 
-          {/* Right: TranscriptToUI button */}
-          <div className="ml-auto">
-            <button
-              onClick={() => navigate("/transcript")}
-              className="px-5 py-2.5 text-xs font-bold tracking-wider uppercase transition-all hover:scale-[1.03] active:scale-[0.98]"
-              style={{
-                background: "linear-gradient(135deg, hsl(152 69% 40%) 0%, hsl(160 65% 35%) 100%)",
-                color: "white",
-                boxShadow: "0 4px 15px -3px hsl(152 69% 40% / 0.4)",
-              }}
-            >
-              TranscriptToUI
-            </button>
-          </div>
+          <div className="ml-auto" />
         </div>
       </header>
 
