@@ -188,9 +188,9 @@ serve(async (req) => {
       }
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured");
     }
 
     const config = PERSONA_CONFIGS[personaId] || PERSONA_CONFIGS.solo;
@@ -251,32 +251,37 @@ You MUST respond with ONLY a valid JSON object (no markdown, no backticks, no tr
 CRITICAL: Return ONLY the JSON object. No text before or after. No markdown fences. Return 4-8 categories with 1-4 issues each. Every issue MUST have x,y coordinates, ruleId, and principle.`;
 
     const imageContent = imageBase64
-      ? { type: "image_url", image_url: { url: `data:image/png;base64,${imageBase64}` } }
-      : { type: "image_url", image_url: { url: imageUrl } };
+      ? { inlineData: { mimeType: "image/png", data: imageBase64 } }
+      : { fileData: { mimeType: "image/png", fileUri: imageUrl } };
+
+    // For URL-based images, use inline approach by fetching the image
+    let imagePart: Record<string, unknown>;
+    if (imageBase64) {
+      imagePart = { inlineData: { mimeType: "image/png", data: imageBase64 } };
+    } else {
+      // Fetch the image and convert to base64 for Gemini
+      const imgResp = await fetch(imageUrl);
+      const imgBuf = await imgResp.arrayBuffer();
+      const imgBase64 = btoa(String.fromCharCode(...new Uint8Array(imgBuf)));
+      imagePart = { inlineData: { mimeType: "image/png", data: imgBase64 } };
+    }
 
     const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: `Analyze this design screenshot and provide a comprehensive UX audit with positioned annotations for each issue.${screenContext}`,
-                },
-                imageContent,
-              ],
-            },
-          ],
+          contents: [{
+            parts: [
+              { text: systemPrompt + `\n\nAnalyze this design screenshot and provide a comprehensive UX audit with positioned annotations for each issue.${screenContext}` },
+              imagePart,
+            ],
+          }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.7,
+          },
         }),
       }
     );
@@ -288,14 +293,14 @@ CRITICAL: Return ONLY the JSON object. No text before or after. No markdown fenc
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
+      if (response.status === 403) {
         return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add funds in Settings → Workspace → Usage." }),
+          JSON.stringify({ error: "API quota exceeded. Please check your Gemini API key billing." }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "AI analysis failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -303,7 +308,7 @@ CRITICAL: Return ONLY the JSON object. No text before or after. No markdown fenc
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     const auditResult = tryParseJSON(content);
     if (!auditResult) {
