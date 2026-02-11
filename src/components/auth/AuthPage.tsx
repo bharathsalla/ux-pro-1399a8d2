@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ManualRegisterForm from "./ManualRegisterForm";
 import LoginForm from "./LoginForm";
 import SocialAuthButtons from "./SocialAuthButtons";
 import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
 import { FixUxLogo } from "@/components/FixUxLogo";
-import { ShieldCheck, User } from "lucide-react";
+import { ShieldCheck, User, CheckCircle2, ArrowRight } from "lucide-react";
+import heroCharacter from "@/assets/hero-character.png";
+
+const features = [
+  "AI-powered UX audits in seconds",
+  "60+ design principles analyzed",
+  "Transcript-to-UI generation",
+  "Actionable fix suggestions",
+];
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
@@ -15,36 +22,7 @@ export default function AuthPage() {
   const [showAdminPasscode, setShowAdminPasscode] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative">
-      {/* User / Admin mode selector — top-right */}
-      <div className="fixed top-4 right-4 z-50 flex rounded-lg border border-border bg-card shadow-sm overflow-hidden">
-        <button
-          onClick={() => setMode("user")}
-          className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors ${
-            mode === "user"
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <User className="h-4 w-4" />
-          User
-        </button>
-        <button
-          onClick={() => {
-            setMode("admin");
-            setShowAdminPasscode(true);
-          }}
-          className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-colors ${
-            mode === "admin"
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <ShieldCheck className="h-4 w-4" />
-          Admin
-        </button>
-      </div>
-
+    <div className="min-h-screen bg-background flex">
       {/* Admin Passcode Modal */}
       <AdminPasscodeModal
         open={showAdminPasscode}
@@ -55,90 +33,192 @@ export default function AuthPage() {
         onSuccess={() => {}}
       />
 
-      {/* User auth flow */}
-      {mode === "user" && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
-          <div className="text-center mb-8 flex flex-col items-center gap-2">
-            <FixUxLogo size="lg" />
-            <p className="text-muted-foreground">
-              AI-powered UX audit for your designs
+      {/* ═══ Left Branding Panel ═══ */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-primary relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+        <div className="relative z-10 flex flex-col justify-between w-full p-12 xl:p-16">
+          {/* Top: Logo */}
+          <div>
+            <div className="flex items-center gap-3 mb-16">
+              <div className="w-8 h-8 bg-primary-foreground/20 border border-primary-foreground/30 flex items-center justify-center">
+                <span className="text-primary-foreground text-xs font-black tracking-tight">Fx</span>
+              </div>
+              <span className="text-primary-foreground font-extrabold text-lg tracking-tight">FixUx</span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="text-3xl xl:text-4xl font-extrabold text-primary-foreground leading-[1.15] tracking-tight mb-6">
+              Build better
+              <br />
+              interfaces, faster.
+            </h1>
+            <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-sm mb-10">
+              Join thousands of designers and developers using AI to ship polished, user-tested products.
             </p>
+
+            {/* Feature list */}
+            <div className="space-y-3">
+              {features.map((f) => (
+                <div key={f} className="flex items-center gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-primary-foreground/60 shrink-0" />
+                  <span className="text-sm text-primary-foreground/80 font-medium">{f}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <Card className="border border-border shadow-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl text-center">Welcome</CardTitle>
-              <CardDescription className="text-center">
-                Sign in or create an account to continue
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          {/* Bottom: Character illustration */}
+          <div className="mt-12 flex items-end">
+            <motion.img
+              src={heroCharacter}
+              alt="FixUx mascot"
+              className="w-32 xl:w-40 h-auto object-contain opacity-80"
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              style={{ filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.15))" }}
+            />
+            <div className="ml-4 mb-4">
+              <p className="text-[10px] text-primary-foreground/40 uppercase tracking-[0.2em] font-medium">
+                Free to use · No credit card
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ Right Auth Panel ═══ */}
+      <div className="flex-1 flex flex-col">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 sm:px-10 py-5 border-b border-border">
+          <div className="lg:hidden">
+            <FixUxLogo size="sm" />
+          </div>
+          <div className="hidden lg:block" />
+
+          {/* User/Admin toggle */}
+          <div className="flex border border-border overflow-hidden">
+            <button
+              onClick={() => setMode("user")}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-wide transition-colors ${
+                mode === "user"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              }`}
+            >
+              <User className="h-3 w-3" /> User
+            </button>
+            <button
+              onClick={() => {
+                setMode("admin");
+                setShowAdminPasscode(true);
+              }}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-wide transition-colors ${
+                mode === "admin"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              }`}
+            >
+              <ShieldCheck className="h-3 w-3" /> Admin
+            </button>
+          </div>
+        </div>
+
+        {/* Auth form area */}
+        <div className="flex-1 flex items-center justify-center px-6 sm:px-10">
+          {mode === "user" && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="w-full max-w-[400px]"
+            >
+              {/* Header */}
+              <div className="mb-8">
+                <h2 className="text-2xl font-extrabold text-foreground tracking-tight mb-1.5">
+                  {activeTab === "login" ? "Welcome back" : "Create account"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {activeTab === "login"
+                    ? "Sign in to continue to FixUx"
+                    : "Get started with your free account"}
+                </p>
+              </div>
+
+              {/* Social first */}
+              <SocialAuthButtons />
+
+              {/* Divider */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.15em]">
+                  <span className="bg-background px-3 text-muted-foreground font-medium">
+                    or continue with email
+                  </span>
+                </div>
+              </div>
+
+              {/* Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="register">Register</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 mb-5 h-9">
+                  <TabsTrigger value="login" className="text-xs font-semibold uppercase tracking-wide">
+                    Sign In
+                  </TabsTrigger>
+                  <TabsTrigger value="register" className="text-xs font-semibold uppercase tracking-wide">
+                    Register
+                  </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="login" className="space-y-4">
-                  <p className="text-sm font-medium text-muted-foreground text-center">
-                    If you registered manually, sign in with your credentials
-                  </p>
+                <TabsContent value="login">
                   <LoginForm />
-                  <div className="relative my-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">or</span>
-                    </div>
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground text-center">
-                    Continue with your social account
-                  </p>
-                  <SocialAuthButtons />
                 </TabsContent>
 
-                <TabsContent value="register" className="space-y-4">
+                <TabsContent value="register">
                   <ManualRegisterForm onSuccess={() => setActiveTab("login")} />
-                  <div className="relative my-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">or register with</span>
-                    </div>
-                  </div>
-                  <SocialAuthButtons />
                 </TabsContent>
               </Tabs>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
 
-      {/* Admin mode — show prompt to enter passcode */}
-      {mode === "admin" && !showAdminPasscode && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <ShieldCheck className="h-16 w-16 mx-auto mb-4 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground mb-2">Admin Access</h2>
-          <p className="text-muted-foreground mb-6">Enter the admin passcode to continue.</p>
-          <button
-            onClick={() => setShowAdminPasscode(true)}
-            className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-          >
-            Enter Passcode
-          </button>
-        </motion.div>
-      )}
+              {/* Footer text */}
+              <p className="mt-8 text-center text-[11px] text-muted-foreground leading-relaxed">
+                By continuing, you agree to our Terms of Service
+                <br />
+                and Privacy Policy.
+              </p>
+            </motion.div>
+          )}
+
+          {mode === "admin" && !showAdminPasscode && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <div className="w-16 h-16 mx-auto mb-5 bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <ShieldCheck className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-2xl font-extrabold text-foreground mb-2">Admin Access</h2>
+              <p className="text-muted-foreground text-sm mb-6">Enter the admin passcode to continue.</p>
+              <button
+                onClick={() => setShowAdminPasscode(true)}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors"
+              >
+                Enter Passcode <ArrowRight className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Bottom bar */}
+        <div className="px-6 sm:px-10 py-4 border-t border-border">
+          <p className="text-[10px] text-muted-foreground text-center tracking-wide">
+            © 2025 FixUx · AI-powered design tools
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
