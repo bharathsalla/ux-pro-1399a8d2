@@ -49,6 +49,14 @@ export default function AuthPage() {
               <span className="text-primary-foreground font-extrabold text-lg tracking-tight">FixUx</span>
             </div>
 
+            {/* Illustration above text */}
+            <img
+              src={loginIllustration}
+              alt="FixUx character"
+              className="w-40 xl:w-48 h-auto object-contain mb-10"
+              style={{ filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.1))" }}
+            />
+
             {/* Headline */}
             <h1 className="text-3xl xl:text-4xl font-extrabold text-primary-foreground leading-[1.15] tracking-tight mb-6">
               Build better
@@ -70,17 +78,10 @@ export default function AuthPage() {
             </div>
           </div>
 
-          {/* Bottom: Illustration */}
-          <div className="mt-10">
-            <img
-              src={loginIllustration}
-              alt="Team collaboration"
-              className="w-full max-w-xs xl:max-w-sm h-auto object-contain"
-            />
-            <p className="text-[10px] text-primary-foreground/40 uppercase tracking-[0.2em] font-medium mt-4">
-              Free to use · No credit card
-            </p>
-          </div>
+          {/* Bottom */}
+          <p className="text-[10px] text-primary-foreground/40 uppercase tracking-[0.2em] font-medium mt-10">
+            Free to use · No credit card
+          </p>
         </div>
       </div>
 
