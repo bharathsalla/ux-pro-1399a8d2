@@ -35,6 +35,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { FixUxLogo } from "@/components/FixUxLogo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 /* ── Types ── */
 interface GeneratedResult {
@@ -73,9 +74,9 @@ interface Session {
 /* ── Constants ── */
 const roles = [
   { id: "ux-designer", label: "UX Designer", icon: "🎨", color: "hsl(340 82% 52%)" },
-  { id: "product-manager", label: "PM", icon: "📋", color: "hsl(262 83% 58%)" },
+  { id: "product-manager", label: "Product Manager", icon: "📋", color: "hsl(262 83% 58%)" },
   { id: "developer", label: "Developer", icon: "💻", color: "hsl(200 90% 48%)" },
-  { id: "qa-engineer", label: "QA", icon: "🧪", color: "hsl(160 60% 38%)" },
+  { id: "qa-engineer", label: "QA Engineer", icon: "🧪", color: "hsl(160 60% 38%)" },
   { id: "stakeholder", label: "Stakeholder", icon: "👔", color: "hsl(30 90% 50%)" },
 ];
 
@@ -280,7 +281,7 @@ export default function TranscriptToUIPage() {
 
   /* ── Render ── */
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* ═══ Header ═══ */}
       <header className="sticky top-0 z-30 border-b border-border bg-card/80" style={{ backdropFilter: "blur(12px)" }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -298,6 +299,7 @@ export default function TranscriptToUIPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {sessions.length > 0 && (
               <button
                 onClick={() => setShowHistory(!showHistory)}
@@ -314,7 +316,7 @@ export default function TranscriptToUIPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="flex-1 flex flex-col max-w-6xl mx-auto px-6 py-6 w-full">
         {/* ═══ Input Section ═══ */}
         {!result && !isGenerating && (
           <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -328,7 +330,7 @@ export default function TranscriptToUIPage() {
                   <button
                     key={r.id}
                     onClick={() => setRole(r.id)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold transition-all border"
                     style={{
                       background: role === r.id ? r.color : "hsl(var(--card))",
                       color: role === r.id ? "white" : "hsl(var(--muted-foreground))",
@@ -507,7 +509,7 @@ export default function TranscriptToUIPage() {
         {/* ═══ Results ═══ */}
         <AnimatePresence>
           {result && !isGenerating && (
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex-1 flex flex-col min-h-0">
               {/* New generation button */}
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
@@ -527,7 +529,7 @@ export default function TranscriptToUIPage() {
               </div>
 
               {/* ── Tab Navigation ── */}
-              <div className="flex items-center gap-1 border-b border-border mb-0">
+              <div className="flex items-center gap-0 border-b border-border bg-muted/50 mb-0">
                 {resultTabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = resultTab === tab.id;
@@ -535,26 +537,22 @@ export default function TranscriptToUIPage() {
                     <button
                       key={tab.id}
                       onClick={() => setResultTab(tab.id)}
-                      className="flex items-center gap-1.5 px-5 py-3 text-[11px] font-bold transition-all relative"
+                      className="flex items-center gap-2 px-6 py-3.5 text-xs font-bold transition-all relative"
                       style={{
                         color: isActive ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                        background: isActive ? "hsl(var(--card))" : "transparent",
+                        borderBottom: isActive ? "2px solid hsl(var(--primary))" : "2px solid transparent",
                       }}
                     >
-                      <Icon className="w-3.5 h-3.5" />
+                      <Icon className="w-4 h-4" />
                       {tab.label}
-                      {isActive && (
-                        <motion.div
-                          layoutId="resultTabIndicator"
-                          className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary"
-                        />
-                      )}
                     </button>
                   );
                 })}
               </div>
 
               {/* ── Tab Content ── */}
-              <div className="border border-border border-t-0 bg-card" style={{ minHeight: "500px" }}>
+              <div className="border border-border border-t-0 bg-card flex-1 flex flex-col min-h-0" style={{ minHeight: "calc(100vh - 280px)" }}>
                 {/* Preview Tab */}
                 {resultTab === "preview" && (
                   <div className="relative">
@@ -570,8 +568,8 @@ export default function TranscriptToUIPage() {
                     <iframe
                       title="Live Preview"
                       srcDoc={previewSrcDoc}
-                      className="w-full border-0"
-                      style={{ height: "500px" }}
+                      className="w-full border-0 flex-1"
+                      style={{ height: "calc(100vh - 300px)", minHeight: "500px" }}
                       sandbox="allow-scripts"
                     />
                   </div>
@@ -617,7 +615,7 @@ export default function TranscriptToUIPage() {
                         </button>
                       </div>
                     </div>
-                    <div className="p-5 overflow-auto" style={{ height: "460px" }}>
+                    <div className="p-5 overflow-auto flex-1" style={{ height: "calc(100vh - 360px)", minHeight: "400px" }}>
                       <div className="flex font-mono text-[12px] leading-[1.8]">
                         <div className="pr-4 select-none text-right shrink-0" style={{ color: "hsl(220 10% 30%)", minWidth: "2.5rem" }}>
                           {activeCode.split("\n").map((_, i) => (
@@ -634,7 +632,7 @@ export default function TranscriptToUIPage() {
 
                 {/* Analysis Tab */}
                 {resultTab === "analysis" && (
-                  <div className="p-6 overflow-auto" style={{ maxHeight: "500px" }}>
+                  <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 300px)", minHeight: "400px" }}>
                     {/* Summary */}
                     {result.summary && (
                       <div className="mb-5 p-5 border border-primary/20" style={{ background: "hsl(var(--primary) / 0.04)" }}>
@@ -741,7 +739,7 @@ export default function TranscriptToUIPage() {
 
                 {/* Insights Tab */}
                 {resultTab === "insights" && (
-                  <div className="p-6 overflow-auto" style={{ maxHeight: "500px" }}>
+                  <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 300px)", minHeight: "400px" }}>
                     {result.suggestions?.length > 0 ? (
                       <div className="space-y-2">
                         {result.suggestions.map((s, i) => {
