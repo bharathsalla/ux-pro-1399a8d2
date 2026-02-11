@@ -13,7 +13,7 @@ import AuditConfigScreen from "@/components/AuditConfigScreen";
 import AuditRunning from "@/components/AuditRunning";
 import ImageAuditResults from "@/components/ImageAuditResults";
 import MultiScreenResults from "@/components/MultiScreenResults";
-import HeaderProfile from "@/components/auth/HeaderProfile";
+
 
 import { useAuditDesign } from "@/hooks/useAuditDesign";
 import { useAuthContext } from "@/contexts/AuthContext";
