@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function SocialAuthButtons() {
@@ -9,18 +10,50 @@ export default function SocialAuthButtons() {
 
   const handleGoogleSignIn = async () => {
     setLoading("google");
+
     try {
+      const host = window.location.hostname;
+      const isLovableHosted = host.endsWith("lovable.app") || host.endsWith("lovableproject.com");
+
+      // Custom domains: bypass /~oauth bridge and do a manual redirect
+      if (!isLovableHosted) {
+        const redirectTo = window.location.origin;
+
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo,
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (error) throw error;
+        if (!data?.url) throw new Error("No OAuth URL returned");
+
+        // Basic safety: ensure we only redirect to the auth server we expect
+        const url = new URL(data.url);
+        const supabaseHost = new URL(import.meta.env.VITE_SUPABASE_URL as string).hostname;
+        const allowedHosts = new Set([supabaseHost]);
+        if (!allowedHosts.has(url.hostname)) {
+          throw new Error("Invalid OAuth redirect URL");
+        }
+
+        window.location.assign(data.url);
+        return;
+      }
+
+      // Lovable hosted: use default managed flow
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      // If we get redirected, the page will navigate away — don't reset loading
+
       if (result?.error) {
         toast.error(result.error.message || "Google sign-in failed");
         setLoading(null);
       }
-      // If result.redirected is true, page is navigating — keep loading state
     } catch (e) {
-      toast.error("Google sign-in failed. Please try again.");
+      const message = e instanceof Error ? e.message : "Google sign-in failed. Please try again.";
+      toast.error(message);
       setLoading(null);
     }
   };
