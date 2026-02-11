@@ -40,7 +40,7 @@ export default function ManualRegisterForm({ onSuccess }: ManualRegisterFormProp
     if (error) {
       toast.error(error);
     } else {
-      toast.success("Registration successful! Please check your email to verify your account.");
+      toast.success("Account created successfully! You are now signed in.");
       onSuccess();
     }
   };
