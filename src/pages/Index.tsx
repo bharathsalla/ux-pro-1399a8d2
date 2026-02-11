@@ -31,7 +31,7 @@ interface UploadedImage {
 
 const Index = () => {
   const { user } = useAuthContext();
-  const { showLimitPopup, checkAndIncrement, dismissPopup, remainingToday } = useAuditLimit(user?.id ?? null);
+  const { showLimitPopup, checkAndIncrement, dismissPopup, remainingToday } = useAuditLimit(user?.id ?? null, "audit");
   
   // Restore step & persona from sessionStorage so Back navigation works
   const [step, setStep] = useState<AuditStep>(() => {
