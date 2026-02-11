@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { lovable } from "@/integrations/lovable/index";
+import { lovable } from "@/integrations/lovableAuth";
 import { toast } from "sonner";
 
 export default function SocialAuthButtons() {
