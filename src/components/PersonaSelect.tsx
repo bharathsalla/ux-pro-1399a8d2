@@ -11,6 +11,7 @@ import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
 import SiteNav from "@/components/SiteNav";
 import heroCharacter from "@/assets/hero-character.png";
+import heroCharacters from "@/assets/hero-characters.png";
 import personaSoloImg from "@/assets/persona-solo.png";
 import personaLeadImg from "@/assets/persona-lead.png";
 import personaA11yImg from "@/assets/persona-a11y.png";
@@ -86,13 +87,10 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <motion.img
-              src={heroCharacter}
-              alt="FixUx"
-              className="w-36 md:w-44 h-auto mx-auto object-contain mb-10"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              style={{ filter: "drop-shadow(0 8px 24px hsl(var(--foreground) / 0.08))" }}
+            <img
+              src={heroCharacters}
+              alt="Team working together"
+              className="w-full max-w-2xl mx-auto h-auto object-contain mb-10 rounded-sm"
             />
 
             <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-foreground leading-[1.08] mb-5">
