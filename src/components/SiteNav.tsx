@@ -27,9 +27,9 @@ export default function SiteNav({
   return (
     <>
       {/* Row 1: Dark announcement banner */}
-      <div className="bg-foreground border-b border-muted-foreground/20">
+      <div className="bg-primary border-b border-primary/80">
         <div className="max-w-[1400px] mx-auto px-6 py-2 flex items-center justify-center">
-          <p className="text-[11px] text-background/80 tracking-wide font-medium">
+          <p className="text-[11px] text-primary-foreground/90 tracking-wide font-medium">
             {announcementText}
           </p>
         </div>
