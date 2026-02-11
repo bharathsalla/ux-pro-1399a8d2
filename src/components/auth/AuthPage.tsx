@@ -6,14 +6,14 @@ import LoginForm from "./LoginForm";
 import SocialAuthButtons from "./SocialAuthButtons";
 import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
 import { FixUxLogo } from "@/components/FixUxLogo";
-import { ShieldCheck, User, CheckCircle2, ArrowRight } from "lucide-react";
+import { ShieldCheck, User, CheckCircle2, ArrowRight, Sparkles, Zap, Shield } from "lucide-react";
 import loginIllustration from "@/assets/login-illustration.png";
 
 const features = [
-  "AI-powered UX audits in seconds",
-  "60+ design principles analyzed",
-  "Transcript-to-UI generation",
-  "Actionable fix suggestions",
+  { icon: Zap, text: "AI-powered UX audits in seconds" },
+  { icon: Shield, text: "60+ design principles analyzed" },
+  { icon: Sparkles, text: "Transcript-to-UI generation" },
+  { icon: CheckCircle2, text: "Actionable fix suggestions" },
 ];
 
 export default function AuthPage() {
@@ -34,12 +34,27 @@ export default function AuthPage() {
       />
 
       {/* ═══ Left Branding Panel ═══ */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-background relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] relative overflow-hidden"
+        style={{
+          background: `radial-gradient(ellipse 120% 80% at 20% 10%, hsl(var(--primary) / 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse 80% 60% at 80% 90%, hsl(var(--primary) / 0.08) 0%, transparent 50%),
+            hsl(var(--background))`,
+        }}
+      >
+        {/* Star/cross pattern with primary (green) color */}
         <div
-          className="absolute inset-0 opacity-[0.06]"
+          className="absolute inset-0 opacity-[0.08]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2330a06e' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}
+        />
+
+        {/* Floating green glow orbs */}
+        <div className="absolute top-20 left-10 w-32 h-32 rounded-full opacity-20"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.4), transparent 70%)" }}
+        />
+        <div className="absolute bottom-32 right-16 w-48 h-48 rounded-full opacity-15"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.3), transparent 70%)" }}
         />
 
         <div className="relative z-10 flex flex-col justify-between w-full p-12 xl:p-16">
@@ -67,12 +82,20 @@ export default function AuthPage() {
             </p>
 
             {/* Feature list */}
-            <div className="space-y-3">
-              {features.map((f) => (
-                <div key={f} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-foreground/80 font-medium">{f}</span>
-                </div>
+            <div className="space-y-3.5">
+              {features.map((f, i) => (
+                <motion.div
+                  key={f.text}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.1 }}
+                  className="flex items-center gap-3"
+                >
+                  <div className="w-7 h-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <f.icon className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <span className="text-sm text-foreground/80 font-medium">{f.text}</span>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -128,10 +151,18 @@ export default function AuthPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="w-full max-w-[400px]"
+              className="w-full max-w-[420px]"
             >
               {/* Header */}
-              <div className="mb-8">
+              <div className="mb-8 text-center">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center"
+                >
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </motion.div>
                 <h2 className="text-2xl font-extrabold text-foreground tracking-tight mb-1.5">
                   {activeTab === "login" ? "Welcome back" : "Create account"}
                 </h2>
@@ -142,51 +173,81 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              {/* Social first */}
-              <SocialAuthButtons />
-
-              {/* Email + password section */}
+              {/* Auth card with premium glassmorphism */}
               <motion.div
-                whileHover={{ rotateX: -1.25, rotateY: 1.25 }}
-                transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                whileHover={{ rotateX: -1, rotateY: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 style={{ transformStyle: "preserve-3d" }}
-                className="glass rounded-xl p-5 sm:p-6"
+                className="relative rounded-2xl border border-border/50 p-6 sm:p-7 overflow-hidden"
               >
-                {/* Divider */}
-                <div className="relative mb-5">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-border" />
+                {/* Card background layers */}
+                <div className="absolute inset-0 bg-card/80 backdrop-blur-xl" />
+                <div
+                  className="absolute inset-0 opacity-60"
+                  style={{
+                    background: `radial-gradient(ellipse 100% 80% at 0% 0%, hsl(var(--primary) / 0.06) 0%, transparent 50%),
+                      radial-gradient(ellipse 80% 60% at 100% 100%, hsl(var(--primary) / 0.04) 0%, transparent 50%)`,
+                  }}
+                />
+                {/* Shimmer border top */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-px"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent)`,
+                  }}
+                />
+
+                <div className="relative z-10 space-y-5">
+                  {/* Social first */}
+                  <SocialAuthButtons />
+
+                  {/* Divider */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border/60" />
+                    </div>
+                    <div className="relative flex justify-center text-[10px] uppercase tracking-[0.15em]">
+                      <span className="bg-card/80 px-3 text-muted-foreground font-medium backdrop-blur-sm">
+                        or continue with email
+                      </span>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-[10px] uppercase tracking-[0.15em]">
-                    <span className="bg-background/70 px-3 text-muted-foreground font-medium backdrop-blur">
-                      or continue with email
-                    </span>
-                  </div>
+
+                  {/* Tabs */}
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-5 h-9">
+                      <TabsTrigger value="login" className="text-xs font-semibold uppercase tracking-wide">
+                        Sign In
+                      </TabsTrigger>
+                      <TabsTrigger value="register" className="text-xs font-semibold uppercase tracking-wide">
+                        Register
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="login">
+                      <LoginForm />
+                    </TabsContent>
+
+                    <TabsContent value="register">
+                      <ManualRegisterForm onSuccess={() => setActiveTab("login")} />
+                    </TabsContent>
+                  </Tabs>
                 </div>
-
-                {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-5 h-9">
-                    <TabsTrigger value="login" className="text-xs font-semibold uppercase tracking-wide">
-                      Sign In
-                    </TabsTrigger>
-                    <TabsTrigger value="register" className="text-xs font-semibold uppercase tracking-wide">
-                      Register
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="login">
-                    <LoginForm />
-                  </TabsContent>
-
-                  <TabsContent value="register">
-                    <ManualRegisterForm onSuccess={() => setActiveTab("login")} />
-                  </TabsContent>
-                </Tabs>
               </motion.div>
 
+              {/* Trust badges */}
+              <div className="mt-6 flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Shield className="w-3 h-3" /> SSL Encrypted
+                </span>
+                <span>·</span>
+                <span className="flex items-center gap-1">
+                  <Zap className="w-3 h-3" /> Free Forever
+                </span>
+              </div>
+
               {/* Footer text */}
-              <p className="mt-8 text-center text-[11px] text-muted-foreground leading-relaxed">
+              <p className="mt-4 text-center text-[11px] text-muted-foreground leading-relaxed">
                 By continuing, you agree to our Terms of Service
                 <br />
                 and Privacy Policy.
