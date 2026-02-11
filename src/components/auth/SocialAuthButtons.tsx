@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { lovable } from "@/integrations/lovable/index";
-import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovableAuth";
 import { toast } from "sonner";
 
 export default function SocialAuthButtons() {
@@ -12,37 +11,7 @@ export default function SocialAuthButtons() {
     setLoading("google");
 
     try {
-      const host = window.location.hostname;
-      const isLovableHosted = host.endsWith("lovable.app") || host.endsWith("lovableproject.com");
-
-      // Custom domains: bypass /~oauth bridge and do a manual redirect
-      if (!isLovableHosted) {
-        const redirectTo = window.location.origin;
-
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo,
-            skipBrowserRedirect: true,
-          },
-        });
-
-        if (error) throw error;
-        if (!data?.url) throw new Error("No OAuth URL returned");
-
-        // Basic safety: ensure we only redirect to the auth server we expect
-        const url = new URL(data.url);
-        const supabaseHost = new URL(import.meta.env.VITE_SUPABASE_URL as string).hostname;
-        const allowedHosts = new Set([supabaseHost]);
-        if (!allowedHosts.has(url.hostname)) {
-          throw new Error("Invalid OAuth redirect URL");
-        }
-
-        window.location.assign(data.url);
-        return;
-      }
-
-      // Lovable hosted: use default managed flow
+      // Use Lovable Cloud OAuth broker flow (works on lovable.app + custom domains).
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });

@@ -10,7 +10,7 @@ function getOAuthBrokerUrl() {
   // Lovable-hosted preview/published domains have the broker mounted at /~oauth.
   // Custom domains use the hosted broker endpoint which requires `project_id`.
   const host = window.location.hostname;
-  const isLovableHosted = host.endsWith("lovable.app");
+  const isLovableHosted = host.endsWith("lovable.app") || host.endsWith("lovableproject.com");
   return isLovableHosted ? "/~oauth/initiate" : "https://oauth.lovable.app/initiate";
 }
 
