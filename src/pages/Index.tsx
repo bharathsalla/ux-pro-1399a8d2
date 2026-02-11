@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   type PersonaId,
@@ -30,10 +31,12 @@ interface UploadedImage {
 }
 
 const Index = () => {
+  const location = useLocation();
   const { user } = useAuthContext();
   const { showLimitPopup, checkAndIncrement, dismissPopup, remainingToday } = useAuditLimit(user?.id ?? null, "audit");
   
-  // Restore step & persona from sessionStorage so Back navigation works
+  // Restore step & persona from sessionStorage (for sub-page back navigation)
+  // But reset to persona if logo was clicked (sessionStorage cleared)
   const [step, setStep] = useState<AuditStep>(() => {
     const saved = sessionStorage.getItem('fixux_step');
     return (saved === 'config' ? 'config' : 'persona') as AuditStep;
@@ -53,6 +56,20 @@ const Index = () => {
 
   const { runAudit, runMultiScreenAudit } = useAuditDesign();
 
+  // Reset to landing when logo is clicked (navigates with resetToLanding state)
+  useEffect(() => {
+    if ((location.state as any)?.resetToLanding) {
+      setStep('persona');
+      setSelectedPersona(null);
+      setImagePreviewUrl(null);
+      setImageBase64(null);
+      setAuditResult(null);
+      setIsMultiScreen(false);
+      setFigmaFrames([]);
+      setScreenResults([]);
+      setCompletedScreens(0);
+    }
+  }, [(location.state as any)?.resetToLanding]);
 
   // Persist step & persona to sessionStorage
   useEffect(() => {

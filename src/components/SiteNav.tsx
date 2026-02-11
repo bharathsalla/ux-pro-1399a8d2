@@ -40,7 +40,15 @@ export default function SiteNav({
         <div className="max-w-[1400px] mx-auto px-6 py-3 flex items-center">
           {/* Logo */}
           <button
-            onClick={onLogoClick || (() => navigate("/"))}
+            onClick={() => {
+              sessionStorage.removeItem('fixux_step');
+              sessionStorage.removeItem('fixux_persona');
+              if (onLogoClick) {
+                onLogoClick();
+              } else {
+                navigate("/", { state: { resetToLanding: Date.now() } });
+              }
+            }}
             className="flex items-center mr-8 shrink-0"
           >
             <FixUxLogo size="sm" />
