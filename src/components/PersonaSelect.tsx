@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
 import { ThemeToggle } from "./ThemeToggle";
 import {
@@ -44,6 +44,15 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
   const [showAdminPasscode, setShowAdminPasscode] = useState(false);
   const [activeFeature, setActiveFeature] = useState<"audit" | null>(null);
   const personaRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  // Parallax scroll
+  const { scrollY } = useScroll();
+  const heroImageY = useTransform(scrollY, [0, 400], [0, -40]);
+  const heroTextY = useTransform(scrollY, [0, 400], [0, -20]);
+  const cardsY = useTransform(scrollY, [0, 600], [0, -30]);
+  const heroImageScale = useTransform(scrollY, [0, 300], [1, 0.95]);
+  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0.85]);
 
   // Auto-scroll to persona cards when audit is selected
   useEffect(() => {
@@ -80,20 +89,25 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
       />
 
       {/* ═══ Hero ═══ */}
-      <section className="max-w-5xl mx-auto px-8 pt-20 pb-16 md:pt-28 md:pb-20">
+      <section ref={heroRef} className="max-w-5xl mx-auto px-8 pt-10 pb-6 md:pt-14 md:pb-8">
         <div className="flex flex-col items-center text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            style={{ y: heroImageY, scale: heroImageScale, opacity: heroOpacity }}
           >
             <img
               src={heroCharacters}
               alt="Team working together"
-              className="w-full max-w-sm mx-auto h-auto object-contain mb-8"
+              className="w-full max-w-sm mx-auto h-auto object-contain mb-5"
             />
+          </motion.div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-foreground leading-[1.08] mb-5">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            style={{ y: heroTextY }}
+          >
+            <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-foreground leading-[1.08] mb-3">
               We help you build
               <br />
               <span className="text-gradient-primary">better interfaces.</span>
@@ -107,7 +121,7 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
       </section>
 
       {/* ═══ Feature Cards ═══ */}
-      <section className="max-w-5xl mx-auto px-8 pb-12">
+      <motion.section style={{ y: cardsY }} className="max-w-5xl mx-auto px-8 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-border bg-card">
           {/* UX Audit */}
           <motion.button
@@ -186,7 +200,7 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
             </div>
           </motion.button>
         </div>
-      </section>
+      </motion.section>
 
       {/* ═══ Persona Drawer ═══ */}
       <AnimatePresence>
