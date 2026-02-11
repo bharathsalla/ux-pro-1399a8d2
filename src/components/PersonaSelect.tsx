@@ -1,11 +1,11 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { type PersonaId, personas } from "@/types/audit";
 import { ThemeToggle } from "./ThemeToggle";
 import {
   X, ShieldCheck, MessageCircleHeart, ArrowRight, Upload, FileText, Eye,
-  CheckCircle2, Zap,
+  CheckCircle2, Zap, Sparkles, Rocket,
 } from "lucide-react";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
@@ -37,6 +37,39 @@ const personaAccentBorder: Record<string, string> = {
   founder: "hover:border-persona-founder",
   consultant: "hover:border-persona-consultant",
 };
+
+/* Tilt-on-hover card wrapper */
+function TiltCard({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [6, -6]), { stiffness: 300, damping: 30 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-6, 6]), { stiffness: 300, damping: 30 });
+
+  const handleMouse = useCallback((e: React.MouseEvent) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
+  }, [x, y]);
+
+  const handleLeave = useCallback(() => {
+    x.set(0);
+    y.set(0);
+  }, [x, y]);
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouse}
+      onMouseLeave={handleLeave}
+      style={{ rotateX, rotateY, transformPerspective: 800 }}
+      className="will-change-transform"
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
   const navigate = useNavigate();
@@ -122,83 +155,96 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
 
       {/* ═══ Feature Cards ═══ */}
       <motion.section style={{ y: cardsY }} className="max-w-5xl mx-auto px-8 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-border bg-card">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* UX Audit */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            onClick={() => setActiveFeature(activeFeature === "audit" ? null : "audit")}
-            className="group relative w-full text-left transition-all duration-300 md:border-r border-b md:border-b-0 border-border hover:bg-primary/[0.02]"
-            style={{
-              background: activeFeature === "audit" ? "hsl(var(--primary) / 0.04)" : undefined,
-            }}
-          >
-            <div className="p-8 lg:p-10">
-              <span className="text-[8px] font-bold px-2 py-1 bg-primary text-primary-foreground uppercase tracking-[0.15em] inline-block mb-5">Popular</span>
+          <TiltCard>
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              onClick={() => setActiveFeature(activeFeature === "audit" ? null : "audit")}
+              className="group relative w-full h-full text-left glass glass-hover rounded-2xl overflow-hidden"
+              style={{
+                background: activeFeature === "audit" ? "hsl(var(--primary) / 0.08)" : undefined,
+              }}
+            >
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-transparent rounded-2xl pointer-events-none" />
+              <div className="relative p-7 lg:p-9">
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="text-[8px] font-bold px-2 py-1 bg-primary text-primary-foreground uppercase tracking-[0.15em] rounded-full">🔥 Popular</span>
+                  <span className="text-[9px] font-medium text-muted-foreground">Used by 10K+ designers</span>
+                </div>
 
-              <div className="w-11 h-11 flex items-center justify-center bg-primary/8 border border-primary/15 mb-4">
-                <Upload className="w-5 h-5 text-primary" />
+                <div className="w-11 h-11 flex items-center justify-center bg-primary/10 border border-primary/20 rounded-xl mb-4">
+                  <Upload className="w-5 h-5 text-primary" />
+                </div>
+
+                <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight mb-2">
+                  UX Design Audit
+                </h2>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  Upload a screenshot → get AI feedback with issue pinpointing, severity scoring & fix suggestions.
+                </p>
+
+                <div className="space-y-1.5 mb-5">
+                  {["60+ UX principles", "Issue pinpointing on image", "Severity-based fixes", "5 expert personas"].map((f) => (
+                    <div key={f} className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3 h-3 text-primary shrink-0" />
+                      <span className="text-[11px] font-medium text-foreground">{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-[11px] font-bold rounded-full group-hover:gap-3 transition-all">
+                  <Zap className="w-3.5 h-3.5" /> Start Free Audit <ArrowRight className="w-3.5 h-3.5" />
+                </span>
               </div>
-
-              <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight mb-2">
-                UX Design Audit
-              </h2>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-                Upload a screenshot → get AI feedback with issue pinpointing, severity scoring & fix suggestions.
-              </p>
-
-              <div className="space-y-1.5 mb-5">
-                {["60+ UX principles", "Issue pinpointing on image", "Severity-based fixes", "5 expert personas"].map((f) => (
-                  <div key={f} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3 h-3 text-primary shrink-0" />
-                    <span className="text-[11px] font-medium text-foreground">{f}</span>
-                  </div>
-                ))}
-              </div>
-
-              <span className="inline-flex items-center gap-2 text-xs font-bold text-primary group-hover:gap-3 transition-all">
-                <Zap className="w-3.5 h-3.5" /> Start Audit <ArrowRight className="w-3.5 h-3.5" />
-              </span>
-            </div>
-          </motion.button>
+            </motion.button>
+          </TiltCard>
 
           {/* Transcript → UI */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            onClick={() => navigate("/transcript")}
-            className="group relative w-full text-left transition-all duration-300 hover:bg-[hsl(262_83%_58%_/_0.02)]"
-          >
-            <div className="p-8 lg:p-10">
-              <span className="text-[8px] font-bold px-2 py-1 uppercase tracking-[0.15em] inline-block mb-5" style={{ background: "hsl(262 83% 58%)", color: "white" }}>New</span>
+          <TiltCard>
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              onClick={() => navigate("/transcript")}
+              className="group relative w-full h-full text-left glass glass-hover rounded-2xl overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-[hsl(262_83%_58%_/_0.06)] via-transparent to-transparent rounded-2xl pointer-events-none" />
+              <div className="relative p-7 lg:p-9">
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="text-[8px] font-bold px-2 py-1 uppercase tracking-[0.15em] rounded-full" style={{ background: "hsl(262 83% 58%)", color: "white" }}>✨ New</span>
+                  <span className="text-[9px] font-medium text-muted-foreground">AI-powered generation</span>
+                </div>
 
-              <div className="w-11 h-11 flex items-center justify-center border mb-4" style={{ background: "hsl(262 83% 58% / 0.06)", borderColor: "hsl(262 83% 58% / 0.15)" }}>
-                <FileText className="w-5 h-5" style={{ color: "hsl(262 83% 58%)" }} />
+                <div className="w-11 h-11 flex items-center justify-center border rounded-xl mb-4" style={{ background: "hsl(262 83% 58% / 0.08)", borderColor: "hsl(262 83% 58% / 0.2)" }}>
+                  <FileText className="w-5 h-5" style={{ color: "hsl(262 83% 58%)" }} />
+                </div>
+
+                <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight mb-2">
+                  Transcript → UI
+                </h2>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  Paste a meeting transcript → AI generates production-ready UI with HTML, CSS, JS & insights.
+                </p>
+
+                <div className="space-y-1.5 mb-5">
+                  {["Live interactive preview", "Full code export", "AI design insights", "5 specialist roles"].map((f) => (
+                    <div key={f} className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: "hsl(262 83% 58%)" }} />
+                      <span className="text-[11px] font-medium text-foreground">{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <span className="inline-flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-full group-hover:gap-3 transition-all" style={{ background: "hsl(262 83% 58%)", color: "white" }}>
+                  <Rocket className="w-3.5 h-3.5" /> Try It Free <ArrowRight className="w-3.5 h-3.5" />
+                </span>
               </div>
-
-              <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight mb-2">
-                Transcript → UI
-              </h2>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-                Paste a meeting transcript → AI generates production-ready UI with HTML, CSS, JS & insights.
-              </p>
-
-              <div className="space-y-1.5 mb-5">
-                {["Live interactive preview", "Full code export", "AI design insights", "5 specialist roles"].map((f) => (
-                  <div key={f} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: "hsl(262 83% 58%)" }} />
-                    <span className="text-[11px] font-medium text-foreground">{f}</span>
-                  </div>
-                ))}
-              </div>
-
-              <span className="inline-flex items-center gap-2 text-xs font-bold group-hover:gap-3 transition-all" style={{ color: "hsl(262 83% 58%)" }}>
-                <Zap className="w-3.5 h-3.5" /> Generate UI <ArrowRight className="w-3.5 h-3.5" />
-              </span>
-            </div>
-          </motion.button>
+            </motion.button>
+          </TiltCard>
         </div>
       </motion.section>
 
