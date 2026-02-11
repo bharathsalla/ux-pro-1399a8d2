@@ -7,7 +7,7 @@ import SocialAuthButtons from "./SocialAuthButtons";
 import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
 import { FixUxLogo } from "@/components/FixUxLogo";
 import { ShieldCheck, User, CheckCircle2, ArrowRight } from "lucide-react";
-import heroCharacter from "@/assets/hero-character.png";
+import loginIllustration from "@/assets/login-illustration.png";
 
 const features = [
   "AI-powered UX audits in seconds",
@@ -70,21 +70,16 @@ export default function AuthPage() {
             </div>
           </div>
 
-          {/* Bottom: Character illustration */}
-          <div className="mt-12 flex items-end">
-            <motion.img
-              src={heroCharacter}
-              alt="FixUx mascot"
-              className="w-32 xl:w-40 h-auto object-contain opacity-80"
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              style={{ filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.15))" }}
+          {/* Bottom: Illustration */}
+          <div className="mt-10">
+            <img
+              src={loginIllustration}
+              alt="Team collaboration"
+              className="w-full max-w-xs xl:max-w-sm h-auto object-contain"
             />
-            <div className="ml-4 mb-4">
-              <p className="text-[10px] text-primary-foreground/40 uppercase tracking-[0.2em] font-medium">
-                Free to use · No credit card
-              </p>
-            </div>
+            <p className="text-[10px] text-primary-foreground/40 uppercase tracking-[0.2em] font-medium mt-4">
+              Free to use · No credit card
+            </p>
           </div>
         </div>
       </div>
