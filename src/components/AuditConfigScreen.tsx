@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { type PersonaId, type AuditConfig, personas } from "@/types/audit";
 import ImageUpload from "./ImageUpload";
-import { FixUxLogo } from "./FixUxLogo";
+import SiteNav from "@/components/SiteNav";
 
 interface UploadedImage {
   base64: string;
@@ -54,17 +53,12 @@ const purposeOptions: Record<PersonaId, { value: AuditConfig["purpose"]; label: 
 
 type ExtInputMode = "single" | "multi";
 
-const navItems: { path: string; label: string }[] = [
-  { path: "/flowcheck", label: "FlowCheck" },
-  { path: "/testimonials", label: "Testimonials" },
-  { path: "/about", label: "About Fix UX" },
-  { path: "/contact", label: "Contact Us" },
-  { path: "/why-it-is-free", label: "Why It Is Free" },
-];
+
+
 
 const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: AuditConfigScreenProps) => {
   const persona = personas.find((p) => p.id === personaId)!;
-  const navigate = useNavigate();
+  
   const [inputMode, setInputMode] = useState<ExtInputMode>("single");
   const [fidelity, setFidelity] = useState<AuditConfig["fidelity"]>("high-fidelity");
   const [purpose, setPurpose] = useState<AuditConfig["purpose"]>(purposeOptions[personaId][0].value);
@@ -110,45 +104,10 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
-      className="min-h-screen"
+      className="min-h-screen bg-background"
     >
-      {/* ═══ Row 1: Top announcement banner ═══ */}
-      <div className="bg-foreground border-b border-muted-foreground/20">
-        <div className="max-w-[1400px] mx-auto px-6 py-2.5 flex items-center justify-center">
-          <p className="text-[12px] text-background tracking-wide">
-            Free AI-powered UX & functional audits · No credit card · No usage limits
-          </p>
-        </div>
-      </div>
-
-      {/* ═══ Row 2: Main navigation bar ═══ */}
-      <header className="sticky top-0 z-20 bg-background border-b border-border">
-        <div className="max-w-[1400px] mx-auto px-6 py-3.5 flex items-center">
-          {/* Left: Brand */}
-          <button
-            onClick={onBack}
-            className="flex items-center mr-8 shrink-0"
-          >
-            <FixUxLogo size="sm" />
-          </button>
-
-          {/* Center: Navigation links */}
-          <nav className="flex items-center gap-1">
-            {navItems.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className="px-3.5 py-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
-              >
-                {item.label}
-                <span className="absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-foreground scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              </button>
-            ))}
-          </nav>
-
-          <div className="ml-auto" />
-        </div>
-      </header>
+      {/* ═══ Dual Navigation ═══ */}
+      <SiteNav onLogoClick={onBack} />
 
       {/* ═══ Main Content ═══ */}
       <div
