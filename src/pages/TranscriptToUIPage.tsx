@@ -134,7 +134,7 @@ function getHighlightedCode(code: string, tab: "html" | "css" | "js"): string {
 export default function TranscriptToUIPage() {
   const navigate = useNavigate();
   const { user } = useAuthContext();
-  const { checkAndIncrement, showLimitPopup, dismissPopup } = useAuditLimit(user?.id ?? null);
+  const { checkAndIncrement, showLimitPopup, dismissPopup } = useAuditLimit(user?.id ?? null, "transcript");
 
   const [transcript, setTranscript] = useState("");
   const [role, setRole] = useState("ux-designer");
@@ -685,13 +685,35 @@ export default function TranscriptToUIPage() {
               {/* Suggestion cards */}
               {result.suggestions?.length > 0 && (
                 <div className="grid grid-cols-3 lg:grid-cols-5 gap-3">
-                  {result.suggestions.map((s, i) => {
+              {result.suggestions.map((s, i) => {
                     const styles = categoryStyles[s.category] || categoryStyles.Insight;
                     const Icon = styles.icon;
                     return (
-                      <div key={i} className={`p-4 border ${styles.border} ${styles.bg} transition-all hover:scale-[1.02]`}>
+                      <div key={i} className="p-4 border transition-all hover:scale-[1.02] hover:shadow-lg"
+                        style={{
+                          background: s.category === "Improvement"
+                            ? "linear-gradient(135deg, hsl(160 50% 96%) 0%, hsl(140 40% 93%) 100%)"
+                            : s.category === "Action Item"
+                            ? "linear-gradient(135deg, hsl(38 60% 96%) 0%, hsl(30 50% 93%) 100%)"
+                            : "linear-gradient(135deg, hsl(220 50% 96%) 0%, hsl(240 40% 93%) 100%)",
+                          borderColor: s.category === "Improvement"
+                            ? "hsl(160 40% 82%)"
+                            : s.category === "Action Item"
+                            ? "hsl(38 50% 82%)"
+                            : "hsl(220 40% 85%)",
+                        }}
+                      >
                         <div className="flex items-center gap-1.5 mb-2.5">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${styles.badge}`}>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.12em]"
+                            style={{
+                              background: s.category === "Improvement"
+                                ? "hsl(160 50% 35%)"
+                                : s.category === "Action Item"
+                                ? "hsl(38 70% 40%)"
+                                : "hsl(220 60% 45%)",
+                              color: "white",
+                            }}
+                          >
                             <Icon className="w-2.5 h-2.5" />
                             {s.category}
                           </span>

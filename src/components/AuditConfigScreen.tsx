@@ -150,17 +150,14 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
           <div className="ml-auto">
             <button
               onClick={() => navigate("/transcript")}
-              className="group relative px-5 py-2.5 text-xs font-bold tracking-wider uppercase overflow-hidden transition-all hover:scale-[1.03] active:scale-[0.98]"
+              className="px-5 py-2.5 text-xs font-bold tracking-wider uppercase transition-all hover:scale-[1.03] active:scale-[0.98]"
               style={{
-                background: "linear-gradient(135deg, hsl(262 83% 55%) 0%, hsl(280 70% 60%) 100%)",
+                background: "linear-gradient(135deg, hsl(152 69% 40%) 0%, hsl(160 65% 35%) 100%)",
                 color: "white",
-                boxShadow: "0 4px 15px -3px hsl(262 83% 55% / 0.4)",
+                boxShadow: "0 4px 15px -3px hsl(152 69% 40% / 0.4)",
               }}
             >
-              <span className="relative z-10 flex items-center gap-2">
-                <span className="text-sm">✨</span>
-                TranscriptToUI
-              </span>
+              TranscriptToUI
             </button>
           </div>
         </div>
