@@ -35,9 +35,9 @@ const verdictConfig = {
 };
 
 const severityConfig = {
-  critical: { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/20", dot: "bg-destructive", dashColor: "border-destructive/60" },
-  major: { bg: "bg-score-medium/10", text: "text-score-medium", border: "border-score-medium/20", dot: "bg-score-medium", dashColor: "border-score-medium/60" },
-  minor: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20", dot: "bg-primary", dashColor: "border-primary/60" },
+  critical: { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/20", dot: "bg-destructive", dashColor: "hsl(0 72% 51%)" },
+  major: { bg: "bg-score-medium/10", text: "text-score-medium", border: "border-score-medium/20", dot: "bg-score-medium", dashColor: "hsl(38 92% 50%)" },
+  minor: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20", dot: "bg-primary", dashColor: "hsl(217 91% 55%)" },
 };
 
 type Tab = "gaps" | "recommendations" | "enterprise";
@@ -184,21 +184,20 @@ const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: Funct
                               const isActive = activeGapIndex === i;
                               const sev = severityConfig[gap.severity] || severityConfig.minor;
                               
-                              // Position annotations distributed across the image
                               const row = Math.floor(i / 2);
                               const col = i % 2;
                               const totalRows = Math.ceil(result.gaps.length / 2);
                               const topPct = 5 + (row * 85) / Math.max(totalRows, 1);
                               const leftPct = col === 0 ? 3 : 50;
-                              const width = col === 0 ? 44 : 44;
+                              const width = 44;
 
                               return (
                                 <motion.div
                                   key={i}
                                   initial={{ opacity: 0 }}
                                   animate={{ 
-                                    opacity: isActive ? 1 : 0.5,
-                                    scale: isActive ? 1.02 : 1,
+                                    opacity: isActive ? 1 : 0.75,
+                                    scale: isActive ? 1.03 : 1,
                                   }}
                                   className={`absolute pointer-events-auto transition-all duration-300 ${
                                     isActive ? "z-20" : "z-10"
@@ -207,30 +206,53 @@ const FunctionalityReport = ({ result, onRecheck, imageUrl, imageBase64 }: Funct
                                     top: `${topPct}%`,
                                     left: `${leftPct}%`,
                                     width: `${width}%`,
-                                    minHeight: "40px",
+                                    minHeight: "44px",
                                   }}
                                 >
-                                  {/* Dashed outline box */}
-                                  <div className={`border-2 border-dashed ${sev.dashColor} ${
-                                    isActive ? "bg-primary/5" : ""
-                                  } p-2 transition-all`}>
-                                    <div className="flex items-center gap-1.5">
-                                      <span className={`w-5 h-5 flex items-center justify-center text-[10px] font-bold text-primary-foreground ${sev.dot} shrink-0`}>
+                                  {/* Bright dashed outline box */}
+                                  <div
+                                    className="p-2.5 transition-all"
+                                    style={{
+                                      border: `3px dashed ${sev.dashColor}`,
+                                      background: isActive ? `${sev.dashColor}15` : "transparent",
+                                      boxShadow: isActive ? `0 0 12px ${sev.dashColor}40` : "none",
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        className="w-6 h-6 flex items-center justify-center text-[11px] font-extrabold text-white shrink-0"
+                                        style={{ background: sev.dashColor, boxShadow: `0 2px 8px ${sev.dashColor}60` }}
+                                      >
                                         {i + 1}
                                       </span>
-                                      <span className={`text-[9px] font-medium ${sev.text} truncate bg-card/80 backdrop-blur-sm px-1 py-0.5`}>
+                                      <span
+                                        className="text-[11px] font-bold px-2 py-0.5"
+                                        style={{
+                                          color: sev.dashColor,
+                                          background: "hsl(0 0% 100% / 0.9)",
+                                          backdropFilter: "blur(4px)",
+                                          border: `1px solid ${sev.dashColor}50`,
+                                        }}
+                                      >
                                         {gap.area}
                                       </span>
                                     </div>
+                                    {/* Show issue title for clarity */}
+                                    {isActive && (
+                                      <motion.p
+                                        initial={{ opacity: 0, y: 4 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-[10px] font-semibold mt-1.5 px-1"
+                                        style={{
+                                          color: sev.dashColor,
+                                          background: "hsl(0 0% 100% / 0.85)",
+                                          padding: "2px 6px",
+                                        }}
+                                      >
+                                        {gap.issue}
+                                      </motion.p>
+                                    )}
                                   </div>
-                                  {/* Connector line hint */}
-                                  {isActive && (
-                                    <motion.div
-                                      initial={{ width: 0 }}
-                                      animate={{ width: "100%" }}
-                                      className="h-px bg-primary/40 mt-1"
-                                    />
-                                  )}
                                 </motion.div>
                               );
                             })}

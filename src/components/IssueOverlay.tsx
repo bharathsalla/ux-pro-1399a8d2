@@ -11,31 +11,30 @@ interface IssueOverlayProps {
   onPinClick?: (issueId: string) => void;
 }
 
-const severityConfig: Record<string, { bg: string; border: string; text: string; label: string; pinBg: string }> = {
+const severityConfig: Record<string, { label: string; stickyBg: string; stickyBorder: string; headerBg: string; textColor: string }> = {
   critical: {
-    bg: "bg-destructive",
-    border: "border-destructive",
-    text: "text-destructive",
     label: "CRITICAL",
-    pinBg: "bg-red-600",
+    stickyBg: "linear-gradient(135deg, hsl(0 85% 95%) 0%, hsl(0 80% 90%) 100%)",
+    stickyBorder: "hsl(0 70% 55%)",
+    headerBg: "hsl(0 72% 51%)",
+    textColor: "hsl(0 70% 35%)",
   },
   warning: {
-    bg: "bg-score-medium",
-    border: "border-score-medium",
-    text: "text-score-medium",
     label: "WARNING",
-    pinBg: "bg-amber-500",
+    stickyBg: "linear-gradient(135deg, hsl(45 95% 92%) 0%, hsl(40 90% 85%) 100%)",
+    stickyBorder: "hsl(38 92% 45%)",
+    headerBg: "hsl(38 92% 50%)",
+    textColor: "hsl(38 80% 30%)",
   },
   info: {
-    bg: "bg-primary",
-    border: "border-primary",
-    text: "text-primary",
     label: "INFO",
-    pinBg: "bg-blue-500",
+    stickyBg: "linear-gradient(135deg, hsl(210 85% 95%) 0%, hsl(210 80% 90%) 100%)",
+    stickyBorder: "hsl(217 91% 50%)",
+    headerBg: "hsl(217 91% 55%)",
+    textColor: "hsl(217 80% 35%)",
   },
 };
 
-/** Determine if the card should open left/right/up based on pin position */
 function getCardPosition(x: number, y: number) {
   const isRight = x > 65;
   const isLeft = x < 35;
@@ -78,9 +77,8 @@ const IssueOverlay = ({
   }, [onPinClick]);
 
   return (
-    <div ref={containerRef} className="relative bg-card border border-border overflow-visible rounded-lg">
-      {/* Image */}
-      <img src={imageUrl} alt={imageAlt} className="w-full h-auto block rounded-lg" />
+    <div ref={containerRef} className="relative bg-card border border-border overflow-visible">
+      <img src={imageUrl} alt={imageAlt} className="w-full h-auto block" />
 
       {/* Dark overlay when a pin is active */}
       <AnimatePresence>
@@ -89,15 +87,14 @@ const IssueOverlay = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/40 rounded-lg z-10"
+            className="absolute inset-0 bg-black/40 z-10"
             onClick={handleClose}
           />
         )}
       </AnimatePresence>
 
-      {/* Issue pins */}
+      {/* Issue sticky notes */}
       {issues.map((issue, idx) => {
-        // Golden-angle scatter for non-overlapping distribution
         const goldenAngle = 137.508;
         const radius = 30;
         const angle = idx * goldenAngle * (Math.PI / 180);
@@ -121,44 +118,51 @@ const IssueOverlay = ({
               zIndex: isActive ? 30 : 20,
             }}
           >
-            {/* Outer pulse ring */}
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{
-                scale: [1, 2, 1],
-                opacity: [0.5, 0, 0.5],
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                delay: idx * 0.2,
-              }}
-              className={`absolute inset-0 rounded-full ${config.pinBg}`}
-              style={{ width: 40, height: 40, top: -4, left: -4 }}
-            />
-
-            {/* Pin */}
+            {/* Sticky note */}
             <motion.button
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: isActive ? 1.3 : 1, opacity: 1 }}
-              whileHover={{ scale: 1.25 }}
+              initial={{ scale: 0, opacity: 0, rotate: -10 }}
+              animate={{ scale: isActive ? 1.15 : 1, opacity: 1, rotate: (idx % 2 === 0 ? -3 : 3) }}
+              whileHover={{ scale: 1.2, rotate: 0 }}
               transition={{
-                delay: 0.15 + idx * 0.06,
+                delay: 0.1 + idx * 0.05,
                 type: "spring",
-                stiffness: 400,
-                damping: 15,
+                stiffness: 350,
+                damping: 18,
               }}
               onClick={(e) => {
                 e.stopPropagation();
                 handlePinClick(issue.id);
               }}
-              className={`relative w-9 h-9 rounded-full ${config.pinBg} border-[3px] border-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] flex items-center justify-center text-sm font-extrabold text-white cursor-pointer select-none`}
-              style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
+              className="relative cursor-pointer select-none"
+              style={{
+                background: config.stickyBg,
+                border: `2px solid ${config.stickyBorder}`,
+                boxShadow: `3px 4px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.6)`,
+                padding: "6px 10px",
+                minWidth: "56px",
+                maxWidth: "140px",
+              }}
             >
-              {idx + 1}
+              {/* Number badge */}
+              <span
+                className="absolute -top-2.5 -left-2.5 w-6 h-6 flex items-center justify-center text-[11px] font-extrabold text-white"
+                style={{
+                  background: config.headerBg,
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+                }}
+              >
+                {idx + 1}
+              </span>
+              {/* Title preview */}
+              <p
+                className="text-[10px] font-bold leading-tight pl-3 truncate"
+                style={{ color: config.textColor }}
+              >
+                {issue.title}
+              </p>
             </motion.button>
 
-            {/* Detail card */}
+            {/* Expanded detail card */}
             <AnimatePresence>
               {isActive && (
                 <motion.div
@@ -166,13 +170,21 @@ const IssueOverlay = ({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.92 }}
                   transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                  className={`absolute z-50 ${cardPos} w-80 bg-card rounded-xl border-2 ${config.border} shadow-[0_8px_32px_rgba(0,0,0,0.3)]`}
+                  className={`absolute z-50 ${cardPos} w-80`}
+                  style={{
+                    background: "hsl(0 0% 100%)",
+                    border: `2px solid ${config.stickyBorder}`,
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   {/* Header */}
-                  <div className={`px-4 py-2.5 ${config.bg} rounded-t-[10px] flex items-center justify-between`}>
+                  <div
+                    className="px-4 py-2.5 flex items-center justify-between"
+                    style={{ background: config.headerBg }}
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-extrabold text-white">
+                      <span className="w-6 h-6 bg-white/20 flex items-center justify-center text-xs font-extrabold text-white">
                         {idx + 1}
                       </span>
                       <span className="text-xs font-bold text-white tracking-wider uppercase">
@@ -181,7 +193,7 @@ const IssueOverlay = ({
                     </div>
                     <div className="flex items-center gap-2">
                       {issue.ruleId && (
-                        <span className="text-[10px] font-mono text-white/80 bg-white/15 px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-mono text-white/80 bg-white/15 px-2 py-0.5">
                           {issue.ruleId}
                         </span>
                       )}
@@ -200,7 +212,7 @@ const IssueOverlay = ({
                       {issue.title}
                     </h4>
                     {issue.principle && (
-                      <span className="inline-block text-[10px] text-muted-foreground bg-muted border border-border px-2 py-0.5 rounded mb-2 font-mono">
+                      <span className="inline-block text-[10px] text-muted-foreground bg-muted border border-border px-2 py-0.5 mb-2 font-mono">
                         {issue.principle}
                       </span>
                     )}
@@ -209,10 +221,10 @@ const IssueOverlay = ({
                     </p>
 
                     {/* Fix */}
-                    <div className="bg-primary/8 border border-primary/25 rounded-lg p-3">
+                    <div className="p-3" style={{ background: "hsl(152 60% 96%)", border: "1px solid hsl(152 50% 80%)" }}>
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <Lightbulb className="w-3.5 h-3.5 text-primary" />
-                        <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                        <Lightbulb className="w-3.5 h-3.5" style={{ color: "hsl(152 60% 35%)" }} />
+                        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "hsl(152 60% 35%)" }}>
                           How to fix
                         </span>
                       </div>
@@ -230,12 +242,18 @@ const IssueOverlay = ({
 
       {/* Issue count badge */}
       {issues.length > 0 && (
-        <div className="absolute top-3 right-3 z-20 flex items-center gap-2 bg-card/95 backdrop-blur-sm border border-border px-3 py-2 rounded-lg shadow-lg">
-          <span className="w-2.5 h-2.5 bg-destructive rounded-full animate-pulse" />
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-2 px-3 py-2 shadow-lg"
+          style={{
+            background: "linear-gradient(135deg, hsl(0 0% 100% / 0.95), hsl(0 0% 98% / 0.95))",
+            backdropFilter: "blur(8px)",
+            border: "1px solid hsl(220 15% 85%)",
+          }}
+        >
+          <span className="w-2.5 h-2.5 bg-destructive animate-pulse" style={{ borderRadius: "50%" }} />
           <span className="text-xs font-bold text-foreground">
-            {issues.length} issue{issues.length !== 1 ? "s" : ""} found
+            {issues.length} issue{issues.length !== 1 ? "s" : ""} spotted
           </span>
-          <span className="text-[10px] text-muted-foreground">— click pins to see details</span>
+          <span className="text-[10px] text-muted-foreground">— click notes to expand</span>
         </div>
       )}
     </div>
