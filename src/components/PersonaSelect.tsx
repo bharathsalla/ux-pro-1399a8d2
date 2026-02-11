@@ -79,37 +79,31 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
       />
 
       {/* ═══ Hero ═══ */}
-      <section className="max-w-6xl mx-auto px-8 pt-20 pb-16 md:pt-28 md:pb-20">
-        <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16">
+      <section className="max-w-5xl mx-auto px-8 pt-20 pb-16 md:pt-28 md:pb-20">
+        <div className="flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="flex-1 text-center md:text-left"
           >
+            <motion.img
+              src={heroCharacter}
+              alt="FixUx"
+              className="w-36 md:w-44 h-auto mx-auto object-contain mb-10"
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              style={{ filter: "drop-shadow(0 8px 24px hsl(var(--foreground) / 0.08))" }}
+            />
+
             <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-foreground leading-[1.08] mb-5">
               We help you build
               <br />
               <span className="text-gradient-primary">better interfaces.</span>
             </h1>
 
-            <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-lg mb-0">
+            <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-lg mx-auto mb-0">
               AI-powered design audits and transcript-to-UI generation — two tools, one platform.
             </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex-shrink-0 w-64 md:w-80 lg:w-[22rem]"
-          >
-            <img
-              src={heroCharacter}
-              alt="FixUx illustration"
-              className="w-full h-auto object-contain"
-              style={{ filter: "drop-shadow(0 12px 32px hsl(var(--foreground) / 0.1))" }}
-            />
           </motion.div>
         </div>
       </section>
