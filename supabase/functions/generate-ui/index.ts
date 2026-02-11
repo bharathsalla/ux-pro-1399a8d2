@@ -71,6 +71,10 @@ ${roleFocus}
 3. Summarize the key points of the meeting in 2-3 sentences
 4. Extract meeting metadata (participants mentioned, estimated duration, key topics)
 5. Provide 3-5 actionable suggestions categorized as Improvement, Insight, or Action Item
+6. Extract key notes — the most important decisions, requirements, and takeaways from the transcript
+7. Describe what the stakeholders/users asked for in plain language
+8. Explain how you designed the solution and why you made specific design decisions
+9. Describe the impact this solution will have on users and the business
 
 ## Code Quality Requirements
 - Use modern CSS (flexbox, grid, custom properties, subtle gradients)
@@ -89,16 +93,20 @@ Return ONLY a valid JSON object with this exact structure:
   "html": "The complete HTML body content (no <html>, <head>, or <body> wrapper tags)",
   "css": "Complete CSS styles including a minimal reset, layout, components, responsive breakpoints, and hover states",
   "js": "JavaScript for interactivity. Use DOMContentLoaded. Return empty string if no JS needed.",
+  "keyNotes": ["Key decision or takeaway 1", "Key decision 2", "Key requirement 3"],
+  "whatTheyAsked": "A clear paragraph explaining what the stakeholders/users requested in the meeting",
+  "howDesigned": "A paragraph explaining the design approach, layout decisions, and component choices made",
+  "solutionImpact": "A paragraph describing how this UI solution addresses the needs and its expected impact",
   "suggestions": [
     {
       "title": "Short actionable title",
-      "description": "Detailed 1-2 sentence description of the suggestion",
+      "description": "Detailed 1-2 sentence description",
       "category": "Improvement"
     }
   ],
   "meetingMeta": {
     "participants": ["Name 1", "Name 2"],
-    "duration": "Estimated meeting duration (e.g. '45 minutes')",
+    "duration": "Estimated meeting duration",
     "topics": ["Topic 1", "Topic 2", "Topic 3"]
   }
 }
@@ -158,6 +166,10 @@ ${transcript}`;
       html: (parsed.html as string) || "<p>No HTML generated</p>",
       css: (parsed.css as string) || "",
       js: (parsed.js as string) || "",
+      keyNotes: Array.isArray(parsed.keyNotes) ? parsed.keyNotes : [],
+      whatTheyAsked: (parsed.whatTheyAsked as string) || "",
+      howDesigned: (parsed.howDesigned as string) || "",
+      solutionImpact: (parsed.solutionImpact as string) || "",
       suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
       meetingMeta: (parsed.meetingMeta as Record<string, unknown>) || {
         participants: [],
