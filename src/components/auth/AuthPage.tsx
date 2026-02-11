@@ -53,8 +53,8 @@ export default function AuthPage() {
             <img
               src={loginIllustration}
               alt="FixUx character"
-              className="w-40 xl:w-48 h-auto object-contain mb-10"
-              style={{ filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.1))" }}
+              className="w-56 xl:w-64 h-auto object-contain mb-10"
+              style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.18)) drop-shadow(0 4px 12px rgba(0,0,0,0.1))" }}
             />
 
             {/* Headline */}
