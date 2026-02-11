@@ -149,13 +149,8 @@ export default function AuthPage() {
               <motion.div
                 whileHover={{ rotateX: -1.25, rotateY: 1.25 }}
                 transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                style={{
-                  transformStyle: "preserve-3d",
-                  backgroundImage: `radial-gradient(90% 80% at 10% 0%, hsl(var(--primary) / 0.10) 0%, transparent 60%),
-                    radial-gradient(80% 70% at 100% 20%, hsl(var(--accent) / 0.14) 0%, transparent 55%),
-                    linear-gradient(180deg, hsl(var(--card) / 0.55), hsl(var(--card) / 0.92))`,
-                }}
-                className="rounded-xl border border-border/60 p-5 sm:p-6"
+                style={{ transformStyle: "preserve-3d" }}
+                className="glass rounded-xl p-5 sm:p-6"
               >
                 {/* Divider */}
                 <div className="relative mb-5">
