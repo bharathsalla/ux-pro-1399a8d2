@@ -34,7 +34,7 @@ export default function AuthPage() {
       />
 
       {/* ═══ Left Branding Panel ═══ */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-gradient-to-br from-background via-background to-muted relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] xl:w-[42%] bg-background relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
