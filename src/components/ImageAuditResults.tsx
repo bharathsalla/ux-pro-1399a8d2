@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Home, RotateCcw } from "lucide-react";
 import { type PersonaId, type AuditResult, type AuditIssue, personas } from "@/types/audit";
 import ScoreRing from "./ScoreRing";
@@ -23,6 +24,7 @@ const ImageAuditResults = ({
   onRestart,
 }: ImageAuditResultsProps) => {
   const persona = personas.find((p) => p.id === personaId)!;
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activeIssueId, setActiveIssueId] = useState<string | null>(null);
 
@@ -49,7 +51,7 @@ const ImageAuditResults = ({
       <div className="border-b border-border bg-card sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <FixUxLogo size="sm" />
+            <button onClick={() => { onRestart(); navigate("/"); }} className="flex items-center"><FixUxLogo size="sm" /></button>
             <div className="h-5 w-px bg-border" />
             <div className="flex items-center gap-2">
               <span className="text-xl">{persona.icon}</span>

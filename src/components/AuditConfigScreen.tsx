@@ -107,7 +107,7 @@ const AuditConfigScreen = ({ personaId, onStart, onStartMultiImage, onBack }: Au
       className="min-h-screen bg-background"
     >
       {/* ═══ Dual Navigation ═══ */}
-      <SiteNav onLogoClick={onBack} />
+      <SiteNav />
 
       {/* ═══ Main Content ═══ */}
       <div
