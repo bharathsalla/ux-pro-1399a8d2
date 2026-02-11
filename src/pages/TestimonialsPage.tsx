@@ -42,7 +42,7 @@ export default function TestimonialsPage() {
     name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background page-parallax">
       <header className="sticky top-0 z-10 bg-background border-b border-border">
         <div className="max-w-[680px] mx-auto px-6 py-4 flex items-center justify-between">
           <FixUxLogo size="sm" />

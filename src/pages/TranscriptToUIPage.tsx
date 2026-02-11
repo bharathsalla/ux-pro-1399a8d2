@@ -282,7 +282,7 @@ export default function TranscriptToUIPage() {
 
   /* ── Render ── */
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col page-parallax">
       {/* ═══ Dual Navigation ═══ */}
       <SiteNav
         announcementText="TranscriptToUI · Paste a meeting transcript → get production-ready UI instantly"
