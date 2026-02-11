@@ -90,7 +90,7 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
             <img
               src={heroCharacters}
               alt="Team working together"
-              className="w-full max-w-2xl mx-auto h-auto object-contain mb-10 rounded-sm"
+              className="w-full max-w-sm mx-auto h-auto object-contain mb-8"
             />
 
             <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-foreground leading-[1.08] mb-5">
