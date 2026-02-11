@@ -197,8 +197,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <HeaderProfile />
-
 
 
       <AnimatePresence mode="wait">
