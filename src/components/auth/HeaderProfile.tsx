@@ -26,7 +26,7 @@ export default function HeaderProfile() {
     : "U";
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="relative z-50">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="flex items-center gap-2 rounded-full border border-border bg-card p-1 pr-3 shadow-sm hover:shadow-md transition-shadow">
