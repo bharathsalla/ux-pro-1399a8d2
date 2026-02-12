@@ -5,7 +5,7 @@ import { type PersonaId, personas } from "@/types/audit";
 import { ThemeToggle } from "./ThemeToggle";
 import {
   X, ShieldCheck, MessageCircleHeart, ArrowRight, Upload, FileText, Eye,
-  CheckCircle2, Zap, Sparkles, Rocket,
+  CheckCircle2, Zap, Sparkles, Rocket, Users, MessageSquare,
 } from "lucide-react";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import AdminPasscodeModal from "@/components/admin/AdminPasscodeModal";
@@ -155,7 +155,7 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
 
       {/* ═══ Feature Cards ═══ */}
       <motion.section style={{ y: cardsY }} className="max-w-5xl mx-auto px-8 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* UX Audit */}
           <TiltCard>
             <motion.button
@@ -241,6 +241,49 @@ const PersonaSelect = ({ onSelect }: PersonaSelectProps) => {
 
                 <span className="inline-flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-full group-hover:gap-3 transition-all" style={{ background: "hsl(262 83% 58%)", color: "white" }}>
                   <Rocket className="w-3.5 h-3.5" /> Try It Free <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            </motion.button>
+          </TiltCard>
+
+          {/* Review Rooms */}
+          <TiltCard>
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              onClick={() => navigate("/rooms")}
+              className="group relative w-full h-full text-left glass glass-hover rounded-2xl overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-[hsl(38_92%_50%_/_0.06)] via-transparent to-transparent rounded-2xl pointer-events-none" />
+              <div className="relative p-7 lg:p-9">
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="text-[8px] font-bold px-2 py-1 uppercase tracking-[0.15em] rounded-full" style={{ background: "hsl(38 92% 50%)", color: "white" }}>🔐 Collab</span>
+                  <span className="text-[9px] font-medium text-muted-foreground">Async design critique</span>
+                </div>
+
+                <div className="w-11 h-11 flex items-center justify-center border rounded-xl mb-4" style={{ background: "hsl(38 92% 50% / 0.08)", borderColor: "hsl(38 92% 50% / 0.2)" }}>
+                  <MessageSquare className="w-5 h-5" style={{ color: "hsl(38 92% 50%)" }} />
+                </div>
+
+                <h2 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight mb-2">
+                  Review Rooms
+                </h2>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  Create visual feedback rooms → share with your team → collect structured design critiques.
+                </p>
+
+                <div className="space-y-1.5 mb-5">
+                  {["Visual pin commenting", "Public & private rooms", "Figma link preview", "Auto-delete on expiry"].map((f) => (
+                    <div key={f} className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3 h-3 shrink-0" style={{ color: "hsl(38 92% 50%)" }} />
+                      <span className="text-[11px] font-medium text-foreground">{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <span className="inline-flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-full group-hover:gap-3 transition-all" style={{ background: "hsl(38 92% 50%)", color: "white" }}>
+                  <Users className="w-3.5 h-3.5" /> Open Rooms <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </motion.button>
