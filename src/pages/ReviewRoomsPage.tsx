@@ -20,9 +20,12 @@ import {
   Image as ImageIcon,
   ExternalLink,
   ArrowRight,
+  Share2,
+  Mail,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import CreateRoomModal from "@/components/rooms/CreateRoomModal";
+import ShareRoomModal from "@/components/rooms/ShareRoomModal";
 
 interface Room {
   id: string;
@@ -31,6 +34,7 @@ interface Room {
   image_url: string | null;
   preview_url: string | null;
   is_private: boolean;
+  passcode: string | null;
   expiry_days: number;
   expires_at: string;
   is_expired: boolean;
@@ -38,16 +42,29 @@ interface Room {
   creator_id: string;
 }
 
+interface RoomShare {
+  id: string;
+  room_id: string;
+  shared_by: string;
+  shared_to_email: string;
+  status: string;
+  created_at: string;
+  sharer_name?: string;
+}
+
 export default function ReviewRoomsPage() {
-  const { user } = useAuthContext();
+  const { user, profile } = useAuthContext();
   const navigate = useNavigate();
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [sharedRoomIds, setSharedRoomIds] = useState<Map<string, RoomShare>>(new Map());
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [shareRoom, setShareRoom] = useState<Room | null>(null);
 
   useEffect(() => {
     fetchRooms();
-  }, []);
+    if (user) fetchSharedWithMe();
+  }, [user]);
 
   const fetchRooms = async () => {
     const { data, error } = await supabase
@@ -57,6 +74,30 @@ export default function ReviewRoomsPage() {
 
     if (!error && data) setRooms(data as unknown as Room[]);
     setLoading(false);
+  };
+
+  const fetchSharedWithMe = async () => {
+    if (!user || !profile?.email) return;
+    const { data } = await supabase
+      .from("room_shares")
+      .select("*")
+      .or(`shared_to_user.eq.${user.id},shared_to_email.eq.${profile.email}`)
+      .eq("status", "pending");
+
+    if (data && data.length > 0) {
+      const sharerIds = [...new Set((data as any[]).map((s: any) => s.shared_by))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, name")
+        .in("id", sharerIds);
+
+      const nameMap = new Map((profiles || []).map((p: any) => [p.id, p.name]));
+      const shareMap = new Map<string, RoomShare>();
+      (data as any[]).forEach((s: any) => {
+        shareMap.set(s.room_id, { ...s, sharer_name: nameMap.get(s.shared_by) || "Someone" });
+      });
+      setSharedRoomIds(shareMap);
+    }
   };
 
   const handleDelete = async (roomId: string) => {
@@ -216,6 +257,7 @@ export default function ReviewRoomsPage() {
               {rooms.map((room, i) => {
                 const isExpired = room.is_expired || new Date(room.expires_at) <= new Date();
                 const isOwner = user?.id === room.creator_id;
+                const sharedInfo = sharedRoomIds.get(room.id);
 
                 return (
                   <motion.div
@@ -269,6 +311,18 @@ export default function ReviewRoomsPage() {
                       </div>
 
                       <CardContent className="p-5">
+                        {/* Shared badge */}
+                        {sharedInfo && (
+                          <div className="flex items-center gap-1.5 mb-2 px-2.5 py-1.5 rounded-lg bg-primary/5 border border-primary/15">
+                            <Mail className="h-3 w-3 text-primary shrink-0" />
+                            <span className="text-[10px] font-semibold text-primary">
+                              Shared by {sharedInfo.sharer_name}
+                            </span>
+                            <span className="ml-auto text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                              Feedback Awaiting
+                            </span>
+                          </div>
+                        )}
                         <h3 className="font-bold text-sm text-foreground mb-1.5 truncate">
                           {room.title}
                         </h3>
@@ -291,6 +345,18 @@ export default function ReviewRoomsPage() {
                         {/* Actions */}
                         {isOwner && (
                           <div className="flex items-center gap-1 mt-4 pt-4 border-t border-border">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShareRoom(room);
+                              }}
+                            >
+                              <Share2 className="h-3 w-3" />
+                              Share
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -374,6 +440,15 @@ export default function ReviewRoomsPage() {
               setShowCreate(false);
               fetchRooms();
             }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {shareRoom && (
+          <ShareRoomModal
+            room={{ id: shareRoom.id, title: shareRoom.title, is_private: shareRoom.is_private, passcode: shareRoom.passcode }}
+            onClose={() => setShareRoom(null)}
           />
         )}
       </AnimatePresence>

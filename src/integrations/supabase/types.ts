@@ -310,6 +310,44 @@ export type Database = {
           },
         ]
       }
+      room_shares: {
+        Row: {
+          created_at: string
+          id: string
+          room_id: string
+          shared_by: string
+          shared_to_email: string
+          shared_to_user: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room_id: string
+          shared_by: string
+          shared_to_email: string
+          shared_to_user?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room_id?: string
+          shared_by?: string
+          shared_to_email?: string
+          shared_to_user?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_shares_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "review_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
