@@ -492,23 +492,23 @@ export default function RoomViewPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 bg-background/95 border-b border-border" style={{ backdropFilter: "blur(12px)" }}>
-        <div className="max-w-[1600px] mx-auto px-4 py-2.5 flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => navigate("/rooms")}>
+      <header className="sticky top-0 z-40 bg-background/80 border-b border-border/50" style={{ backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}>
+        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
+          <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-xl" onClick={() => navigate("/rooms")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-sm font-bold text-foreground truncate">{room?.title}</h1>
+            <h1 className="text-sm font-bold text-foreground truncate leading-tight">{room?.title}</h1>
             {room?.description && (
-              <p className="text-[11px] text-muted-foreground truncate">{room.description}</p>
+              <p className="text-[11px] text-muted-foreground truncate mt-0.5">{room.description}</p>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {/* Annotation mode toggle for images */}
             {hasImage && !isExpired && nameSet && (
-              <div className="flex items-center bg-muted rounded-lg p-0.5 gap-0.5">
+              <div className="flex items-center bg-muted/80 rounded-xl p-1 gap-0.5">
                 <button
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[10px] font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold transition-all ${
                     annotationMode === "pin"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
@@ -516,11 +516,11 @@ export default function RoomViewPage() {
                   onClick={() => setAnnotationMode("pin")}
                   title="Pin mode — click to place a pin"
                 >
-                  <MousePointer2 className="h-3 w-3" />
+                  <MousePointer2 className="h-3.5 w-3.5" />
                   Pin
                 </button>
                 <button
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[10px] font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold transition-all ${
                     annotationMode === "rect"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
@@ -528,7 +528,7 @@ export default function RoomViewPage() {
                   onClick={() => setAnnotationMode("rect")}
                   title="Rectangle mode — drag to select an area"
                 >
-                  <Square className="h-3 w-3" />
+                  <Square className="h-3.5 w-3.5" />
                   Area
                 </button>
               </div>
@@ -539,31 +539,31 @@ export default function RoomViewPage() {
               <Button
                 variant={figmaCommentMode ? "default" : "outline"}
                 size="sm"
-                className="h-7 text-xs gap-1.5"
+                className="h-9 text-xs gap-1.5 rounded-xl"
                 onClick={() => {
                   setFigmaCommentMode(!figmaCommentMode);
                   setPendingPin(null);
                 }}
               >
-                <MessageCircle className="h-3 w-3" />
+                <MessageCircle className="h-3.5 w-3.5" />
                 {figmaCommentMode ? "Done" : "Comment"}
               </Button>
             )}
 
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold ${
+            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold ${
               isExpired ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
             }`}>
-              <Clock className="h-3 w-3" />
+              <Clock className="h-3.5 w-3.5" />
               {isExpired ? "Expired" : getTimeRemaining()}
             </div>
             {room?.is_private && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-destructive/10 text-destructive">
-                <Lock className="h-3 w-3" />
+              <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-destructive/10 text-destructive">
+                <Lock className="h-3.5 w-3.5" />
                 Private
               </div>
             )}
-            <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" onClick={() => setShowShareModal(true)}>
-              <Copy className="h-3 w-3" />
+            <Button variant="outline" size="sm" className="h-9 text-xs gap-1.5 rounded-xl" onClick={() => setShowShareModal(true)}>
+              <Copy className="h-3.5 w-3.5" />
               Share
             </Button>
           </div>
@@ -571,15 +571,16 @@ export default function RoomViewPage() {
       </header>
 
       {isExpired && (
-        <div className="bg-destructive/10 border-b border-destructive/20 px-4 py-2.5 text-center text-xs text-destructive font-semibold">
-          ⚠️ This room has expired. Comments are disabled and data will be permanently deleted soon.
+        <div className="bg-destructive/5 border-b border-destructive/10 px-6 py-3 text-center text-xs text-destructive font-semibold flex items-center justify-center gap-2">
+          <Clock className="h-3.5 w-3.5" />
+          This room has expired. Comments are disabled and data will be permanently deleted soon.
         </div>
       )}
 
       {/* Main Layout */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Design Area */}
-        <div className="flex-1 relative overflow-auto bg-muted/30">
+        <div className="flex-1 relative overflow-auto bg-muted/20">
           {/* Figma iframe preview with overlay */}
           {hasFigma ? (
             <div className="relative w-full h-full min-h-[60vh]">
@@ -653,7 +654,7 @@ export default function RoomViewPage() {
             </div>
           ) : (
             /* Image with pins/rectangles */
-            <div className="p-4 lg:p-6 flex items-start justify-center min-h-[60vh]">
+            <div className="p-6 lg:p-8 flex items-start justify-center min-h-[60vh]">
               <div
                 ref={imageRef}
                 className={`relative max-w-full select-none ${
@@ -669,16 +670,16 @@ export default function RoomViewPage() {
                     <img
                       src={room.image_url}
                       alt={room?.title}
-                      className="max-w-full max-h-[80vh] object-contain rounded-lg border border-border shadow-sm select-none"
+                      className="max-w-full max-h-[80vh] object-contain rounded-xl border border-border/50 shadow-md select-none"
                       draggable={false}
                       onDoubleClick={() => setIsFullscreen(true)}
                     />
-                    <div className="absolute bottom-2 left-2 bg-background/80 backdrop-blur-sm rounded-md px-2 py-1 text-[10px] text-muted-foreground">
+                    <div className="absolute bottom-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-[11px] text-muted-foreground font-medium shadow-sm border border-border/50">
                       {annotationMode === "pin" ? "Click to pin" : "Drag to select area"} · Double-click to enlarge
                     </div>
                   </>
                 ) : room?.preview_url ? (
-                  <div className="w-full max-w-2xl bg-card border border-border rounded-xl p-10 text-center">
+                  <div className="w-full max-w-2xl bg-card border border-border rounded-2xl p-12 text-center shadow-sm">
                     <ExternalLink className="h-10 w-10 text-muted-foreground/30 mx-auto mb-4" />
                     <p className="text-sm text-muted-foreground mb-3">Preview URL</p>
                     <a href={room.preview_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm break-all font-medium">
@@ -686,7 +687,7 @@ export default function RoomViewPage() {
                     </a>
                   </div>
                 ) : (
-                  <div className="w-96 h-64 bg-card border border-border rounded-xl flex items-center justify-center">
+                  <div className="w-96 h-64 bg-card border border-border rounded-2xl flex items-center justify-center shadow-sm">
                     <p className="text-sm text-muted-foreground">No design uploaded</p>
                   </div>
                 )}
@@ -703,7 +704,7 @@ export default function RoomViewPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute bottom-4 left-4 right-4 lg:left-1/4 lg:right-1/4 bg-card border border-border rounded-xl shadow-2xl p-4 z-20"
+                className="absolute bottom-6 left-6 right-6 lg:left-1/4 lg:right-1/4 bg-card border border-border/50 rounded-2xl shadow-2xl p-5 z-20"
               >
                 <div className="flex items-start gap-3">
                   <Avatar className="h-8 w-8 shrink-0">
@@ -755,15 +756,19 @@ export default function RoomViewPage() {
         </div>
 
         {/* Comments Sidebar */}
-        <div className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-border bg-card flex flex-col">
-          <div className="p-4 border-b border-border shrink-0">
-            <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <MessageCircle className="h-4 w-4 text-primary" />
+        <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-border/50 bg-card flex flex-col">
+          <div className="px-5 py-4 border-b border-border/50 shrink-0">
+            <h2 className="text-sm font-bold text-foreground flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MessageCircle className="h-3.5 w-3.5 text-primary" />
+              </div>
               Comments
-              <span className="text-xs font-normal text-muted-foreground ml-1">({topLevelComments.length})</span>
+              <span className="text-xs font-normal text-muted-foreground ml-auto bg-muted px-2 py-0.5 rounded-full">
+                {topLevelComments.length}
+              </span>
             </h2>
             {!isExpired && (
-              <p className="text-[11px] text-muted-foreground mt-1.5">
+              <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
                 {hasImage
                   ? annotationMode === "pin"
                     ? "Click on the design to place a pin comment."
@@ -775,12 +780,14 @@ export default function RoomViewPage() {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-border">
+          <div className="flex-1 overflow-y-auto">
             {topLevelComments.length === 0 ? (
-              <div className="p-10 text-center text-muted-foreground">
-                <MessageCircle className="h-10 w-10 mx-auto mb-4 opacity-20" />
-                <p className="text-xs font-medium">No comments yet</p>
-                <p className="text-[11px] mt-1 text-muted-foreground/70">
+              <div className="p-12 text-center text-muted-foreground">
+                <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="h-7 w-7 opacity-30" />
+                </div>
+                <p className="text-xs font-semibold mb-1">No comments yet</p>
+                <p className="text-[11px] text-muted-foreground/70 max-w-[200px] mx-auto leading-relaxed">
                   {hasImage ? "Click or drag on the design to leave feedback." : "Click Comment to start annotating."}
                 </p>
               </div>
@@ -794,7 +801,7 @@ export default function RoomViewPage() {
                   <div
                     key={c.id}
                     id={`comment-${c.id}`}
-                    className={`p-4 transition-colors duration-200 cursor-pointer ${isActive ? "bg-primary/5" : "hover:bg-muted/50"}`}
+                    className={`px-5 py-4 transition-colors duration-200 cursor-pointer border-b border-border/30 last:border-b-0 ${isActive ? "bg-primary/5" : "hover:bg-muted/30"}`}
                     onClick={() => setActivePin(isActive ? null : c.pin_number)}
                   >
                     <div className="flex items-start gap-2.5">

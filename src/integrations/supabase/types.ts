@@ -314,6 +314,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          passcode: string | null
           room_id: string
           shared_by: string
           shared_to_email: string
@@ -323,6 +324,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          passcode?: string | null
           room_id: string
           shared_by: string
           shared_to_email: string
@@ -332,6 +334,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          passcode?: string | null
           room_id?: string
           shared_by?: string
           shared_to_email?: string
