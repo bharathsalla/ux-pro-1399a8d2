@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import ShareRoomModal from "@/components/rooms/ShareRoomModal";
 
 interface Room {
   id: string;
@@ -98,6 +99,7 @@ export default function RoomViewPage() {
 
   // Figma commenting overlay
   const [figmaCommentMode, setFigmaCommentMode] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const isExpired = room ? room.is_expired || new Date(room.expires_at) <= new Date() : false;
   const isOwner = user?.id === room?.creator_id;
@@ -560,7 +562,7 @@ export default function RoomViewPage() {
                 Private
               </div>
             )}
-            <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" onClick={copyLink}>
+            <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" onClick={() => setShowShareModal(true)}>
               <Copy className="h-3 w-3" />
               Share
             </Button>
@@ -1019,6 +1021,16 @@ export default function RoomViewPage() {
               )}
             </AnimatePresence>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {showShareModal && room && (
+          <ShareRoomModal
+            room={{ id: room.id, title: room.title, is_private: room.is_private, passcode: room.passcode }}
+            onClose={() => setShowShareModal(false)}
+          />
         )}
       </AnimatePresence>
     </div>
