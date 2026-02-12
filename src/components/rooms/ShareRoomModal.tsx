@@ -37,6 +37,7 @@ export default function ShareRoomModal({ room, onClose }: ShareRoomModalProps) {
   const [tab, setTab] = useState<ShareTab>("external");
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
+  const [passcodeForShare, setPasscodeForShare] = useState(room.passcode || "");
   const [sending, setSending] = useState(false);
   const [sentEmails, setSentEmails] = useState<string[]>([]);
 
@@ -99,6 +100,7 @@ export default function ShareRoomModal({ room, onClose }: ShareRoomModalProps) {
       shared_to_email: trimmed,
       shared_to_user: targetProfile?.id || null,
       status: "pending",
+      passcode: room.is_private ? passcodeForShare || null : null,
     } as any);
 
     if (error) {
@@ -342,6 +344,30 @@ export default function ShareRoomModal({ room, onClose }: ShareRoomModalProps) {
                   </Button>
                 </div>
               </div>
+
+              {/* Passcode for private rooms */}
+              {room.is_private && (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                    Include Passcode
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                      <Input
+                        value={passcodeForShare}
+                        onChange={(e) => setPasscodeForShare(e.target.value)}
+                        placeholder="Enter room passcode"
+                        className="text-xs h-10 pl-9 font-mono tracking-wider"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3 text-destructive" />
+                    This passcode will be visible on the recipient's dashboard
+                  </p>
+                </div>
+              )}
 
               {/* Sent list */}
               {sentEmails.length > 0 && (

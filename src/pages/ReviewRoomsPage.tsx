@@ -50,6 +50,7 @@ interface RoomShare {
   status: string;
   created_at: string;
   sharer_name?: string;
+  passcode?: string | null;
 }
 
 export default function ReviewRoomsPage() {
@@ -94,7 +95,7 @@ export default function ReviewRoomsPage() {
       const nameMap = new Map((profiles || []).map((p: any) => [p.id, p.name]));
       const shareMap = new Map<string, RoomShare>();
       (data as any[]).forEach((s: any) => {
-        shareMap.set(s.room_id, { ...s, sharer_name: nameMap.get(s.shared_by) || "Someone" });
+        shareMap.set(s.room_id, { ...s, sharer_name: nameMap.get(s.shared_by) || "Someone", passcode: s.passcode || null });
       });
       setSharedRoomIds(shareMap);
     }
@@ -253,7 +254,7 @@ export default function ReviewRoomsPage() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               {rooms.map((room, i) => {
                 const isExpired = room.is_expired || new Date(room.expires_at) <= new Date();
                 const isOwner = user?.id === room.creator_id;
@@ -267,7 +268,7 @@ export default function ReviewRoomsPage() {
                     transition={{ delay: i * 0.05 }}
                   >
                     <Card
-                      className={`overflow-hidden border transition-all duration-300 hover:shadow-lg cursor-pointer group ${
+                      className={`overflow-hidden border transition-all duration-300 hover:shadow-lg cursor-pointer group h-full flex flex-col ${
                         isExpired ? "opacity-50 grayscale" : ""
                       }`}
                       onClick={() => navigate(`/room/${room.id}`)}
@@ -310,17 +311,28 @@ export default function ReviewRoomsPage() {
                         )}
                       </div>
 
-                      <CardContent className="p-5">
+                      <CardContent className="p-5 flex-1 flex flex-col">
                         {/* Shared badge */}
                         {sharedInfo && (
-                          <div className="flex items-center gap-1.5 mb-2 px-2.5 py-1.5 rounded-lg bg-primary/5 border border-primary/15">
-                            <Mail className="h-3 w-3 text-primary shrink-0" />
-                            <span className="text-[10px] font-semibold text-primary">
-                              Shared by {sharedInfo.sharer_name}
-                            </span>
-                            <span className="ml-auto text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                              Feedback Awaiting
-                            </span>
+                          <div className="space-y-1.5 mb-2">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary/5 border border-primary/15">
+                              <Mail className="h-3 w-3 text-primary shrink-0" />
+                              <span className="text-[10px] font-semibold text-primary">
+                                Shared by {sharedInfo.sharer_name}
+                              </span>
+                              <span className="ml-auto text-[9px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                                Review Required
+                              </span>
+                            </div>
+                            {sharedInfo.passcode && (
+                              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-destructive/5 border border-destructive/15">
+                                <Lock className="h-3 w-3 text-destructive shrink-0" />
+                                <span className="text-[10px] font-medium text-muted-foreground">Passcode:</span>
+                                <code className="text-[10px] font-mono font-bold text-destructive tracking-wider">
+                                  {sharedInfo.passcode}
+                                </code>
+                              </div>
+                            )}
                           </div>
                         )}
                         <h3 className="font-bold text-sm text-foreground mb-1.5 truncate">
@@ -331,7 +343,7 @@ export default function ReviewRoomsPage() {
                             {room.description}
                           </p>
                         )}
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mt-auto pt-2">
                           <span className="text-[11px] text-muted-foreground">
                             {formatDistanceToNow(new Date(room.created_at), { addSuffix: true })}
                           </span>
