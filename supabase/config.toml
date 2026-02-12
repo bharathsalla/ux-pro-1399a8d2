@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.generate-ui]
 verify_jwt = false
+
+[functions.cleanup-expired-rooms]
+verify_jwt = false

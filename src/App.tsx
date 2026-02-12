@@ -46,9 +46,14 @@ function AppRoutes() {
     );
   }
 
-  // Not logged in — show auth page
+  // Not logged in — show auth page, but allow room viewing
   if (!user) {
-    return <AuthPage />;
+    return (
+      <Routes>
+        <Route path="/room/:roomId" element={<RoomViewPage />} />
+        <Route path="*" element={<AuthPage />} />
+      </Routes>
+    );
   }
 
   return (
