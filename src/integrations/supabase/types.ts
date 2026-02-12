@@ -257,6 +257,8 @@ export type Database = {
           pin_number: number | null
           pin_x: number | null
           pin_y: number | null
+          rect_h: number | null
+          rect_w: number | null
           reviewer_id: string | null
           reviewer_name: string
           room_id: string
@@ -270,6 +272,8 @@ export type Database = {
           pin_number?: number | null
           pin_x?: number | null
           pin_y?: number | null
+          rect_h?: number | null
+          rect_w?: number | null
           reviewer_id?: string | null
           reviewer_name?: string
           room_id: string
@@ -283,6 +287,8 @@ export type Database = {
           pin_number?: number | null
           pin_x?: number | null
           pin_y?: number | null
+          rect_h?: number | null
+          rect_w?: number | null
           reviewer_id?: string | null
           reviewer_name?: string
           room_id?: string
