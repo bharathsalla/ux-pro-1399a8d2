@@ -202,6 +202,108 @@ export type Database = {
           },
         ]
       }
+      review_rooms: {
+        Row: {
+          created_at: string
+          creator_id: string
+          description: string | null
+          expires_at: string
+          expiry_days: number
+          id: string
+          image_url: string | null
+          is_expired: boolean
+          is_private: boolean
+          passcode: string | null
+          preview_url: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          expires_at: string
+          expiry_days?: number
+          id?: string
+          image_url?: string | null
+          is_expired?: boolean
+          is_private?: boolean
+          passcode?: string | null
+          preview_url?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          expires_at?: string
+          expiry_days?: number
+          id?: string
+          image_url?: string | null
+          is_expired?: boolean
+          is_private?: boolean
+          passcode?: string | null
+          preview_url?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      room_comments: {
+        Row: {
+          comment_text: string
+          created_at: string
+          id: string
+          is_resolved: boolean
+          parent_id: string | null
+          pin_number: number | null
+          pin_x: number | null
+          pin_y: number | null
+          reviewer_id: string | null
+          reviewer_name: string
+          room_id: string
+        }
+        Insert: {
+          comment_text: string
+          created_at?: string
+          id?: string
+          is_resolved?: boolean
+          parent_id?: string | null
+          pin_number?: number | null
+          pin_x?: number | null
+          pin_y?: number | null
+          reviewer_id?: string | null
+          reviewer_name?: string
+          room_id: string
+        }
+        Update: {
+          comment_text?: string
+          created_at?: string
+          id?: string
+          is_resolved?: boolean
+          parent_id?: string | null
+          pin_number?: number | null
+          pin_x?: number | null
+          pin_y?: number | null
+          reviewer_id?: string | null
+          reviewer_name?: string
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "room_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_comments_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "review_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
