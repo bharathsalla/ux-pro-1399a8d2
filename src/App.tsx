@@ -16,6 +16,8 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import WhyFreePage from "./pages/WhyFreePage";
 import TranscriptToUIPage from "./pages/TranscriptToUIPage";
+import ReviewRoomsPage from "./pages/ReviewRoomsPage";
+import RoomViewPage from "./pages/RoomViewPage";
 import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
@@ -54,6 +56,8 @@ function AppRoutes() {
       <Route path="/" element={<Index />} />
       <Route path="/transcript" element={<TranscriptToUIPage />} />
       <Route path="/flowcheck" element={<FlowCheckPage />} />
+      <Route path="/rooms" element={<ReviewRoomsPage />} />
+      <Route path="/room/:roomId" element={<RoomViewPage />} />
       <Route path="/testimonials" element={<TestimonialsPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />

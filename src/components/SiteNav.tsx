@@ -5,6 +5,7 @@ import HeaderProfile from "@/components/auth/HeaderProfile";
 
 const navItems = [
   { path: "/flowcheck", label: "FlowCheck" },
+  { path: "/rooms", label: "Review Rooms" },
   { path: "/testimonials", label: "Testimonials" },
   { path: "/about", label: "About" },
   { path: "/contact", label: "Contact" },
