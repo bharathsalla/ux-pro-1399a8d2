@@ -343,7 +343,7 @@ export default function RoomViewPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm">
-          <div className="bg-card border border-border rounded-2xl p-8 text-center shadow-xl">
+          <div className="bg-card border border-border rounded-2xl p-8 text-center shadow-xl relative">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-destructive/10 rounded-2xl mb-6">
               <Lock className="h-8 w-8 text-destructive" />
             </div>
@@ -356,9 +356,15 @@ export default function RoomViewPage() {
               className="mb-4 text-center text-sm h-12"
               onKeyDown={(e) => e.key === "Enter" && verifyPasscode()}
             />
-            <Button onClick={verifyPasscode} className="w-full h-11 font-bold">Enter Room</Button>
+            <div className="flex flex-col gap-2.5">
+              <Button onClick={verifyPasscode} className="w-full h-11 font-bold">Enter Room</Button>
+              <Button variant="ghost" className="w-full h-10 text-sm text-muted-foreground gap-1.5" onClick={() => navigate("/rooms")}>
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Go Back
+              </Button>
+            </div>
           </div>
-          <p className="text-center text-[11px] text-muted-foreground mt-4">Ask the room creator for the passcode.</p>
+          <p className="text-center text-[11px] text-muted-foreground mt-4">Don't have the passcode? Ask the room creator.</p>
         </motion.div>
       </div>
     );
@@ -507,16 +513,16 @@ export default function RoomViewPage() {
           </Button>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-bold text-foreground truncate leading-tight">{room?.title}</h1>
+              <h1 className="text-base font-bold text-foreground truncate leading-tight">{room?.title}</h1>
               {room?.is_private && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-destructive/10 text-destructive border border-destructive/20">
-                  <Lock className="h-2.5 w-2.5" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-destructive/10 text-destructive border border-destructive/20">
+                  <Lock className="h-3 w-3" />
                   Private
                 </span>
               )}
             </div>
             {room?.description && (
-              <p className="text-[11px] text-muted-foreground truncate mt-0.5 max-w-md">{room.description}</p>
+              <p className="text-xs text-muted-foreground truncate mt-0.5 max-w-md">{room.description}</p>
             )}
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
@@ -524,25 +530,25 @@ export default function RoomViewPage() {
             {hasImage && !isExpired && nameSet && (
               <div className="flex items-center bg-muted/60 rounded-lg p-0.5 gap-0.5 border border-border/30">
                 <button
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-md text-[13px] font-semibold transition-all duration-200 ${
                     annotationMode === "pin"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                   }`}
                   onClick={() => setAnnotationMode("pin")}
                 >
-                  <MousePointer2 className="h-3 w-3" />
+                  <MousePointer2 className="h-4 w-4" />
                   Pin
                 </button>
                 <button
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-md text-[13px] font-semibold transition-all duration-200 ${
                     annotationMode === "rect"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                   }`}
                   onClick={() => setAnnotationMode("rect")}
                 >
-                  <Square className="h-3 w-3" />
+                  <Square className="h-4 w-4" />
                   Area
                 </button>
               </div>
@@ -553,25 +559,25 @@ export default function RoomViewPage() {
               <Button
                 variant={figmaCommentMode ? "default" : "outline"}
                 size="sm"
-                className="h-8 text-xs gap-1.5 rounded-lg"
+                className="h-9 text-[13px] gap-1.5 rounded-lg"
                 onClick={() => {
                   setFigmaCommentMode(!figmaCommentMode);
                   setPendingPin(null);
                 }}
               >
-                <MessageCircle className="h-3 w-3" />
+                <MessageCircle className="h-4 w-4" />
                 {figmaCommentMode ? "Done" : "Comment"}
               </Button>
             )}
 
-            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border ${
+            <div className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-semibold border ${
               isExpired ? "bg-destructive/5 text-destructive border-destructive/20" : "bg-primary/5 text-primary border-primary/20"
             }`}>
-              <Clock className="h-3 w-3" />
+              <Clock className="h-3.5 w-3.5" />
               {isExpired ? "Expired" : getTimeRemaining()}
             </div>
-            <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 rounded-lg" onClick={() => setShowShareModal(true)}>
-              <Copy className="h-3 w-3" />
+            <Button variant="outline" size="sm" className="h-9 text-[13px] gap-1.5 rounded-lg" onClick={() => setShowShareModal(true)}>
+              <Copy className="h-3.5 w-3.5" />
               Share
             </Button>
           </div>
