@@ -52,9 +52,9 @@ export default function AuthPage() {
 
             {/* Illustration above text */}
             <img
-              src={loginIllustration}
+
               alt="FixUx character"
-              className="w-56 xl:w-64 h-auto object-contain mb-10" />
+              className="w-56 xl:w-64 h-auto object-contain mb-10" src="/lovable-uploads/da5eb1e4-15a5-43fd-8c5f-91a16cc01488.jpg" />
 
 
             {/* Headline */}
@@ -63,7 +63,7 @@ export default function AuthPage() {
               <br />
               interfaces, faster.
             </h1>
-            <p className="text-primary-foreground/70 leading-relaxed max-w-sm mb-10 text-base">
+            <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-sm mb-10">
               Join thousands of designers and developers using AI to ship polished, user-tested products.
             </p>
 
