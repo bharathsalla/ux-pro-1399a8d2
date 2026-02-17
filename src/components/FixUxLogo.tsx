@@ -19,7 +19,7 @@ export function FixUxLogo({ size = "md" }: {size?: "sm" | "md" | "lg";}) {
         height={s.icon}
         viewBox="0 0 28 28"
         fill="none"
-        className="text-primary">
+        className="text-foreground">
 
         {/* Back square — screen/canvas */}
         <rect x="4" y="4" width="16" height="16" rx="1" stroke="currentColor" strokeWidth="2.2" fill="none" />
@@ -30,8 +30,8 @@ export function FixUxLogo({ size = "md" }: {size?: "sm" | "md" | "lg";}) {
         <line x1="13" y1="17" x2="21" y2="17" stroke="white" strokeWidth="2" strokeLinecap="round" />
       </svg>
       <span className={`inline-flex items-baseline ${s.text} uppercase`} style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "0.02em" }}>
-        <span className="font-black tracking-tight text-primary-foreground">Fix</span>
-        <span className="font-[900] tracking-tight text-primary-foreground" style={{ fontWeight: 900 }}>Ux</span>
+        <span className="tracking-tight text-foreground font-bold">Fix</span>
+        <span className="tracking-tight text-foreground font-bold" style={{ fontWeight: 900 }}>Ux</span>
       </span>
     </span>);
 
