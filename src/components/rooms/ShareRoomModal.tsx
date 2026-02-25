@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,6 @@ interface ShareRoomModalProps {
     id: string;
     title: string;
     is_private: boolean;
-    passcode: string | null;
   };
   onClose: () => void;
 }
@@ -37,7 +36,25 @@ export default function ShareRoomModal({ room, onClose }: ShareRoomModalProps) {
   const [tab, setTab] = useState<ShareTab>("external");
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
-  const [passcodeForShare, setPasscodeForShare] = useState(room.passcode || "");
+  const [roomPasscode, setRoomPasscode] = useState<string | null>(null);
+  const [passcodeForShare, setPasscodeForShare] = useState("");
+
+  // Fetch passcode server-side (only owner can read from review_rooms via RLS)
+  useEffect(() => {
+    if (room.is_private) {
+      supabase
+        .from("review_rooms")
+        .select("passcode")
+        .eq("id", room.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.passcode) {
+            setRoomPasscode(data.passcode);
+            setPasscodeForShare(data.passcode);
+          }
+        });
+    }
+  }, [room.id, room.is_private]);
   const [sending, setSending] = useState(false);
   const [sentEmails, setSentEmails] = useState<string[]>([]);
 
@@ -204,21 +221,21 @@ export default function ShareRoomModal({ room, onClose }: ShareRoomModalProps) {
               </div>
 
               {/* Passcode Display */}
-              {room.is_private && room.passcode && (
+              {room.is_private && roomPasscode && (
                 <div className="bg-muted/50 border border-border rounded-xl p-3.5">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
                     Room Passcode
                   </p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm font-mono font-bold text-foreground tracking-wider">
-                      {room.passcode}
+                      {roomPasscode}
                     </code>
                     <Button
                       variant="outline"
                       size="sm"
                       className="h-9 text-xs gap-1"
                       onClick={() => {
-                        navigator.clipboard.writeText(room.passcode!);
+                        navigator.clipboard.writeText(roomPasscode!);
                         toast.success("Passcode copied!");
                       }}
                     >
