@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface AdminContextType {
   isAdmin: boolean;
   isCheckingAdmin: boolean;
-  adminPasscode: string | null;
+  adminToken: string | null;
   verifyPasscode: (passcode: string) => Promise<{ success: boolean; error?: string }>;
   exitAdminMode: () => void;
 }
@@ -14,9 +14,9 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
-  // Store the passcode temporarily for admin API calls (needed by admin-fetch-feedback and admin-update-feedback)
-  // This is re-verified server-side on every call via constant-time comparison
-  const [adminPasscode, setAdminPasscode] = useState<string | null>(null);
+  // Store the HMAC-signed session token (not the passcode) for admin API calls
+  // Token is time-limited (30 min) and verified server-side via cryptographic signature
+  const [adminToken, setAdminToken] = useState<string | null>(null);
 
   const verifyPasscode = useCallback(async (passcode: string): Promise<{ success: boolean; error?: string }> => {
     setIsCheckingAdmin(true);
@@ -30,9 +30,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: "Invalid passcode. Please try again." };
       }
 
-      if (data?.success) {
+      if (data?.success && data?.token) {
         setIsAdmin(true);
-        setAdminPasscode(passcode);
+        setAdminToken(data.token);
         setIsCheckingAdmin(false);
         return { success: true };
       }
@@ -47,11 +47,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const exitAdminMode = useCallback(() => {
     setIsAdmin(false);
-    setAdminPasscode(null);
+    setAdminToken(null);
   }, []);
 
   return (
-    <AdminContext.Provider value={{ isAdmin, isCheckingAdmin, adminPasscode, verifyPasscode, exitAdminMode }}>
+    <AdminContext.Provider value={{ isAdmin, isCheckingAdmin, adminToken, verifyPasscode, exitAdminMode }}>
       {children}
     </AdminContext.Provider>
   );
