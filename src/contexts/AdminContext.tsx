@@ -14,6 +14,8 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
+  // Store the passcode temporarily for admin API calls (needed by admin-fetch-feedback and admin-update-feedback)
+  // This is re-verified server-side on every call via constant-time comparison
   const [adminPasscode, setAdminPasscode] = useState<string | null>(null);
 
   const verifyPasscode = useCallback(async (passcode: string): Promise<{ success: boolean; error?: string }> => {

@@ -151,12 +151,53 @@ function tryParseJSON(content: string): Record<string, unknown> | null {
   return null;
 }
 
+const DAILY_LIMIT = 2;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // --- Auth check ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // --- Server-side rate limit ---
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    const { data: currentCount } = await supabaseAdmin.rpc("get_audit_usage", { p_user_id: user.id });
+    if (currentCount !== null && currentCount >= DAILY_LIMIT) {
+      return new Response(
+        JSON.stringify({ error: "Daily audit limit reached (2 per day). Please try again tomorrow." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    // --- End rate limit check ---
 
     const { imageBase64, imageUrl, personaId, fidelity, purpose, screenName } = await req.json();
 
@@ -324,13 +365,16 @@ CRITICAL: Return ONLY the JSON object. No text before or after. No markdown fenc
       );
     }
 
+    // Increment usage after successful audit
+    await supabaseAdmin.rpc("increment_audit_usage", { p_user_id: user.id });
+
     return new Response(JSON.stringify(auditResult), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("audit-design error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "An internal error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
