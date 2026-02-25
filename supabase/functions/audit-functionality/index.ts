@@ -53,6 +53,23 @@ serve(async (req) => {
     }
     // --- End auth check ---
 
+    // --- Server-side rate limit ---
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    const DAILY_LIMIT = 2;
+    const { data: currentCount } = await supabaseAdmin.rpc("get_audit_usage", { p_user_id: user.id });
+    if (currentCount !== null && currentCount >= DAILY_LIMIT) {
+      return new Response(
+        JSON.stringify({ error: "Daily audit limit reached (2 per day). Please try again tomorrow." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    // --- End rate limit check ---
+
     const { imageBase64, imageUrl, screenName } = await req.json();
 
     if (!imageBase64 && !imageUrl) {
@@ -237,13 +254,16 @@ CRITICAL: Return ONLY valid JSON. No markdown. No backticks. 2-5 items per array
       );
     }
 
+    // Increment usage after successful audit
+    await supabaseAdmin.rpc("increment_audit_usage", { p_user_id: user.id });
+
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("audit-functionality error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "An internal error occurred" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

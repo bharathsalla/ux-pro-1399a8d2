@@ -7,6 +7,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Constant-time string comparison
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    let result = a.length ^ b.length;
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      result |= (a.charCodeAt(i % a.length) || 0) ^ (b.charCodeAt(i % b.length) || 0);
+    }
+    return false;
+  }
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -16,7 +32,7 @@ serve(async (req) => {
     const { passcode, action, feedbackId, updates } = await req.json();
 
     const ADMIN_PASSCODE = Deno.env.get("ADMIN_PASSCODE");
-    if (!ADMIN_PASSCODE || !passcode || passcode !== ADMIN_PASSCODE) {
+    if (!ADMIN_PASSCODE || !passcode || !timingSafeEqual(passcode, ADMIN_PASSCODE)) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -67,7 +83,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("admin-update-feedback error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: "Internal error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -162,12 +162,25 @@ export default function RoomViewPage() {
     if (data) setComments(data as unknown as Comment[]);
   };
 
-  const verifyPasscode = () => {
-    if (passcodeInput === room?.passcode) {
-      setPasscodeVerified(true);
-      toast.success("Access granted!");
-    } else {
-      toast.error("Incorrect passcode");
+  const verifyPasscode = async () => {
+    if (!roomId) return;
+    try {
+      const { data, error } = await supabase.rpc("verify_room_passcode", {
+        p_room_id: roomId,
+        p_passcode: passcodeInput,
+      });
+      if (error) {
+        toast.error("Verification failed");
+        return;
+      }
+      if (data) {
+        setPasscodeVerified(true);
+        toast.success("Access granted!");
+      } else {
+        toast.error("Incorrect passcode");
+      }
+    } catch {
+      toast.error("Verification failed");
     }
   };
 
