@@ -42,7 +42,6 @@ interface Room {
   image_url: string | null;
   preview_url: string | null;
   is_private: boolean;
-  passcode: string | null;
   expiry_days: number;
   expires_at: string;
   is_expired: boolean;
@@ -139,7 +138,7 @@ export default function RoomViewPage() {
 
   const fetchRoom = async () => {
     const { data, error } = await supabase
-      .from("review_rooms")
+      .from("review_rooms_safe")
       .select("*")
       .eq("id", roomId!)
       .maybeSingle();
@@ -1072,7 +1071,7 @@ export default function RoomViewPage() {
       <AnimatePresence>
         {showShareModal && room && (
           <ShareRoomModal
-            room={{ id: room.id, title: room.title, is_private: room.is_private, passcode: room.passcode }}
+            room={{ id: room.id, title: room.title, is_private: room.is_private }}
             onClose={() => setShowShareModal(false)}
           />
         )}

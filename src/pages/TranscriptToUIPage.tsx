@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import DOMPurify from "dompurify";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -268,7 +269,8 @@ export default function TranscriptToUIPage() {
 
   const highlightedCode = useMemo(() => {
     if (!activeCode) return "";
-    return getHighlightedCode(activeCode, activeTab);
+    const raw = getHighlightedCode(activeCode, activeTab);
+    return DOMPurify.sanitize(raw, { ALLOWED_TAGS: ['span'], ALLOWED_ATTR: ['style'] });
   }, [activeCode, activeTab]);
 
   const activeRole = roles.find((r) => r.id === role);
