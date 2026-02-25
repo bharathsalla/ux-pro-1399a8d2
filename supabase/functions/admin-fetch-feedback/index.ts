@@ -7,18 +7,27 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Constant-time string comparison
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    let result = a.length ^ b.length;
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      result |= (a.charCodeAt(i % a.length) || 0) ^ (b.charCodeAt(i % b.length) || 0);
-    }
-    return false;
-  }
+// Verify HMAC-signed admin token
+async function verifyAdminToken(token: string, secret: string): Promise<boolean> {
+  if (!token || !secret) return false;
+  const parts = token.split(".");
+  if (parts.length !== 2) return false;
+  const [expiryStr, sigHex] = parts;
+  const expiry = Number(expiryStr);
+  if (isNaN(expiry) || Date.now() > expiry) return false;
+
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const expectedSig = await crypto.subtle.sign("HMAC", key, encoder.encode(expiryStr));
+  const expectedHex = Array.from(new Uint8Array(expectedSig)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+  // Constant-time comparison
+  if (sigHex.length !== expectedHex.length) return false;
   let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  for (let i = 0; i < sigHex.length; i++) {
+    result |= sigHex.charCodeAt(i) ^ expectedHex.charCodeAt(i);
   }
   return result === 0;
 }
@@ -29,16 +38,16 @@ serve(async (req) => {
   }
 
   try {
-    const { passcode } = await req.json();
-    if (!passcode || typeof passcode !== "string") {
-      return new Response(JSON.stringify({ error: "Passcode required" }), {
+    const { token } = await req.json();
+    if (!token || typeof token !== "string") {
+      return new Response(JSON.stringify({ error: "Token required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const ADMIN_PASSCODE = Deno.env.get("ADMIN_PASSCODE");
-    if (!ADMIN_PASSCODE || !timingSafeEqual(passcode, ADMIN_PASSCODE)) {
+    if (!ADMIN_PASSCODE || !(await verifyAdminToken(token, ADMIN_PASSCODE))) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

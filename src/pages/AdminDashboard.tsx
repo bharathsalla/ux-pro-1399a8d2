@@ -42,7 +42,7 @@ interface AnalyticsData {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { exitAdminMode, adminPasscode } = useAdminContext();
+  const { exitAdminMode, adminToken } = useAdminContext();
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,13 +53,13 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchData = async () => {
-    if (!adminPasscode) {
+    if (!adminToken) {
       setLoading(false);
       return;
     }
 
     const { data, error } = await supabase.functions.invoke("admin-fetch-feedback", {
-      body: { passcode: adminPasscode },
+      body: { token: adminToken },
     });
 
     if (error || !data?.feedbacks) {
@@ -98,11 +98,11 @@ export default function AdminDashboard() {
   };
 
   const toggleApproval = async (id: string, currentStatus: boolean) => {
-    if (!adminPasscode) return;
+    if (!adminToken) return;
 
     const { data, error } = await supabase.functions.invoke("admin-update-feedback", {
       body: {
-        passcode: adminPasscode,
+        token: adminToken,
         action: "approve",
         feedbackId: id,
         updates: { is_approved: !currentStatus },
@@ -133,13 +133,13 @@ export default function AdminDashboard() {
 
   const deleteFeedback = async (id: string) => {
     if (!window.confirm("Delete this testimonial permanently?")) return;
-    if (!adminPasscode) return;
+    if (!adminToken) return;
 
     const fb = feedbacks.find((f) => f.id === id);
 
     const { data, error } = await supabase.functions.invoke("admin-update-feedback", {
       body: {
-        passcode: adminPasscode,
+        token: adminToken,
         action: "delete",
         feedbackId: id,
       },

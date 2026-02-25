@@ -9,7 +9,6 @@ const corsHeaders = {
 // Constant-time string comparison to prevent timing attacks
 function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) {
-    // Still do the comparison to avoid length-based timing leak
     let result = a.length ^ b.length;
     for (let i = 0; i < Math.max(a.length, b.length); i++) {
       result |= (a.charCodeAt(i % a.length) || 0) ^ (b.charCodeAt(i % b.length) || 0);
@@ -21,6 +20,18 @@ function timingSafeEqual(a: string, b: string): boolean {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
   return result === 0;
+}
+
+// Generate HMAC-signed admin session token (expires in 30 minutes)
+async function generateAdminToken(secret: string): Promise<string> {
+  const expiry = Date.now() + 30 * 60 * 1000; // 30 minutes
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(String(expiry)));
+  const sigHex = Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, "0")).join("");
+  return `${expiry}.${sigHex}`;
 }
 
 serve(async (req) => {
@@ -45,7 +56,6 @@ serve(async (req) => {
       });
     }
 
-    // Use constant-time comparison to prevent timing attacks
     if (!timingSafeEqual(passcode, ADMIN_PASSCODE)) {
       return new Response(JSON.stringify({ error: "Invalid passcode" }), {
         status: 403,
@@ -53,10 +63,10 @@ serve(async (req) => {
       });
     }
 
-    // Generate a session token instead of echoing back the passcode
-    const sessionToken = crypto.randomUUID();
+    // Generate a signed session token instead of echoing back the passcode
+    const token = await generateAdminToken(ADMIN_PASSCODE);
 
-    return new Response(JSON.stringify({ success: true, token: sessionToken }), {
+    return new Response(JSON.stringify({ success: true, token }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
