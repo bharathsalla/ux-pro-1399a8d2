@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_usage: {
+        Row: {
+          count: number
+          id: string
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          id?: string
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          id?: string
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           comment_text: string
@@ -308,6 +329,13 @@ export type Database = {
             referencedRelation: "review_rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "room_comments_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "review_rooms_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       room_shares: {
@@ -349,6 +377,13 @@ export type Database = {
             referencedRelation: "review_rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "room_shares_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "review_rooms_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -371,14 +406,61 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      review_rooms_safe: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          description: string | null
+          expires_at: string | null
+          expiry_days: number | null
+          id: string | null
+          image_url: string | null
+          is_expired: boolean | null
+          is_private: boolean | null
+          preview_url: string | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          expires_at?: string | null
+          expiry_days?: number | null
+          id?: string | null
+          image_url?: string | null
+          is_expired?: boolean | null
+          is_private?: boolean | null
+          preview_url?: string | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          expires_at?: string | null
+          expiry_days?: number | null
+          id?: string | null
+          image_url?: string | null
+          is_expired?: boolean | null
+          is_private?: boolean | null
+          preview_url?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_audit_usage: { Args: { p_user_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      increment_audit_usage: { Args: { p_user_id: string }; Returns: number }
+      verify_room_passcode: {
+        Args: { p_passcode: string; p_room_id: string }
         Returns: boolean
       }
     }
